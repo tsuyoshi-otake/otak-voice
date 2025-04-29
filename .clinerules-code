@@ -1,0 +1,46 @@
+# Project Rules and Summary for Code Mode
+
+## Task Summary (voice.js Chrome Extension Conversion)
+
+1.  **Objective:** Convert the Tampermonkey script `voice.js` into a functional Chrome Extension.
+2.  **`manifest.json` Creation & Refinement:**
+    *   Created `manifest.json` (v3) defining necessary permissions (`storage`, `scripting`), host permissions (`<all_urls>`, `https://api.openai.com/`), and content script injection (`content.js`, `style.css`).
+    *   Corrected JSON errors by removing comments.
+    *   Removed `icons` definition due to missing files causing loading errors.
+    *   Set `"default_locale": "ja"` and removed duplicate `description`.
+3.  **CSS Extraction (`style.css`):**
+    *   Extracted CSS rules previously defined within `GM_addStyle` in `voice.js` into `style.css`.
+4.  **JavaScript Adaptation (`content.js`):**
+    *   Renamed `voice.js` to `content.js` as specified in the manifest.
+    *   Removed Tampermonkey-specific headers and `GM_addStyle` call.
+    *   Replaced `localStorage` with `chrome.storage.local` for API key persistence, adapting related functions (`loadSettings`, `saveApiKey`, `proofreadCurrentInput`, `correctWithGPT`, `proofreadWithGPT`) to be asynchronous (`async/await`).
+    *   Replaced `GM_xmlhttpRequest` with the standard `fetch` API within the GPT interaction functions (`correctWithGPT`, `proofreadWithGPT`).
+    *   Updated the OpenAI model for automatic correction (in `correctWithGPT`) to `gpt-4.1-mini`.
+    *   Updated the OpenAI model for manual proofreading (in `proofreadWithGPT`) to `gpt-4.1` for higher accuracy and context handling, adjusting `max_tokens`.
+    *   Removed the surrounding IIFE and `'use strict';`.
+    *   Fixed a `ReferenceError` by removing a redundant `loadApiKey()` call inside `initVoiceInput`.
+5.  **Feature Modifications (Based on Feedback):**
+    *   Initially added an auto-submit toggle feature (button, state variable, storage).
+    *   Disabled auto-submission when `appendMode` is active.
+    *   Removed the auto-submit toggle feature entirely (button, styles, logic, storage key) as it was deemed unnecessary.
+    *   Removed the manual submit button (➤) from the UI and its associated event listener as it was also deemed unnecessary.
+6.  **UI Design Update:**
+    *   Modified `style.css` to use a monochromatic color scheme (grays, black, white) for better visibility in both light and dark modes. Adjusted background colors, text colors, borders, and hover states.
+    *   Updated icons in `content.js` (`createUI` function) from emojis to simpler text-based symbols (🎙, +, ✕, ✔, ⚙, 🕒) for design consistency and better rendering across environments.
+7.  **Internationalization (i18n):**
+    *   Created `_locales` directory with `messages.json` files for Japanese (`ja`), English (`en`), and Vietnamese (`vi`).
+    *   Replaced hardcoded strings (UI tooltips, status messages, console logs, alerts) in `content.js` with `chrome.i18n.getMessage()` calls.
+    *   Added/updated corresponding message keys (including new `statusProofreadingModel`) in all three `messages.json` files, also updating tooltips and descriptions to reflect the different GPT models used.
+    *   Changed the log level for skipping correction due to missing API key from `warn` to `log` as it's expected behavior.
+8.  **UI/UX Refinements:**
+    *   Adjusted tooltip (`.voice-menu-label`) position in `style.css` to appear above and right-aligned with the button, preventing it from going off-screen.
+    *   Modified `content.js` and `style.css` to handle the main menu button's expanded state (`#voice-menu-btn`) using CSS classes instead of inline styles, ensuring consistency with the monochromatic theme.
+
+## Current State
+
+*   The extension should now load correctly in Chrome.
+*   Core functionality (voice input, SPA handling, GPT correction, UI) is adapted for the extension environment.
+*   Auto-submit only triggers in normal mode (not append mode).
+*   Manual submit button and auto-submit toggle button have been removed.
+*   UI uses a simple monochromatic theme with text-based icons.
+*   The extension is internationalized for Japanese (default), English, and Vietnamese.

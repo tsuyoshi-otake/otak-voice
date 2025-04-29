@@ -1,0 +1,518 @@
+{
+  "extName": {
+    "message": "Enhanced Universal Voice Input",
+    "description": "Extension name."
+  },
+  "extDescription": {
+    "message": "Voice input for any website with context correction, expandable menu, clear input, and auto-submit features. SPA compatible.",
+    "description": "Extension description."
+  },
+  "menuTooltip": {
+    "message": "Open/Close Menu",
+    "description": "Tooltip for the main menu button."
+  },
+  "micTooltip": {
+    "message": "Microphone (Auto-detect input field)",
+    "description": "Tooltip for the microphone button."
+  },
+  "micTooltipAlwaysOn": {
+    "message": "Microphone (Always On - Double-click to disable)",
+    "description": "Tooltip for the microphone button when always-on mode is active."
+  },
+  "appendTooltip": {
+    "message": "Append Mode (On/Off)\nAppends to existing text during voice recognition",
+    "description": "Tooltip for the append mode button."
+  },
+  "clearTooltip": {
+    "message": "Clear Input Field\nClears the content of the current input field",
+    "description": "Tooltip for the clear button."
+  },
+  "proofreadTooltip": {
+    "message": "Proofread Content (GPT-4.1)\nProofreads the entire content with the high-accuracy model",
+    "description": "Tooltip for the proofread button."
+  },
+  "editTooltip": {
+    "message": "Edit Text (GPT-4.1)\nEdit input field content based on instructions",
+    "description": "Tooltip for the edit button."
+  },
+  "settingsTooltip": {
+    "message": "Set OpenAI API Key (for GPT-4.1-mini / GPT-4.1)",
+    "description": "Tooltip for the settings button."
+  },
+  "historyTooltip": {
+    "message": "Show Voice Input History",
+    "description": "Tooltip for the history button."
+  },
+  "statusListening": {
+    "message": "Listening...",
+    "description": "Status message when listening."
+  },
+  "statusListeningAppend": {
+    "message": "Listening... (Appending)",
+    "description": "Status message when listening in append mode."
+  },
+  "statusInputFound": {
+    "message": "Input field selected",
+    "description": "Status message when an input field is found/selected."
+  },
+  "statusInputNotFound": {
+    "message": "Input field not found",
+    "description": "Status message when no input field is found."
+  },
+  "statusClearSuccess": {
+    "message": "Input field cleared",
+    "description": "Status message when input field is cleared."
+  },
+  "statusClearNotFound": {
+    "message": "Input field to clear not found",
+    "description": "Status message when no input field is found to clear."
+  },
+  "statusAppendOn": {
+    "message": "Append Mode: On (Appends to existing text)",
+    "description": "Status message when append mode is turned on."
+  },
+  "statusAppendOff": {
+    "message": "Append Mode: Off",
+    "description": "Status message when append mode is turned off."
+  },
+  "statusProofreading": {
+    "message": "Proofreading entire text...",
+    "description": "Status message during proofreading."
+  },
+  "statusProofreadingModel": {
+    "message": "Proofreading entire text with $model$...",
+    "description": "Status message during proofreading indicating the model.",
+    "placeholders": {
+        "model": {
+            "content": "$1",
+            "example": "gpt-4-turbo"
+        }
+    }
+  },
+  "statusProofreadSuccess": {
+    "message": "Proofreading complete",
+    "description": "Status message when proofreading is successful."
+  },
+  "statusProofreadError": {
+    "message": "Error during proofreading",
+    "description": "Status message when proofreading fails."
+  },
+   "statusProofreadErrorDetail": {
+    "message": "Proofreading error: $error$",
+    "description": "Status message when proofreading fails with details.",
+    "placeholders": {
+      "error": {
+        "content": "$1",
+        "example": "Network error"
+      }
+    }
+  },
+  "statusProofreadNotFound": {
+    "message": "Input field for proofreading not found",
+    "description": "Status message when no input field is found for proofreading."
+  },
+  "statusProofreadEmpty": {
+    "message": "Nothing to proofread",
+    "description": "Status message when trying to proofread empty content."
+  },
+  "statusEditNotFound": {
+    "message": "No input field found for editing",
+    "description": "Status message when no input field is found for editing."
+  },
+  "statusEditEmpty": {
+    "message": "No content to edit",
+    "description": "Status message when trying to edit empty content."
+  },
+  "statusEditInstructionEmpty": {
+    "message": "Edit instruction is empty",
+    "description": "Status message when edit instruction is empty."
+  },
+  "statusEditingError": {
+    "message": "Error occurred during editing",
+    "description": "Status message when editing fails."
+  },
+  "statusEditingComplete": {
+    "message": "Text editing complete",
+    "description": "Status message when editing is complete."
+  },
+  "statusApiKeyMissing": {
+    "message": "API key not set. Please set it via the settings button.",
+    "description": "Status message when API key is missing."
+  },
+  "statusApiKeyInvalid": {
+    "message": "API key must start with 'sk-'",
+    "description": "Status message for invalid API key format."
+  },
+  "statusApiKeySaveSuccess": {
+    "message": "API key saved",
+    "description": "Status message when API key is saved successfully."
+  },
+  "statusApiKeySaveError": {
+    "message": "Failed to save API key",
+    "description": "Status message when API key saving fails."
+  },
+  "statusSpeechError": {
+    "message": "Error: $error$",
+    "description": "Generic speech recognition error message.",
+    "placeholders": {
+      "error": {
+        "content": "$1",
+        "example": "network"
+      }
+    }
+  },
+  "statusSpeechErrorNoSpeech": {
+    "message": "No speech detected",
+    "description": "Speech recognition error: no speech detected."
+  },
+  "statusSpeechErrorAudioCapture": {
+    "message": "Cannot access microphone",
+    "description": "Speech recognition error: audio capture failed."
+  },
+  "statusSpeechErrorNotAllowed": {
+    "message": "Microphone permission denied",
+    "description": "Speech recognition error: microphone permission denied."
+  },
+  "statusSpeechStartError": {
+    "message": "Could not start voice recognition",
+    "description": "Error message when speech recognition fails to start."
+  },
+  "statusSpeechStop": {
+    "message": "Voice input stopped",
+    "description": "Status message when speech input is stopped."
+  },
+  "statusCorrecting": {
+    "message": "Correcting with GPT-4.1-mini...",
+    "description": "Status message during GPT correction."
+  },
+  "statusCorrectionSuccess": {
+    "message": "GPT correction complete",
+    "description": "Status message when GPT correction is successful."
+  },
+  "statusCorrectionError": {
+    "message": "GPT correction error: $error$",
+    "description": "Status message when GPT correction fails.",
+     "placeholders": {
+      "error": {
+        "content": "$1",
+        "example": "API Error"
+      }
+    }
+  },
+  "statusCorrectionSkip": {
+    "message": "API key not set. Skipping correction.",
+    "description": "Status message when skipping correction due to missing API key."
+  },
+  "statusCorrectionApiError": {
+    "message": "API Error: $status$",
+    "description": "Status message for OpenAI API errors.",
+     "placeholders": {
+      "status": {
+        "content": "$1",
+        "example": "401"
+      }
+    }
+  },
+  "statusCorrectionApiKeyInvalid": {
+    "message": "Invalid API key. Please check settings.",
+    "description": "Status message for invalid API key from API response."
+  },
+  "statusCorrectionResponseError": {
+    "message": "GPT response error. Skipping correction.",
+    "description": "Status message for unexpected API response."
+  },
+   "statusAlwaysOnEnabled": {
+    "message": "Always On mode enabled (Double-click mic to disable)",
+    "description": "Status message when always-on mode is enabled."
+  },
+  "statusAlwaysOnDisabled": {
+    "message": "Always On mode disabled",
+    "description": "Status message when always-on mode is disabled."
+  },
+  "modalSettingsTitle": {
+    "message": "OpenAI API Key Settings",
+    "description": "Title for the settings modal."
+  },
+  "modalSettingsDescription": {
+    "message": "Enter your API key for automatic voice recognition correction (GPT-4.1-mini) and manual proofreading (GPT-4.1). The key is stored locally in the extension's storage and used only for OpenAI API calls.",
+    "description": "Description text in the settings modal."
+  },
+  "modalSettingsInputPlaceholder": {
+    "message": "sk-...",
+    "description": "Placeholder for the API key input field."
+  },
+  "modalSettingsLangLabel": {
+    "message": "Recognition Language:",
+    "description": "Label for the language selection dropdown in settings."
+  },
+  "modalSettingsLangJa": {
+    "message": "Japanese (ja-JP)",
+    "description": "Japanese language option in settings."
+  },
+  "modalSettingsLangEn": {
+    "message": "English (en-US)",
+    "description": "English language option in settings."
+  },
+  "modalSettingsLangVi": {
+    "message": "Vietnamese (vi-VN)",
+    "description": "Vietnamese language option in settings."
+  },
+  "modalSettingsButtonCancel": {
+    "message": "Cancel",
+    "description": "Cancel button text in the settings modal."
+  },
+  "modalSettingsButtonSave": {
+    "message": "Save",
+    "description": "Save button text in the settings modal."
+  },
+  "historyPanelTitle": {
+    "message": "Voice Input History:",
+    "description": "Title for the history panel."
+  },
+  "historyPanelEmpty": {
+    "message": "No history yet",
+    "description": "Message shown when history is empty."
+  },
+  "logDomObserverStart": {
+    "message": "Starting DOM change observer (SPA support)",
+    "description": "Log message when the DOM observer starts."
+  },
+  "logSpaNavigationDetected": {
+    "message": "SPA navigation detected: New textareas found",
+    "description": "Log message when SPA navigation is detected."
+  },
+  "logSpaUiReinit": {
+    "message": "Executing UI reinitialization after SPA navigation",
+    "description": "Log message when reinitializing UI after SPA navigation."
+  },
+  "logPollingUiNotFound": {
+    "message": "Polling check: UI not found, reinitializing",
+    "description": "Log message when UI is not found during polling check."
+  },
+  "logForceSetSuccess": {
+    "message": "Force set textarea value succeeded:",
+    "description": "Log message when force setting textarea value succeeds."
+  },
+  "logForceSetError": {
+    "message": "Force setting textarea value failed:",
+    "description": "Log message when force setting textarea value fails."
+  },
+  "logTypingSimulateError": {
+    "message": "Typing simulation error:",
+    "description": "Log message when typing simulation fails."
+  },
+  "logPaperPlaneButtonFound": {
+    "message": "Paper plane icon submit button found",
+    "description": "Log message when the paper plane submit button is found."
+  },
+  "logBgPrimaryButtonFound": {
+    "message": "Submit button with bg-primary/40 class found",
+    "description": "Log message when a submit button with bg-primary/40 class is found."
+  },
+  "logPaperPlaneButtonDisabled": {
+    "message": "Paper plane submit button is disabled. Triggering React state update...",
+    "description": "Log message when the paper plane button is disabled."
+  },
+  "logSubmitButtonDisabled": {
+    "message": "Submit button is disabled. Triggering React state update...",
+    "description": "Log message when the submit button is disabled."
+  },
+  "logStateUpdateError": {
+    "message": "State update trigger error:",
+    "description": "Log message when triggering state update fails."
+  },
+  "logSubmitButtonCandidates": {
+    "message": "Submit button candidates:",
+    "description": "Log message showing submit button candidates."
+  },
+  "logInitializing": {
+    "message": "Initializing Enhanced Voice Input Script v$version$ (Extension)...",
+    "description": "Log message during initialization.",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "1.7"
+      }
+    }
+  },
+  "logSpeechNotSupported": {
+    "message": "This browser does not support Speech Recognition.",
+    "description": "Log message when Speech Recognition API is not supported."
+  },
+  "alertSpeechNotSupported": {
+    "message": "Your browser does not support Speech Recognition.",
+    "description": "Alert message when Speech Recognition API is not supported."
+  },
+  "logUiAlreadyExists": {
+    "message": "UI already exists.",
+    "description": "Log message when UI elements already exist."
+  },
+  "logInitializationComplete": {
+    "message": "Enhanced Voice Input Script v$version$ (Extension) initialization complete.",
+    "description": "Log message when initialization is complete.",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "1.7"
+      }
+    }
+  },
+  "logSettingsLoaded": {
+    "message": "Settings loaded:",
+    "description": "Log message when settings are loaded."
+  },
+  "logApiKeySet": {
+    "message": "Set",
+    "description": "Log part indicating API key is set."
+  },
+  "logApiKeyNotSet": {
+    "message": "Not set",
+    "description": "Log part indicating API key is not set."
+  },
+  "logSettingsLoadError": {
+    "message": "Settings load error:",
+    "description": "Log message when loading settings fails."
+  },
+  "logSettingsSaved": {
+    "message": "Settings saved:",
+    "description": "Log message when settings (API key, language) are saved."
+  },
+  "logSettingsSaveError": {
+    "message": "Failed to save settings:",
+    "description": "Log message when saving settings fails."
+  },
+  "logAlwaysOnModeSaved": {
+    "message": "Always On mode setting saved:",
+    "description": "Log message when the always-on mode setting is saved."
+  },
+  "logAlwaysOnModeSaveError": {
+    "message": "Failed to save Always On mode setting:",
+    "description": "Log message when saving the always-on mode setting fails."
+  },
+  "alertApiKeyMissing": {
+    "message": "API key is not set. Please set it via the settings button.",
+    "description": "Alert message when API key is missing during save attempt."
+  },
+  "alertApiKeyInvalid": {
+    "message": "Invalid API key format. It must start with 'sk-'.",
+    "description": "Alert message for invalid API key format during save attempt."
+  },
+  "logApiKeySaveError": {
+    "message": "API key save error:",
+    "description": "Log message when saving API key fails."
+  },
+  "statusSettingsSaveSuccess": {
+    "message": "Settings saved successfully",
+    "description": "Status message when settings are saved successfully."
+  },
+  "statusSettingsSaveError": {
+    "message": "Failed to save settings",
+    "description": "Status message when saving settings fails."
+  },
+  "alertSpeechApiNotAvailable": {
+    "message": "Speech Recognition API is not available.",
+    "description": "Alert message when Speech Recognition API is not available."
+  },
+  "logCorrectionErrorAppend": {
+    "message": "Correction processing error (append mode):",
+    "description": "Log message for correction error in append mode."
+  },
+  "logCorrectionErrorOverwrite": {
+    "message": "Correction processing error (overwrite mode):",
+    "description": "Log message for correction error in overwrite mode."
+  },
+  "logSpeechRecognitionError": {
+    "message": "Speech recognition error:",
+    "description": "Log message for speech recognition error."
+  },
+  "logSpeechStartError": {
+    "message": "Speech recognition start error:",
+    "description": "Log message when starting speech recognition fails."
+  },
+  "logSpeechStopError": {
+    "message": "Failed to stop speech recognition:",
+    "description": "Log message when stopping speech recognition fails."
+  },
+  "logSpecificTextareaFound": {
+    "message": "Specific designated textarea found",
+    "description": "Log message when the specific textarea is found."
+  },
+  "logSimilarTextareaFound": {
+    "message": "Similar specification textarea found",
+    "description": "Log message when a similar textarea is found."
+  },
+  "logTailwindTextareaFound": {
+    "message": "Tailwind styled textarea found",
+    "description": "Log message when a Tailwind styled textarea is found."
+  },
+  "logMessageTextareaFound": {
+    "message": "Message textarea found",
+    "description": "Log message when a message textarea is found."
+  },
+  "logEventDispatchErrorAppend": {
+    "message": "Event dispatch error (append):",
+    "description": "Log message for event dispatch error in append mode."
+  },
+  "logProofreadError": {
+    "message": "Proofreading processing error:",
+    "description": "Log message for proofreading error."
+  },
+  "logOpenAiApiError": {
+    "message": "OpenAI API error:",
+    "description": "Log message for OpenAI API error."
+  },
+  "logOpenAiApiResponseUnexpected": {
+    "message": "Unexpected response from OpenAI API:",
+    "description": "Log message for unexpected OpenAI API response."
+  },
+  "logProofreadRequestError": {
+    "message": "GPT proofread request error:",
+    "description": "Log message for GPT proofread request error."
+  },
+  "logReactTypingSimulated": {
+    "message": "React support: Input via typing simulation",
+    "description": "Log message when React typing simulation is used."
+  },
+  "logFallbackMethod": {
+    "message": "Fallback: Inputting using conventional method",
+    "description": "Log message when using the fallback input method."
+  },
+  "logEventDispatchErrorFallback": {
+    "message": "Event dispatch error (fallback):",
+    "description": "Log message for event dispatch error in fallback mode."
+  },
+  "logUiNotFoundHealing": {
+    "message": "UI elements not found. Attempting regeneration...",
+    "description": "Log message when UI elements are not found during self-healing."
+  },
+  "logRestartingAlwaysOn": {
+    "message": "Restarting voice recognition due to Always On mode...",
+    "description": "Log message when restarting recognition in always-on mode."
+  },
+  "logExtensionLoaded": {
+    "message": "Enhanced Universal Voice Input (Chrome Extension) loaded.",
+    "description": "Log message when the extension has finished loading."
+  },
+  "logApiKeyMissingSkip": {
+    "message": "API key not set, skipping GPT correction.",
+    "description": "Log message when skipping GPT correction due to missing API key."
+  },
+  "logApiRequestFailedUseOriginal": {
+    "message": "API request failed ($status$). Using original text.",
+    "description": "Log message when API request fails and original text is used.",
+    "placeholders": {
+      "status": {
+        "content": "$1",
+        "example": "401"
+      }
+    }
+  },
+  "logApiResponseUnexpected": {
+    "message": "Unexpected response from OpenAI API. Using original text.",
+    "description": "Log message when API response is unexpected and original text is used."
+  },
+  "logCorrectionRequestErrorUseOriginal": {
+    "message": "Error during GPT correction request. Using original text.",
+    "description": "Log message when correction request fails and original text is used."
+  }
+}

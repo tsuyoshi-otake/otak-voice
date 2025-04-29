@@ -1,0 +1,311 @@
+/* --- Monochromatic Theme --- */
+
+/* メインメニューボタン */
+    #voice-menu-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #333333; /* Dark Gray */
+        border: 1px solid #555555; /* Slightly lighter border */
+        cursor: pointer;
+        font-size: 24px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2); /* Subtle shadow */
+        z-index: 9999999;
+        color: #FFFFFF; /* White icon */
+        transition: transform 0.2s, background-color 0.2s, border-color 0.2s;
+    }
+
+    #voice-menu-btn:hover {
+        background-color: #555555; /* Lighter Gray on hover */
+        transform: scale(1.05);
+        border-color: #777777;
+    }
+#voice-menu-btn.expanded-state {
+        background-color: #555555; /* Use hover color for expanded state */
+        border-color: #777777;
+    }
+
+    /* メニューコンテナ */
+    #voice-menu-container {
+        position: fixed;
+        bottom: 80px;
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        z-index: 9999998;
+        transition: opacity 0.3s, transform 0.3s;
+        opacity: 0;
+        transform: translateY(20px);
+        pointer-events: none;
+    }
+
+    #voice-menu-container.expanded {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: all;
+    }
+
+    /* メニューアイテム共通スタイル */
+    .voice-menu-item {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background-color: #F0F0F0; /* Light Gray */
+        border: 1px solid #CCCCCC; /* Medium Gray border */
+        cursor: pointer;
+        font-size: 20px; /* Slightly larger icons */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.15); /* Subtle shadow */
+        transition: transform 0.2s, background-color 0.2s, border-color 0.2s;
+        color: #333333; /* Dark Gray icon */
+    }
+
+    .voice-menu-item:hover {
+        transform: scale(1.05);
+        background-color: #E0E0E0; /* Slightly darker on hover */
+        border-color: #AAAAAA;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    /* マイクボタン */
+    #voice-input-btn {
+        /* Default style inherited */
+    }
+
+    #voice-input-btn.active {
+        background-color: #333333; /* Dark Gray background for active */
+        color: #FFFFFF; /* White icon */
+        border-color: #555555;
+    }
+
+    /* 常時オンモードのマイクボタン */
+    #voice-input-btn.always-on {
+        border: 2px solid #666666; /* Slightly thicker, darker border */
+        /* Optionally, slightly change background or add a subtle glow */
+        /* box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); */
+    }
+    /* 常時オンモード *かつ* アクティブな場合 (より強調) */
+    #voice-input-btn.always-on.active {
+         background-color: #222222; /* Even darker background */
+         border-color: #888888; /* Lighter border for contrast */
+    }
+
+    /* 追記モードボタン */
+    #voice-append-btn {
+       /* Default style inherited */
+    }
+
+    #voice-append-btn.active {
+        background-color: #555555; /* Medium-Dark Gray for active append */
+        color: #FFFFFF; /* White icon */
+        border: 1px solid #777777;
+    }
+
+    /* 校閲ボタン */
+    #voice-proofread-btn {
+       /* Default style inherited */
+    }
+
+    #voice-proofread-btn:hover {
+        background-color: #E0E0E0; /* Consistent hover */
+    }
+
+    /* クリアボタン */
+    #voice-clear-btn {
+       /* Default style inherited */
+    }
+
+    #voice-clear-btn:hover {
+        background-color: #E0E0E0; /* Consistent hover */
+    }
+
+    /* ラベル (ツールチップ) */
+    /* ラベル (ツールチップ) */
+    .voice-menu-label {
+        position: absolute;
+        bottom: 55px; /* ボタンの上に配置 */
+        right: 0; /* ボタンの右端に合わせる */
+        /* left: 50%; */ /* 削除 */
+        /* transform: translateX(-50%); */ /* 削除 */
+        background-color: rgba(51, 51, 51, 0.9); /* 少し濃い背景 */
+        color: #FFFFFF; /* White text */
+        padding: 5px 10px; /* 少しパディングを増やす */
+        border-radius: 4px; /* 少し角を丸める */
+        font-size: 12px; /* 少しフォントサイズを大きく */
+        white-space: nowrap; /* 折り返しを無効化 */
+        /* max-width: 180px; */ /* 必要に応じて調整 */
+        text-align: right; /* テキストを右揃えに変更 */
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out; /* transformも追加 */
+        pointer-events: none;
+        line-height: 1.4; /* 行間を少し調整 */
+        z-index: 1; /* ボタンより手前に表示 */
+        transform: translateY(5px); /* 初期位置を少し下に (X方向のtransform削除) */
+    }
+
+    .voice-menu-item:hover .voice-menu-label {
+        opacity: 1;
+        transform: translateY(0); /* ホバー時に元の位置に (X方向のtransform削除) */
+        transition-delay: 0.4s; /* 表示遅延を少し長く */
+    }
+
+    /* ステータス表示 */
+    #voice-status {
+        position: fixed;
+        bottom: 80px; /* Align with menu container */
+        right: 80px; /* Position next to menu */
+        background-color: rgba(51, 51, 51, 0.85); /* Dark Gray background */
+        color: #FFFFFF; /* White text */
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 13px;
+        display: none;
+        max-width: 250px;
+        word-break: break-word;
+        z-index: 9999998;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    }
+
+    /* 設定モーダル */
+    #voice-settings-modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 350px;
+        background-color: #FFFFFF; /* White background */
+        color: #333333; /* Dark text */
+        border-radius: 6px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        padding: 25px;
+        z-index: 10000000;
+        display: none;
+        border: 1px solid #CCCCCC;
+    }
+
+    #voice-settings-modal h3 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 16px;
+        font-weight: 600;
+        border-bottom: 1px solid #EEEEEE;
+        padding-bottom: 10px;
+    }
+
+    #voice-settings-modal p {
+        margin-bottom: 20px;
+        font-size: 13px;
+        color: #555555; /* Slightly lighter text */
+        line-height: 1.5;
+    }
+
+    #api-key-input {
+        width: 100%;
+        padding: 10px 12px;
+        margin-bottom: 20px;
+        border: 1px solid #CCCCCC;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 14px;
+        background-color: #F9F9F9;
+    }
+     #api-key-input:focus {
+        outline: none;
+        border-color: #AAAAAA;
+        background-color: #FFFFFF;
+    }
+
+    #voice-settings-modal .button-row {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    #voice-settings-modal button {
+        padding: 8px 18px;
+        border-radius: 4px;
+        font-size: 13px;
+        cursor: pointer;
+        border: 1px solid #CCCCCC;
+        transition: background-color 0.2s, border-color 0.2s;
+    }
+     #voice-settings-modal button:hover {
+        border-color: #AAAAAA;
+    }
+
+    #api-key-save {
+        background-color: #555555; /* Dark Gray */
+        color: #FFFFFF;
+        border-color: #555555;
+    }
+    #api-key-save:hover {
+        background-color: #333333;
+        border-color: #333333;
+    }
+
+    #api-key-cancel {
+        background-color: #F0F0F0; /* Light Gray */
+        color: #333333;
+    }
+     #api-key-cancel:hover {
+        background-color: #E0E0E0;
+    }
+
+    /* 履歴パネル */
+    #voice-history-panel {
+        position: fixed;
+        bottom: 80px; /* Align with menu container */
+        right: 80px; /* Position next to menu */
+        width: 280px;
+        max-height: 350px;
+        background-color: #FFFFFF; /* White background */
+        color: #333333; /* Dark text */
+        border: 1px solid #CCCCCC;
+        border-radius: 6px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        overflow-y: auto;
+        padding: 15px;
+        z-index: 9999999;
+        display: none;
+        font-size: 13px;
+    }
+     #voice-history-panel > div:first-child { /* Title styling */
+        font-weight: 600;
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #EEEEEE;
+    }
+
+    .history-item {
+        border-bottom: 1px solid #F0F0F0; /* Lighter border */
+        padding: 10px 0;
+        font-size: 12px; /* Slightly smaller */
+        line-height: 1.4;
+    }
+     .history-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .history-time {
+        color: #888888; /* Medium Gray */
+        font-size: 10px;
+        margin-bottom: 4px;
+        display: block; /* Ensure it takes full width */
+    }
+
+    .history-text {
+        word-break: break-word;
+        color: #444444; /* Slightly darker text for history */
+    }
