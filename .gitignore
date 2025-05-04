@@ -4,3 +4,7 @@ node_modules/
 # Build output
 dist/
 .state/tasks
+
+# Release files
+*.zip
+otak-voice-*.zip
