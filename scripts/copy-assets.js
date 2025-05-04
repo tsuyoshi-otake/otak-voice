@@ -11,8 +11,33 @@ fs.copySync(
   { overwrite: true }
 );
 
-// Copy individual files
-const filesToCopy = ['manifest.json', 'style.css', 'otak-voice-128.png'];
+// Copy and modify manifest.json
+const manifestPath = path.join(__dirname, '../manifest.json');
+const manifestContent = fs.readJsonSync(manifestPath);
+
+// Fix paths in manifest.json
+if (manifestContent.background && manifestContent.background.service_worker) {
+  manifestContent.background.service_worker = manifestContent.background.service_worker.replace('dist/', '');
+}
+
+if (manifestContent.content_scripts) {
+  manifestContent.content_scripts.forEach(script => {
+    if (script.js) {
+      script.js = script.js.map(js => js.replace('dist/', ''));
+    }
+  });
+}
+
+// Write modified manifest.json to dist directory
+fs.writeJsonSync(
+  path.join(__dirname, '../dist/manifest.json'),
+  manifestContent,
+  { spaces: 2 }
+);
+console.log('Copied and modified manifest.json to dist/');
+
+// Copy other files
+const filesToCopy = ['style.css', 'otak-voice-128.png'];
 
 filesToCopy.forEach(file => {
   fs.copySync(

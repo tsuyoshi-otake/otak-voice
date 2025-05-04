@@ -8,3 +8,6 @@ dist/
 # Release files
 *.zip
 otak-voice-*.zip
+
+# Temporary files
+temp_download/

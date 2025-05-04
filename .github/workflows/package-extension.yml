@@ -94,6 +94,20 @@ jobs:
         npm install
         npm run build
         
+    - name: Verify manifest.json paths
+      run: |
+        echo "Verifying manifest.json paths..."
+        if grep -q "dist/" dist/manifest.json; then
+          echo "WARNING: Found 'dist/' in manifest.json paths, fixing..."
+          # Fix paths in manifest.json
+          sed -i 's/"service_worker": "dist\//"service_worker": "/g' dist/manifest.json
+          sed -i 's/"js": \["dist\//"js": \["/g' dist/manifest.json
+          echo "Fixed manifest.json paths"
+          cat dist/manifest.json
+        else
+          echo "manifest.json paths are correct"
+        fi
+        
     - name: Package extension
       run: |
         echo "Packaging extension files..."
