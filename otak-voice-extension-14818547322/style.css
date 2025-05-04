@@ -1,0 +1,987 @@
+/* --- Theme Variables --- */
+:root[data-otak-theme="dark"] {
+    /* ダークテーマの変数 */
+    --otak-bg-color: #1e1e1e;
+    --otak-text-color: #f0f0f0;
+    --otak-border-color: #555555;
+    --otak-header-bg: #2d2d2d;
+    --otak-header-border: #444444;
+    --otak-input-bg: #2a2a2a;
+    --otak-input-border: #444444;
+    --otak-input-focus-border: #d97757;
+    --otak-button-primary-bg: #a2a096;
+    --otak-button-primary-hover: #b2b0a6; /* より明るい色に変更 */
+    --otak-button-secondary-bg: #3a3a3a;
+    --otak-button-secondary-hover: #4a4a4a;
+    --otak-divider-color: #333333;
+    --otak-link-color: #888888;
+    --otak-link-hover: #d97757;
+    --otak-placeholder-color: #888888;
+    --otak-shadow-color: rgba(0, 0, 0, 0.4);
+}
+
+:root[data-otak-theme="light"] {
+    /* ライトテーマの変数 */
+    --otak-bg-color: #ffffff;
+    --otak-text-color: #333333;
+    --otak-border-color: #e0e0e0;
+    --otak-header-bg: #f5f5f5;
+    --otak-header-border: #e0e0e0;
+    --otak-input-bg: #f9f9f9;
+    --otak-input-border: #d0d0d0;
+    --otak-input-focus-border: #d97757;
+    --otak-button-primary-bg: #a2a096;
+    --otak-button-primary-hover: #92908a;
+    --otak-button-secondary-bg: #e0e0e0;
+    --otak-button-secondary-hover: #d0d0d0;
+    --otak-divider-color: #e0e0e0;
+    --otak-link-color: #666666;
+    --otak-link-hover: #d97757;
+    --otak-placeholder-color: #999999;
+    --otak-shadow-color: rgba(0, 0, 0, 0.15);
+}
+
+/* デフォルトテーマ（ダーク）*/
+:root {
+    --otak-bg-color: #1e1e1e;
+    --otak-text-color: #f0f0f0;
+    --otak-border-color: #555555;
+    --otak-header-bg: #2d2d2d;
+    --otak-header-border: #444444;
+    --otak-input-bg: #2a2a2a;
+    --otak-input-border: #444444;
+    --otak-input-focus-border: #d97757;
+    --otak-button-primary-bg: #a2a096;
+    --otak-button-primary-hover: #92908a;
+    --otak-button-secondary-bg: #3a3a3a;
+    --otak-button-secondary-hover: #4a4a4a;
+    --otak-divider-color: #333333;
+    --otak-link-color: #888888;
+    --otak-link-hover: #d97757;
+    --otak-placeholder-color: #888888;
+    --otak-shadow-color: rgba(0, 0, 0, 0.4);
+}
+
+/* --- Monochromatic Theme --- */
+
+/* メインメニューボタン */
+    .otak-voice-menu__btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #2a2a2a; /* 常に同じ背景色 */
+        border: 1px solid #555555; /* 常に同じボーダー色 */
+        cursor: pointer;
+        font-size: 18px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 2px 8px var(--otak-shadow-color); /* テーマに応じたシャドウ */
+        z-index: 9999999;
+        color: #ffffff; /* 常に白色のアイコン */
+        transition: transform 0.2s, background-color 0.2s, border-color 0.2s;
+        user-select: none !important; /* テキスト選択を防止 */
+    }
+
+    .otak-voice-menu__btn:hover {
+        background-color: #3a3a3a; /* ホバー時は少し明るく */
+        transform: scale(1.05);
+        border-color: var(--otak-button-primary-bg);
+    }
+.otak-voice-menu__btn--expanded {
+        background-color: #3a3a3a; /* 展開状態も同じ */
+        border-color: var(--otak-button-primary-bg);
+    }
+
+    /* メニューコンテナ */
+    .otak-voice-menu__container {
+        position: fixed;
+        bottom: 70px; /* 80pxから70pxに変更してメニューボタンに近づける */
+        right: 20px;
+        width: 40px; /* メインメニューボタンと同じ幅 */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        z-index: 9999998;
+        transition: opacity 0.3s, transform 0.3s;
+        opacity: 0;
+        transform: translateY(20px);
+        pointer-events: none;
+    }
+
+    .otak-voice-menu__container--expanded {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: all;
+    }
+
+    /* メニューアイテム共通スタイル */
+    .otak-voice-menu__item {
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 50% !important;
+        background-color: var(--otak-button-secondary-bg) !important; /* テーマに応じた背景色 */
+        border: 1px solid var(--otak-border-color) !important; /* テーマに応じたボーダー */
+        cursor: pointer !important;
+        font-size: 18px !important; /* Slightly smaller icons */
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        box-shadow: 0 1px 3px var(--otak-shadow-color) !important; /* テーマに応じたシャドウ */
+        transition: transform 0.2s, background-color 0.2s, border-color 0.2s !important;
+        color: var(--otak-text-color) !important; /* テーマに応じたアイコン色 */
+        position: relative !important;
+        z-index: 9999997 !important;
+        user-select: none !important; /* テキスト選択を防止 */
+    }
+    
+    /* アイコンコンテナ */
+    .otak-voice-menu__icon-container {
+        width: 24px !important;
+        height: 24px !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        color: inherit !important;
+    }
+    
+    /* 無効化されたボタン */
+    .otak-voice-menu__item--disabled {
+        opacity: 0.5 !important;
+        cursor: not-allowed !important;
+        pointer-events: none !important;
+        filter: grayscale(100%) !important;
+    }
+    
+    /* SVGアイコンのスタイル */
+    .otak-voice-menu__icon-container svg {
+        width: 100% !important;
+        height: 100% !important;
+        fill: none !important;
+        stroke: currentColor !important;
+        stroke-width: 1.5 !important;
+        stroke-linecap: round !important;
+        stroke-linejoin: round !important;
+    }
+    
+    /* メニューボタンのSVGスタイル */
+    .otak-voice-menu__btn svg {
+        fill: currentColor !important;
+        stroke: none !important;
+    }
+    
+    /* メニューボタンが展開されているときのSVGスタイル */
+    .otak-voice-menu__btn--expanded svg {
+        fill: none !important;
+        stroke: currentColor !important;
+    }
+
+    .otak-voice-menu__item:hover {
+        transform: scale(1.05) !important;
+        background-color: var(--otak-button-secondary-hover) !important; /* テーマに応じたホバー色 */
+        border-color: var(--otak-button-primary-bg) !important;
+        box-shadow: 0 2px 6px var(--otak-shadow-color) !important;
+    }
+    
+    /* アクティブ状態のボタンにホバーした場合の特別なスタイル */
+    .otak-voice-menu__item.otak-voice-menu__append-btn--active:hover,
+    .otak-voice-menu__item.otak-voice-menu__input-btn--active:hover,
+    .otak-voice-menu__item.otak-voice-menu__modal-toggle-btn--active:hover {
+        background-color: var(--otak-button-primary-hover) !important; /* アクティブボタンのホバー色 */
+        color: #FFFFFF !important; /* 白色テキスト */
+        border-color: #FFFFFF !important; /* 白色ボーダー - 高コントラスト */
+        box-shadow: 0 2px 8px var(--otak-shadow-color) !important; /* より強調されたシャドウ */
+    }
+
+    /* モーダル表示/非表示切り替えボタン */
+    .otak-voice-menu__modal-toggle-btn {
+        /* Default style inherited */
+    }
+    
+    .otak-voice-menu__modal-toggle-btn--active {
+        background-color: var(--otak-button-primary-bg) !important; /* テーマに応じたアクティブ背景 */
+        color: #FFFFFF !important; /* White icon */
+        border-color: var(--otak-button-primary-hover) !important;
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.2) !important; /* 微かな光彩効果 */
+    }
+    
+    /* マイクボタン */
+    .otak-voice-menu__input-btn {
+        /* Default style inherited */
+    }
+
+    .otak-voice-menu__input-btn--active {
+        background-color: var(--otak-button-primary-bg) !important; /* テーマに応じたアクティブ背景 */
+        color: #FFFFFF !important; /* White icon */
+        border-color: var(--otak-button-primary-hover) !important;
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.2) !important; /* 微かな光彩効果 */
+    }
+
+    /* 常時オンモードのマイクボタン */
+    .otak-voice-menu__input-btn--always-on {
+        border: 2px solid #666666 !important; /* Slightly thicker, darker border */
+        /* Optionally, slightly change background or add a subtle glow */
+        /* box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); */
+    }
+    /* 常時オンモード *かつ* アクティブな場合 (より強調) */
+    .otak-voice-menu__input-btn--always-on.otak-voice-menu__input-btn--active {
+         background-color: #222222 !important; /* Even darker background */
+         border-color: #888888 !important; /* Lighter border for contrast */
+    }
+
+    /* 追記モードボタン */
+    .otak-voice-menu__append-btn {
+       /* Default style inherited */
+    }
+
+    .otak-voice-menu__append-btn--active {
+        background-color: var(--otak-button-primary-bg) !important; /* テーマに応じたアクティブ背景 */
+        color: #FFFFFF !important; /* White icon */
+        border: 1px solid var(--otak-button-primary-hover) !important;
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.2) !important; /* 微かな光彩効果 */
+    }
+
+    /* 校閲ボタン */
+    .otak-voice-menu__proofread-btn {
+       /* Default style inherited */
+    }
+
+    .otak-voice-menu__proofread-btn:hover {
+        background-color: var(--otak-button-secondary-hover) !important; /* テーマに応じたホバー色 */
+    }
+    
+    /* 校閲中のスタイル */
+    .otak-voice-menu__proofread-btn--processing {
+        background-color: #444444 !important; /* モノクロ配色 - ダークグレー */
+        color: #FFFFFF !important; /* 白色テキスト */
+        border-color: #333333 !important; /* より暗いグレー */
+        animation: pulse 1.5s infinite !important; /* 脈動アニメーション */
+    }
+
+    /* クリアボタン */
+    .otak-voice-menu__clear-btn {
+       /* Default style inherited */
+    }
+
+    .otak-voice-menu__clear-btn:hover {
+        background-color: var(--otak-button-secondary-hover) !important; /* テーマに応じたホバー色 */
+    }
+    
+    /* 編集ボタン */
+    .otak-voice-menu__edit-btn {
+       /* Default style inherited */
+    }
+    
+    .otak-voice-menu__edit-btn:hover {
+        background-color: var(--otak-button-secondary-hover) !important; /* テーマに応じたホバー色 */
+    }
+    
+    /* 編集中のスタイル */
+    .otak-voice-menu__edit-btn--processing {
+        background-color: #444444 !important; /* モノクロ配色 - ダークグレー */
+        color: #FFFFFF !important; /* 白色テキスト */
+        border-color: #333333 !important; /* より暗いグレー */
+        animation: pulse 1.5s infinite !important; /* 脈動アニメーション */
+    }
+    
+    /* 処理中の脈動アニメーション */
+    @keyframes pulse {
+        0% {
+            transform: scale(1) !important;
+            opacity: 1 !important;
+        }
+        50% {
+            transform: scale(1.05) !important;
+            opacity: 0.8 !important;
+        }
+        100% {
+            transform: scale(1) !important;
+            opacity: 1 !important;
+        }
+    }
+
+    /* ラベル (ツールチップ) */
+    .otak-voice-menu__label {
+        position: absolute;
+        bottom: 55px; /* ボタンの上に配置 */
+        right: 0; /* ボタンの右端に合わせる */
+        /* left: 50%; */ /* 削除 */
+        /* transform: translateX(-50%); */ /* 削除 */
+        background-color: var(--otak-header-bg); /* テーマに応じた背景 */
+        color: var(--otak-text-color); /* テーマに応じたテキスト色 */
+        padding: 5px 10px; /* 少しパディングを増やす */
+        border-radius: 4px; /* 少し角を丸める */
+        font-size: 12px; /* 少しフォントサイズを大きく */
+        white-space: nowrap; /* 折り返しを無効化 */
+        /* max-width: 180px; */ /* 必要に応じて調整 */
+        text-align: right; /* テキストを右揃えに変更 */
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out; /* transformも追加 */
+        pointer-events: none;
+        line-height: 1.4; /* 行間を少し調整 */
+        z-index: 1; /* ボタンより手前に表示 */
+        transform: translateY(5px); /* 初期位置を少し下に (X方向のtransform削除) */
+        user-select: none !important; /* テキスト選択を防止 */
+    }
+    
+    .otak-voice-menu__item:hover .otak-voice-menu__label {
+        opacity: 1;
+        transform: translateY(0); /* ホバー時に元の位置に (X方向のtransform削除) */
+        transition-delay: 0.4s; /* 表示遅延を少し長く */
+    }
+
+    /* ステータス表示 */
+    .otak-voice-status {
+        position: fixed;
+        bottom: 70px; /* メニューコンテナと同じ高さに調整 */
+        right: 80px; /* Position next to menu */
+        background-color: var(--otak-header-bg); /* テーマに応じた背景 */
+        color: var(--otak-text-color); /* テーマに応じたテキスト色 */
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 13px;
+        display: none;
+        max-width: 250px;
+        word-break: break-word;
+        z-index: 9999998;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        transition: background-color 0.3s ease;
+        user-select: none !important; /* テキスト選択を防止 */
+    }
+    
+    /* 処理中のステータス表示 */
+    .otak-voice-status--processing {
+        background-color: #444444; /* モノクロ配色 - ダークグレー */
+        color: #ffffff; /* 白色テキスト */
+        font-weight: bold;
+    }
+
+    /* モーダルウィンドウ共通スタイル (DeepL風) */
+    .otak-voice-modal {
+        position: fixed;
+        top: 15%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 480px;
+        background: #fff;
+        color: #111;
+        border: 1px solid #ccd0d7;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0,0,0,.15);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Meiryo, sans-serif;
+        z-index: 10000000;
+        overflow: hidden;
+        transition: box-shadow 0.3s ease;
+    }
+    
+    .otak-voice-modal__head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 44px;
+        background: #f5f6f8;
+        cursor: move;
+        padding: 0 12px;
+        border-bottom: 1px solid #e6e9ef;
+    }
+    
+    .otak-voice-modal__logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #d97757;
+    }
+    
+    .otak-voice-modal__title {
+        flex: 1;
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .otak-voice-modal__actions {
+        display: flex;
+        gap: 4px;
+    }
+    
+    .otak-voice-modal__actions button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        color: #444;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+    
+    .otak-voice-modal__actions button:hover {
+        color: #000;
+        background: #e9eaec;
+    }
+    
+    .otak-voice-modal__body {
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .otak-voice-modal__loader {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255,255,255,0.7);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        z-index: 10000001;
+    }
+    
+    .otak-voice-modal__spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(217,119,87,0.2);
+        border-top: 4px solid #d97757;
+        border-radius: 50%;
+        animation: otak-voice-spin 1s linear infinite;
+    }
+    
+    @keyframes otak-voice-spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* 設定モーダル */
+    .otak-voice-settings {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); /* 水平・垂直方向の中央揃え */
+        width: 900px; /* 幅をさらに広げてブロックレイアウトに対応 */
+        max-height: 95vh; /* 画面の95%の高さを最大値に設定 */
+        overflow-y: auto; /* 高さが足りない場合はスクロール可能に */
+        background: var(--otak-bg-color);
+        color: var(--otak-text-color);
+        border: 1px solid var(--otak-border-color);
+        border-radius: 8px;
+        box-shadow: 0 4px 16px var(--otak-shadow-color);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Meiryo, sans-serif;
+        z-index: 10000000;
+        display: none;
+        transition: box-shadow 0.3s ease;
+    }
+    
+    /* 設定モーダルのグリッドレイアウト */
+    .otak-voice-settings__grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* 2列グリッド */
+        gap: 25px; /* 視覚的な明瞭さのために最適化されたギャップ */
+        padding: 20px; /* すべての側面で一貫したパディング */
+    }
+    
+    /* 設定ブロック */
+    .otak-voice-settings__block {
+        background: var(--otak-input-bg);
+        border: 1px solid var(--otak-border-color);
+        border-radius: 6px;
+        overflow: hidden;
+    }
+    
+    /* ブロックヘッダー */
+    .otak-voice-settings__block h4 {
+        margin: 0;
+        padding: 10px 15px;
+        font-size: 14px;
+        background: var(--otak-header-bg);
+        border-bottom: 1px solid var(--otak-header-border);
+        color: var(--otak-text-color);
+    }
+    
+    /* ブロックコンテンツ */
+    .otak-voice-settings__block-content {
+        padding: 12px; /* パディングを少し小さくして縦幅を節約 */
+    }
+    
+    .otak-voice-settings h3 {
+        margin: 0;
+        padding: 12px 15px;
+        font-size: 15px;
+        font-weight: 600;
+        background: var(--otak-header-bg);
+        border-bottom: 1px solid var(--otak-header-border);
+        color: var(--otak-text-color);
+        cursor: move; /* ドラッグ可能を示す */
+        user-select: none !important; /* テキスト選択を防止 */
+    }
+    
+    .otak-voice-settings p {
+        margin: 15px 0 15px 0;
+        padding: 0 15px;
+        font-size: 13px;
+        color: var(--otak-text-color);
+        line-height: 1.5;
+        user-select: none !important; /* テキスト選択を防止 */
+    }
+    
+    .otak-voice-settings label {
+        display: block;
+        margin: 0 0 5px 0;
+        padding: 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--otak-text-color);
+        user-select: none !important; /* テキスト選択を防止 */
+    }
+    
+    /* 設定モーダルの説明文のパディングを調整 */
+    .otak-voice-settings p {
+        margin: 15px 15px 15px 15px;
+        padding: 0;
+        font-size: 13px;
+        color: var(--otak-text-color);
+        line-height: 1.5;
+        user-select: none !important; /* テキスト選択を防止 */
+    }
+    
+    /* ブロック内の最後の要素のマージンを削除 */
+    .otak-voice-settings__block-content > *:last-child {
+        margin-bottom: 0;
+    }
+    
+    /* ヘルプテキスト */
+    .otak-voice-settings__help-text {
+        margin-top: 8px;
+        font-size: 12px;
+        color: var(--otak-link-color);
+    }
+    
+    .otak-voice-settings__help-text a {
+        color: var(--otak-link-color);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    
+    .otak-voice-settings__help-text a:hover {
+        color: var(--otak-link-hover);
+        text-decoration: underline;
+    }
+    
+    /* 数値入力フィールド */
+    .otak-voice-settings__number-input {
+        width: 120px;
+        padding: 8px;
+        border: 1px solid var(--otak-input-border);
+        border-radius: 4px;
+        background-color: var(--otak-input-bg);
+        color: var(--otak-text-color);
+        font-size: 14px;
+        text-align: right;
+    }
+    
+    .otak-voice-settings__number-input:focus {
+        outline: none;
+        border-color: var(--otak-input-focus-border);
+    }
+    
+    /* 数値入力フィールドの矢印ボタンを非表示にする */
+    .otak-voice-settings__number-input::-webkit-inner-spin-button,
+    .otak-voice-settings__number-input::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    
+    /* Firefox用 */
+    .otak-voice-settings__number-input {
+        -moz-appearance: textfield;
+    }
+    
+    #api-key-input {
+        width: 100%;
+        margin: 0 0 15px 0;
+        padding: 10px 12px;
+        border: 1px solid var(--otak-input-border);
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 14px;
+        background-color: var(--otak-input-bg);
+        color: var(--otak-text-color);
+    }
+    
+    #api-key-input:focus {
+        outline: none;
+        border-color: var(--otak-input-focus-border);
+        box-shadow: 0 0 0 2px rgba(217, 119, 87, 0.3);
+    }
+    
+    #api-key-input::placeholder {
+        color: var(--otak-placeholder-color);
+    }
+    
+    #recognition-lang-select, #theme-select {
+        width: 100%;
+        margin: 0 0 15px 0;
+        padding: 8px 10px;
+        border: 1px solid var(--otak-input-border);
+        border-radius: 4px;
+        font-size: 14px;
+        background-color: var(--otak-input-bg);
+        color: var(--otak-text-color);
+    }
+    
+    #recognition-lang-select:focus, #theme-select:focus {
+        outline: none;
+        border-color: var(--otak-input-focus-border);
+        box-shadow: 0 0 0 2px rgba(217, 119, 87, 0.3);
+    }
+    
+    #recognition-lang-select option, #theme-select option {
+        background-color: var(--otak-input-bg);
+        color: var(--otak-text-color);
+    }
+    
+    #auto-correction-prompt-textarea, #proofreading-prompt-textarea {
+        width: 100%;
+        margin: 0 0 15px 0;
+        padding: 10px 12px;
+        border: 1px solid var(--otak-input-border);
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 14px;
+        background-color: var(--otak-input-bg);
+        color: var(--otak-text-color);
+        resize: vertical;
+        min-height: 80px; /* 高さを機能設定エリアに合わせて縮小 */
+        max-height: 150px;
+    }
+    
+    #auto-correction-prompt-textarea:focus, #proofreading-prompt-textarea:focus {
+        outline: none;
+        border-color: var(--otak-input-focus-border);
+        box-shadow: 0 0 0 2px rgba(217, 119, 87, 0.3);
+    }
+    
+    #auto-correction-prompt-textarea::placeholder, #proofreading-prompt-textarea::placeholder {
+        color: var(--otak-placeholder-color);
+    }
+    
+    .otak-voice-settings__item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 0 15px;
+        padding: 8px 0; /* パディングを少し小さくして縦幅を節約 */
+        border-top: 1px solid var(--otak-divider-color);
+    }
+    
+    .otak-voice-settings__item label:first-child {
+        padding: 0;
+        margin: 0;
+        font-weight: normal;
+        color: var(--otak-text-color);
+    }
+    
+    .otak-voice-settings .button-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 20px 15px 15px 15px;
+        padding-top: 15px;
+        border-top: 1px solid var(--otak-divider-color);
+    }
+    
+    .otak-voice-settings .button-group {
+        display: flex;
+        gap: 10px;
+    }
+    
+    #otak-voice-version-link {
+        font-size: 12px;
+        color: var(--otak-link-color);
+        text-decoration: none;
+        transition: color 0.2s;
+        user-select: none !important; /* テキスト選択を防止 */
+    }
+    
+    #otak-voice-version-link:hover {
+        color: var(--otak-link-hover);
+        text-decoration: underline;
+    }
+    
+    .otak-voice-settings button {
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        user-select: none !important; /* テキスト選択を防止 */
+    }
+    
+    .otak-voice-settings__save-btn {
+        background-color: var(--otak-button-primary-bg);
+        color: #ffffff;
+    }
+    
+    .otak-voice-settings__save-btn:hover {
+        background-color: var(--otak-button-primary-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .otak-voice-settings__cancel-btn {
+        background-color: var(--otak-button-secondary-bg);
+        color: var(--otak-text-color);
+    }
+    
+    .otak-voice-settings__cancel-btn:hover {
+        background-color: var(--otak-button-secondary-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* 音声認識テキストモーダル */
+    .otak-voice-recognition {
+        position: fixed;
+        bottom: 150px; /* 通知が見えるように上に移動 */
+        right: 80px; /* メニューコンテナの右側と同じ位置に */
+        transform: none; /* 中央寄せのtransformを削除 */
+        width: 480px; /* ユーザーフィードバックに基づいて幅を増加 */
+        height: 340px; /* 固定高さを設定 */
+        background: var(--otak-bg-color);
+        color: var(--otak-text-color);
+        border: 1px solid var(--otak-border-color);
+        border-radius: 8px;
+        box-shadow: 0 4px 16px var(--otak-shadow-color);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Meiryo, sans-serif;
+        z-index: 10000000;
+        overflow: hidden;
+        transition: box-shadow 0.3s ease;
+    }
+    
+    /* ドラッグ中のモーダルスタイル */
+    .otak-voice-recognition--dragging,
+    .otak-voice-settings--dragging {
+        box-shadow: 0 6px 24px var(--otak-shadow-color);
+    }
+    
+    .otak-voice-recognition h3 {
+        margin: 0;
+        padding: 12px 15px;
+        font-size: 15px;
+        font-weight: 600;
+        background: var(--otak-header-bg);
+        border-bottom: 1px solid var(--otak-header-border);
+        color: var(--otak-text-color);
+        user-select: none !important; /* テキスト選択を防止 */
+    }
+    
+    .otak-voice-recognition textarea {
+        width: 450px;
+        margin: 15px;
+        height: 200px; /* 固定高さを設定 */
+        padding: 10px;
+        border: 1px solid var(--otak-input-border);
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 14px;
+        background-color: var(--otak-input-bg);
+        color: var(--otak-text-color);
+        line-height: 1.5;
+        overflow-y: auto; /* スクロール可能に */
+    }
+    
+    .otak-voice-recognition textarea:focus,
+    .otak-voice-recognition textarea:focus-visible {
+        outline: none !important;
+        border-color: var(--otak-input-focus-border);
+        box-shadow: 0 0 0 2px rgba(217, 119, 87, 0.3);
+        transition: none !important;
+    }
+    
+    .otak-voice-recognition textarea::placeholder {
+        color: var(--otak-placeholder-color);
+    }
+    
+    .otak-voice-recognition__button-container {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin: 0 15px 8px 15px;
+    }
+    
+    .otak-voice-recognition button {
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        user-select: none !important; /* テキスト選択を防止 */
+    }
+    
+    .otak-voice-recognition__copy-btn {
+        background-color: var(--otak-button-primary-bg);
+        color: #ffffff;
+    }
+    
+    .otak-voice-recognition__copy-btn:hover {
+        background-color: var(--otak-button-primary-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .otak-voice-recognition__close-btn {
+        background-color: var(--otak-button-secondary-bg);
+        color: var(--otak-text-color);
+    }
+    
+    .otak-voice-recognition__close-btn:hover {
+        background-color: var(--otak-button-secondary-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 履歴パネル */
+    .otak-voice-history {
+        position: fixed;
+        bottom: 70px; /* メニューコンテナと同じ高さに調整 */
+        right: 80px; /* Position next to menu */
+        width: 280px;
+        max-height: 350px;
+        background-color: var(--otak-bg-color);
+        color: var(--otak-text-color);
+        border: 1px solid var(--otak-border-color);
+        border-radius: 6px;
+        box-shadow: 0 2px 10px var(--otak-shadow-color);
+        overflow-y: auto;
+        padding: 15px;
+        z-index: 9999999;
+        display: none;
+        font-size: 13px;
+        user-select: none !important; /* テキスト選択を防止 */
+    }
+    
+    .otak-voice-history > div:first-child { /* Title styling */
+        font-weight: 600;
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--otak-divider-color);
+        user-select: none !important; /* テキスト選択を防止 */
+    }
+
+    .otak-voice-history__item {
+        border-bottom: 1px solid var(--otak-divider-color);
+        padding: 10px 0;
+        font-size: 12px; /* Slightly smaller */
+        line-height: 1.4;
+        user-select: none !important; /* テキスト選択を防止 */
+    }
+    
+    .otak-voice-history__item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .otak-voice-history__time {
+        color: var(--otak-link-color);
+        font-size: 10px;
+        margin-bottom: 4px;
+        display: block; /* Ensure it takes full width */
+        user-select: none !important; /* テキスト選択を防止 */
+    }
+
+    .otak-voice-history__text {
+        word-break: break-word;
+        color: var(--otak-text-color);
+        user-select: none !important; /* テキスト選択を防止 */
+    }
+/* --- トグルスイッチ スタイル --- */
+.otak-voice-settings__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* ラベルとスイッチを両端に配置 */
+    margin-bottom: 10px; /* マージンを少し小さくして縦幅を節約 */
+    padding: 8px 0; /* パディングを少し小さくして縦幅を節約 */
+    border-bottom: 1px solid var(--otak-divider-color);
+}
+
+.otak-voice-settings__item:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.otak-voice-settings__item label:first-child { /* ラベルのスタイル */
+    font-size: 14px;
+    color: var(--otak-text-color);
+}
+
+.otak-voice-settings__switch {
+    position: relative;
+    display: inline-block;
+    width: 44px; /* 幅を少し小さく */
+    height: 24px; /* 高さを少し小さく */
+}
+
+.otak-voice-settings__switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.otak-voice-settings__slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--otak-button-secondary-bg);
+    transition: .4s;
+    border-radius: 24px; /* 高さに合わせて調整 */
+}
+
+.otak-voice-settings__slider:before {
+    position: absolute;
+    content: "";
+    height: 18px; /* スライダーの高さを調整 */
+    width: 18px; /* スライダーの幅を調整 */
+    left: 3px; /* 左からの位置を調整 */
+    bottom: 3px; /* 下からの位置を調整 */
+    background-color: var(--otak-text-color);
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .otak-voice-settings__slider {
+    background-color: var(--otak-button-primary-bg);
+}
+
+input:focus + .otak-voice-settings__slider {
+    box-shadow: 0 0 1px var(--otak-button-primary-bg);
+}
+
+input:checked + .otak-voice-settings__slider:before {
+    transform: translateX(20px); /* スライダーの移動距離を調整 */
+}
+
+/* Rounded sliders */
+.otak-voice-settings__slider--round {
+    border-radius: 24px; /* 高さに合わせて調整 */
+}
+
+.otak-voice-settings__slider--round:before {
+    border-radius: 50%;
+}
