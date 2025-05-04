@@ -1,6 +1,6 @@
 {
   "extName": {
-    "message": "拡張ユニバーサル音声入力",
+    "message": "otak-voice",
     "description": "Extension name."
   },
   "extDescription": {
@@ -12,16 +12,12 @@
     "description": "Tooltip for the main menu button."
   },
   "micTooltip": {
-    "message": "マイク（入力フィールドを自動認識）",
+    "message": "音声入力\n音声認識を開始/停止",
     "description": "Tooltip for the microphone button."
   },
-  "micTooltipAlwaysOn": {
-    "message": "マイク（常時オン - ダブルクリックで解除）",
-    "description": "Tooltip for the microphone button when always-on mode is active."
-  },
-  "appendTooltip": {
-    "message": "追記モード（オン/オフ）\n音声認識時に既存テキストに追記します",
-    "description": "Tooltip for the append mode button."
+  "autoSubmitTooltip": {
+    "message": "自動送信（オン/オフ）\n音声認識後に自動的に送信します",
+    "description": "Tooltip for the auto-submit toggle button."
   },
   "clearTooltip": {
     "message": "入力フィールドをクリア\n現在の入力フィールドの内容を消去します",
@@ -36,11 +32,11 @@
     "description": "Tooltip for the edit button."
   },
   "settingsTooltip": {
-    "message": "OpenAI APIキーを設定 (GPT-4.1-mini / GPT-4.1用)",
+    "message": "設定\nAPIキーや言語設定を変更",
     "description": "Tooltip for the settings button."
   },
   "historyTooltip": {
-    "message": "音声入力履歴を表示",
+    "message": "履歴\n過去の音声入力を表示",
     "description": "Tooltip for the history button."
   },
   "statusListening": {
@@ -67,13 +63,13 @@
     "message": "クリア対象の入力フィールドが見つかりません",
     "description": "Status message when no input field is found to clear."
   },
-  "statusAppendOn": {
-    "message": "追記モード: オン (元のテキストを維持して追記します)",
-    "description": "Status message when append mode is turned on."
+  "statusAutoSubmitOn": {
+    "message": "自動送信: オン (音声認識後に自動的に送信します)",
+    "description": "Status message when auto-submit is turned on."
   },
-  "statusAppendOff": {
-    "message": "追記モード: オフ",
-    "description": "Status message when append mode is turned off."
+  "statusAutoSubmitOff": {
+    "message": "自動送信: オフ (音声認識後に自動送信しません)",
+    "description": "Status message when auto-submit is turned off."
   },
   "statusProofreading": {
     "message": "テキスト全体を校閲中...",
@@ -116,6 +112,10 @@
     "description": "Status message when trying to proofread empty content."
   },
   "statusEditNotFound": {
+"statusTwitterNotSupported": {
+      "message": "x.comは現在サポートされていません。将来のアップデートで対応予定です。",
+      "description": "Status message shown when trying to use voice input on Twitter/X.com, which is not supported."
+    },
     "message": "編集対象の入力フィールドが見つかりません",
     "description": "Status message when no input field is found for editing."
   },
@@ -126,6 +126,22 @@
   "statusEditInstructionEmpty": {
     "message": "編集指示が入力されていません",
     "description": "Status message when edit instruction is empty."
+  },
+  "statusEditListening": {
+    "message": "編集指示を音声で入力してください...",
+    "description": "Status message when listening for edit instructions."
+  },
+  "statusEditListeningInterim": {
+    "message": "編集指示を認識中",
+    "description": "Status message when showing interim results for edit instructions."
+  },
+  "statusEditInstructionReceived": {
+    "message": "編集指示を受け取りました",
+    "description": "Status message when edit instruction is received."
+  },
+  "statusEditing": {
+    "message": "GPT-4.1で編集中...",
+    "description": "Status message during editing with GPT."
   },
   "statusEditingError": {
     "message": "編集処理中にエラーが発生しました",
@@ -221,20 +237,12 @@
     "message": "GPT応答エラー。校閲スキップ",
     "description": "Status message for unexpected API response."
   },
-   "statusAlwaysOnEnabled": {
-    "message": "常時オンモード有効 (ダブルクリックで解除)",
-    "description": "Status message when always-on mode is enabled."
-  },
-  "statusAlwaysOnDisabled": {
-    "message": "常時オンモード無効",
-    "description": "Status message when always-on mode is disabled."
-  },
   "modalSettingsTitle": {
-    "message": "OpenAI APIキー設定",
+    "message": "設定",
     "description": "Title for the settings modal."
   },
   "modalSettingsDescription": {
-    "message": "音声認識後の自動校正 (GPT-4.1-mini) および手動校閲 (GPT-4.1) のためのAPIキーを入力してください。APIキーは拡張機能のストレージに保存され、OpenAIのAPIにのみ使用されます。",
+    "message": "OpenAI APIキーを入力して、音声認識の自動校正と手動校閲機能を有効にしてください。APIキーは拡張機能内に安全に保存され、OpenAIのAPIにのみ使用されます。",
     "description": "Description text in the settings modal."
   },
   "modalSettingsInputPlaceholder": {
@@ -242,7 +250,7 @@
     "description": "Placeholder for the API key input field."
   },
   "modalSettingsLangLabel": {
-    "message": "音声認識言語:",
+    "message": "音声認識言語",
     "description": "Label for the language selection dropdown in settings."
   },
   "modalSettingsLangJa": {
@@ -256,6 +264,42 @@
   "modalSettingsLangVi": {
     "message": "ベトナム語 (vi-VN)",
     "description": "Vietnamese language option in settings."
+  },
+  "settingAutoDetectInputFieldsLabel": {
+    "message": "入力フィールドの自動検出",
+    "description": "Label for the setting to enable/disable automatic input field detection."
+  },
+  "settingAutoDetectTooltipOn": {
+    "message": "入力フィールドの自動認識 ON",
+    "description": "Tooltip for the auto-detect setting when ON."
+  },
+  "settingAutoDetectTooltipOff": {
+    "message": "入力フィールドの自動認識 OFF",
+    "description": "Tooltip for the auto-detect setting when OFF."
+  },
+  "settingAutoCorrectionLabel": {
+    "message": "音声認識後自動で校閲",
+    "description": "Label for the setting to enable/disable automatic correction after voice recognition."
+  },
+  "settingAutoCorrectionTooltipOn": {
+    "message": "音声認識後自動で校閲 ON",
+    "description": "Tooltip for the auto-correction setting when ON."
+  },
+  "settingAutoCorrectionTooltipOff": {
+    "message": "音声認識後自動で校閲 OFF",
+    "description": "Tooltip for the auto-correction setting when OFF."
+  },
+  "settingUseHistoryContextLabel": {
+    "message": "自動校閲時に過去の入力を文脈に含める",
+    "description": "Label for the setting to enable/disable including past input in context during auto-correction."
+  },
+  "settingUseHistoryContextTooltipOn": {
+    "message": "自動校閲時に過去の入力を文脈に含める ON",
+    "description": "Tooltip for the use-history-context setting when ON."
+  },
+  "settingUseHistoryContextTooltipOff": {
+    "message": "自動校閲時に過去の入力を文脈に含める OFF",
+    "description": "Tooltip for the use-history-context setting when OFF."
   },
   "modalSettingsButtonCancel": {
     "message": "キャンセル",
@@ -381,14 +425,6 @@
     "message": "設定の保存に失敗しました:",
     "description": "Log message when saving settings fails."
   },
-  "logAlwaysOnModeSaved": {
-    "message": "常時オンモード設定を保存しました:",
-    "description": "Log message when the always-on mode setting is saved."
-  },
-  "logAlwaysOnModeSaveError": {
-    "message": "常時オンモード設定の保存に失敗しました:",
-    "description": "Log message when saving the always-on mode setting fails."
-  },
   "alertApiKeyMissing": {
     "message": "APIキーが設定されていません。設定ボタンから設定してください。",
     "description": "Alert message when API key is missing during save attempt."
@@ -412,6 +448,10 @@
   "alertSpeechApiNotAvailable": {
     "message": "音声認識APIが利用できません。",
     "description": "Alert message when Speech Recognition API is not available."
+  },
+  "logCorrectionError": {
+    "message": "校閲処理エラー:",
+    "description": "Log message for general correction error."
   },
   "logCorrectionErrorAppend": {
     "message": "校閲処理エラー（追記モード）:",
@@ -485,10 +525,6 @@
     "message": "UI要素が見つかりません。再生成を試みます...",
     "description": "Log message when UI elements are not found during self-healing."
   },
-  "logRestartingAlwaysOn": {
-    "message": "常時オンモードのため、音声認識を再開します...",
-    "description": "Log message when restarting recognition in always-on mode."
-  },
   "logExtensionLoaded": {
     "message": "Enhanced Universal Voice Input (Chrome Extension) loaded.",
     "description": "Log message when the extension has finished loading."
@@ -514,5 +550,197 @@
   "logCorrectionRequestErrorUseOriginal": {
     "message": "GPT校閲リクエスト中にエラーが発生しました。元のテキストを使用します。",
     "description": "Log message when correction request fails and original text is used."
+  },
+  "statusProcessingInProgress": {
+    "message": "別の処理が進行中です。完了までお待ちください。",
+    "description": "Status message when another processing is already in progress."
+  },
+  "statusSubmitDisabled": {
+    "message": "送信ボタンが無効状態です",
+    "description": "Status message when the submit button is disabled."
+  },
+  "statusSubmitClicked": {
+    "message": "送信ボタンをクリックしました",
+    "description": "Status message when the submit button is clicked."
+  },
+  "statusAutoDetectOff": {
+    "message": "入力フィールドの自動認識がオフです。入力フィールドを直接クリックしてください。",
+    "description": "Status message when auto-detect input fields is turned off."
+  },
+  "statusUsingModalDialog": {
+    "message": "入力フィールドが見つかりません。音声認識結果はモーダルウィンドウに表示されます。",
+    "description": "Status message shown when no input field is found and modal dialog will be used."
+  },
+  "recognitionModalTitle": {
+    "message": "音声認識結果",
+    "description": "Title for the recognition result modal dialog."
+  },
+  "recognitionModalCopyButton": {
+    "message": "コピー",
+    "description": "Copy button text in the recognition result modal dialog."
+  },
+  "recognitionModalCopied": {
+    "message": "コピーしました！",
+    "description": "Text shown after copying in the recognition result modal dialog."
+  },
+  "recognitionModalCloseButton": {
+    "message": "閉じる",
+    "description": "Close button text in the recognition result modal dialog."
+  },
+  "modalToggleTooltip": {
+    "message": "モーダル切替\n音声認識結果の表示方法を切り替えます",
+    "description": "Tooltip for the modal toggle button."
+  },
+  "modalShowTooltip": {
+    "message": "モーダル表示",
+    "description": "Tooltip for showing the modal window."
+  },
+  "modalHideTooltip": {
+    "message": "モーダル非表示",
+    "description": "Tooltip for hiding the modal window."
+  },
+  "recognitionModalPlaceholder": {
+    "message": "音声を認識中...",
+    "description": "Placeholder text shown in the recognition modal while listening."
+  },
+  "statusModalVisible": {
+    "message": "モーダル表示: オン（結果をウィンドウに表示）",
+    "description": "Status message when modal window is visible."
+  },
+  "statusModalHidden": {
+    "message": "モーダル表示: オフ（結果を直接入力）",
+    "description": "Status message when modal window is hidden."
+  },
+  "themeToggleTooltip": {
+    "message": "テーマ切替\nライト/ダークテーマを切り替えます",
+    "description": "Tooltip for the theme toggle button."
+  },
+  "themeToggleToLight": {
+    "message": "ライトテーマに切替",
+    "description": "Tooltip for the theme toggle button when in dark mode."
+  },
+  "themeToggleToDark": {
+    "message": "ダークテーマに切替",
+    "description": "Tooltip for the theme toggle button when in light mode."
+  },
+  "statusThemeLight": {
+    "message": "ライトテーマに切り替えました",
+    "description": "Status message when theme is switched to light."
+  },
+  "statusThemeDark": {
+    "message": "ダークテーマに切り替えました",
+    "description": "Status message when theme is switched to dark."
+  },
+  "modalSettingsThemeLabel": {
+    "message": "テーマ",
+    "description": "Label for the theme selection dropdown in settings."
+  },
+  "modalSettingsThemeDark": {
+    "message": "ダークテーマ",
+    "description": "Dark theme option in settings."
+  },
+  "modalSettingsThemeLight": {
+    "message": "ライトテーマ",
+    "description": "Light theme option in settings."
+  },
+  "errorNetworkFetchFailed": {
+    "message": "ネットワーク接続エラー: データの取得に失敗しました",
+    "description": "Error message for network fetch failure"
+  },
+  "errorNetworkTimeout": {
+    "message": "ネットワークタイムアウト: 接続に時間がかかりすぎています",
+    "description": "Error message for network timeout"
+  },
+  "errorNetworkOffline": {
+    "message": "オフラインエラー: インターネット接続を確認してください",
+    "description": "Error message for offline status"
+  },
+  "errorApiInvalidKey": {
+    "message": "APIキーが無効です",
+    "description": "Error message for invalid API key"
+  },
+  "errorApiUnauthorized": {
+    "message": "API認証エラー: APIキーを確認してください",
+    "description": "Error message for API unauthorized access"
+  },
+  "errorApiRateLimit": {
+    "message": "APIレート制限に達しました。しばらく待ってから再試行してください",
+    "description": "Error message for API rate limit"
+  },
+  "errorApiBadRequest": {
+    "message": "APIリクエストエラー: 無効なリクエストです",
+    "description": "Error message for API bad request"
+  },
+  "errorApiServerError": {
+    "message": "APIサーバーエラー: サービスに問題が発生しています",
+    "description": "Error message for API server error"
+  },
+  "errorApiUnexpectedResponse": {
+    "message": "API応答エラー: 予期しない応答を受信しました",
+    "description": "Error message for unexpected API response"
+  },
+  "errorInputEmptyContent": {
+    "message": "内容が空です",
+    "description": "Error message for empty content"
+  },
+  "errorInputFieldNotFound": {
+    "message": "入力フィールドが見つかりません",
+    "description": "Error message for input field not found"
+  },
+  "errorSpeechNotSupported": {
+    "message": "お使いのブラウザは音声認識をサポートしていません",
+    "description": "Error message for speech recognition not supported"
+  },
+  "errorSpeechAborted": {
+    "message": "音声認識が中断されました",
+    "description": "Error message for aborted speech recognition"
+  },
+  "errorSpeechStopFailed": {
+    "message": "音声認識の停止に失敗しました",
+    "description": "Error message for failed speech recognition stop"
+  },
+  "errorStorageSaveFailed": {
+    "message": "設定の保存に失敗しました",
+    "description": "Error message for storage save failure"
+  },
+  "errorStorageLoadFailed": {
+    "message": "設定の読み込みに失敗しました",
+    "description": "Error message for storage load failure"
+  },
+  "errorDomElementNotFound": {
+    "message": "要素が見つかりません",
+    "description": "Error message for DOM element not found"
+  },
+  "errorDomEventDispatchFailed": {
+    "message": "イベント発火に失敗しました",
+    "description": "Error message for DOM event dispatch failure"
+  },
+  "errorDomManipulationFailed": {
+    "message": "DOM操作に失敗しました",
+    "description": "Error message for DOM manipulation failure"
+  },
+  "errorUnknown": {
+    "message": "不明なエラーが発生しました",
+    "description": "Error message for unknown errors"
+  },
+  "autoCorrectionPromptLabel": {
+    "message": "自動校閲プロンプト",
+    "description": "Label for the auto-correction prompt textarea in settings"
+  },
+  "proofreadingPromptLabel": {
+    "message": "手動校閲プロンプト",
+    "description": "Label for the proofreading prompt textarea in settings"
+  },
+  "promptPlaceholder": {
+    "message": "プロンプトを入力してください。何も入力されていない場合はデフォルトのプロンプトで処理されます。",
+    "description": "Placeholder text for prompt textareas in settings"
+  },
+  "errorInvalidPrompt": {
+    "message": "無効なプロンプトです",
+    "description": "Error message for invalid prompt format"
+  },
+  "statusPreparingRecognition": {
+    "message": "音声認識の準備中...",
+    "description": "Status message when preparing speech recognition"
   }
 }

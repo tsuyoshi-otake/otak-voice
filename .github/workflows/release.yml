@@ -1,0 +1,219 @@
+name: Create GitHub Release
+
+on:
+  push:
+    tags:
+      - 'v*' # vから始まるタグ（例：v3.1）がプッシュされたときに実行
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build extension
+        run: npm run build
+
+      - name: Install packaging dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openssl zip
+
+      - name: Set up extension key from GitHub Secrets
+        run: |
+          mkdir -p keys
+          if [ -n "$EXTENSION_KEY" ]; then
+            echo "Using key from GitHub secrets..."
+            
+            # Check if the key is Base64 encoded
+            if [ -z "${EXTENSION_KEY##*BEGIN RSA PRIVATE KEY*}" ]; then
+              echo "Key appears to be in PEM format, using as is"
+              echo "$EXTENSION_KEY" > keys/extension-key.pem
+            else
+              echo "Key appears to be Base64 encoded, decoding"
+              # Try different base64 decode options for compatibility
+              if command -v base64 > /dev/null; then
+                # Try both decode options
+                echo "$EXTENSION_KEY" | base64 -d > keys/extension-key.pem 2>/dev/null || \
+                echo "$EXTENSION_KEY" | base64 --decode > keys/extension-key.pem 2>/dev/null || \
+                echo "$EXTENSION_KEY" > keys/extension-key.pem
+              else
+                echo "base64 command not found, using key as-is"
+                echo "$EXTENSION_KEY" > keys/extension-key.pem
+              fi
+            fi
+            
+            # Verify the key is valid
+            if openssl rsa -in keys/extension-key.pem -check -noout > /dev/null 2>&1; then
+              echo "✓ Valid RSA key"
+              # Make sure the key has correct permissions
+              chmod 600 keys/extension-key.pem
+            else
+              echo "✗ Invalid RSA key format"
+              echo "Generating new key instead..."
+              openssl genrsa -out keys/extension-key.pem 2048
+              chmod 600 keys/extension-key.pem
+            fi
+          else
+            echo "No key found in GitHub secrets, generating new key..."
+            openssl genrsa -out keys/extension-key.pem 2048
+            echo "Key generated successfully."
+          fi
+        env:
+          EXTENSION_KEY: ${{ secrets.EXTENSION_KEY }}
+
+      - name: Package extension
+        run: |
+          mkdir -p dist
+          echo "Packaging extension files..."
+          
+          # Extract version from tag
+          VERSION=${GITHUB_REF#refs/tags/v}
+          
+          # Generate timestamp for unique filenames
+          TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+          FILE_PREFIX="otak-voice-v${VERSION}-${TIMESTAMP}"
+          
+          echo "Using file prefix: ${FILE_PREFIX}"
+          
+          # Create a temporary directory for unpacked extension
+          mkdir -p temp_ext
+          cp -r manifest.json dist/content.js dist/background.js style.css _locales otak-voice-128.png temp_ext/
+          
+          # Create ZIP file
+          zip -r "dist/${FILE_PREFIX}.zip" manifest.json dist/content.js dist/background.js style.css _locales/ otak-voice-128.png
+          echo "ZIP file created successfully."
+          
+          # Create CRX file using OpenSSL
+          echo "Creating CRX file using OpenSSL..."
+          
+          # Step 1: Create a ZIP file of the extension (already done above)
+          cp "dist/${FILE_PREFIX}.zip" temp_ext.zip
+          
+          # Install node-crx for proper CRX file generation
+          echo "Installing node-crx for proper CRX file generation..."
+          npm install -g crx
+          
+          # Create a temporary directory for the extension
+          mkdir -p temp_ext_dir
+          cp -r manifest.json dist/content.js dist/background.js style.css _locales otak-voice-128.png temp_ext_dir/
+          
+          # Generate CRX file using crx tool
+          echo "Generating CRX file using crx tool..."
+          crx pack temp_ext_dir -o "dist/${FILE_PREFIX}.crx" -p keys/extension-key.pem
+          
+          # If crx tool fails, try alternative method
+          if [ ! -f "dist/${FILE_PREFIX}.crx" ]; then
+            echo "crx tool failed, trying alternative method..."
+            
+            # Create a proper CRX file using Chrome's format
+            # See: https://developer.chrome.com/docs/extensions/reference/crx
+            
+            # Step 1: Create a ZIP file of the extension
+            cd temp_ext_dir
+            zip -r "../temp_ext.zip" *
+            cd ..
+            
+            # Step 2: Generate the CRX header
+            # Magic number "Cr24" (43 72 32 34)
+            printf "Cr24" > dist/header.bin
+            # Version 3 (little-endian)
+            printf "\x03\x00\x00\x00" >> dist/header.bin
+            
+            # Extract public key from the private key
+            openssl rsa -in keys/extension-key.pem -pubout -outform DER > dist/public_key.der 2>/dev/null
+            
+            # Get the public key length and append it to the header (little-endian)
+            KEY_LENGTH=$(stat -c %s dist/public_key.der)
+            printf "\x$(printf "%02x" $((KEY_LENGTH & 0xff)))\x$(printf "%02x" $(($((KEY_LENGTH >> 8)) & 0xff)))\x$(printf "%02x" $(($((KEY_LENGTH >> 16)) & 0xff)))\x$(printf "%02x" $(($((KEY_LENGTH >> 24)) & 0xff)))" >> dist/header.bin
+            
+            # Step 3: Create the signature
+            openssl dgst -sha256 -binary -sign keys/extension-key.pem temp_ext.zip > dist/signature.bin
+            
+            # Get the signature length and append it to the header (little-endian)
+            SIG_LENGTH=$(stat -c %s dist/signature.bin)
+            printf "\x$(printf "%02x" $((SIG_LENGTH & 0xff)))\x$(printf "%02x" $(($((SIG_LENGTH >> 8)) & 0xff)))\x$(printf "%02x" $(($((SIG_LENGTH >> 16)) & 0xff)))\x$(printf "%02x" $(($((SIG_LENGTH >> 24)) & 0xff)))" >> dist/header.bin
+            
+            # Step 4: Concatenate all parts to create the CRX file
+            cat dist/header.bin dist/public_key.der dist/signature.bin temp_ext.zip > "dist/${FILE_PREFIX}.crx"
+          fi
+          
+          # Also create standard named files for latest version
+          cp "dist/${FILE_PREFIX}.zip" dist/otak-voice-latest.zip
+          cp "dist/${FILE_PREFIX}.crx" dist/otak-voice-latest.crx
+          
+          # Create a version info file
+          echo "{\"version\":\"${VERSION}\",\"buildTime\":\"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\",\"files\":[\"${FILE_PREFIX}.zip\",\"${FILE_PREFIX}.crx\",\"otak-voice-latest.zip\",\"otak-voice-latest.crx\"]}" > dist/version-info.json
+          
+          # Clean up temporary files
+          rm -f dist/header.bin dist/public_key.der dist/signature.bin temp_ext.zip
+          rm -rf temp_ext temp_ext_dir
+          
+          echo "Extension packaged successfully (ZIP and CRX formats)."
+          echo "Generated files:"
+          echo "- dist/${FILE_PREFIX}.zip"
+          echo "- dist/${FILE_PREFIX}.crx"
+          echo "- dist/otak-voice-latest.zip"
+          echo "- dist/otak-voice-latest.crx"
+          echo "- dist/version-info.json"
+
+      # リリースノートを生成
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+          # リリースノートのテンプレートを作成
+          cat > RELEASE_NOTES.md << EOF
+          # otak-voice v$VERSION リリースノート
+          
+          ## 変更点
+          
+          - ユニバーサル音声入力機能の強化
+          - UI/UXの改善
+          - バグ修正と安定性の向上
+          
+          ## 主な機能
+          
+          - **どこでも使える音声入力**: あらゆるウェブサイトのテキスト入力欄で使用可能
+          - **GPT-4.1-miniによる自動文脈修正**: 音声認識結果を自動的に校正
+          - **GPT-4.1による高精度校閲**: 入力内容全体を高精度AIモデルで校閲
+          - **SPA（シングルページアプリケーション）対応**: 画面遷移後も自動的に再初期化
+          - **追記モード**: 既存のテキストに追記可能
+          - **自動送信機能**: 音声入力後に自動的に送信ボタンをクリック
+          
+          ## インストール方法
+          
+          1. Chrome拡張機能ページ（chrome://extensions/）を開く
+          2. デベロッパーモードを有効にする
+          3. パッケージ化されていない拡張機能を読み込む（ZIPファイルを使用）
+          
+          または、CRXファイルをChrome拡張機能ページにドラッグ＆ドロップしてインストールすることもできます。
+          EOF
+
+      # GitHub Releaseを作成
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          name: otak-voice v${{ steps.release_notes.outputs.version }}
+          body_path: RELEASE_NOTES.md
+          draft: false
+          prerelease: false
+          files: |
+            ./dist/otak-voice-latest.zip
+            ./dist/otak-voice-latest.crx
+            ./dist/version-info.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

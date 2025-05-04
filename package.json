@@ -1,0 +1,32 @@
+{
+  "name": "otak-voice",
+  "version": "3.1",
+  "description": "otak-voiceは、あらゆるウェブサイトで使える高度な音声入力拡張機能です。",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "build": "esbuild src/content.js --bundle --outdir=dist --format=iife && esbuild src/background.js --bundle --outdir=dist --format=esm"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tsuyoshi-otake/otak-voice.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tsuyoshi-otake/otak-voice/issues"
+  },
+  "homepage": "https://github.com/tsuyoshi-otake/otak-voice#readme",
+  "devDependencies": {
+    "@babel/core": "^7.27.1",
+    "@babel/preset-env": "^7.27.1",
+    "@types/jest": "^29.5.14",
+    "babel-jest": "^29.7.0",
+    "esbuild": "^0.25.3",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  }
+}

@@ -1,86 +1,82 @@
 {
   "extName": {
-    "message": "[VI] Enhanced Universal Voice Input",
+    "message": "otak-voice",
     "description": "Extension name."
   },
   "extDescription": {
-    "message": "[VI] Voice input for any website with context correction, expandable menu, clear input, and auto-submit features. SPA compatible.",
+    "message": "Voice input for any website with context correction, expandable menu, clear input, and auto-submit features. SPA compatible.",
     "description": "Extension description."
   },
   "menuTooltip": {
-    "message": "[VI] Mở/Đóng Menu",
+    "message": "Mở/Đóng Menu",
     "description": "Tooltip for the main menu button."
   },
   "micTooltip": {
-    "message": "[VI] Micrô (Tự động phát hiện trường nhập liệu)",
+    "message": "Micrô\nBắt đầu/dừng nhận dạng giọng nói",
     "description": "Tooltip for the microphone button."
   },
-  "micTooltipAlwaysOn": {
-    "message": "[VI] Micrô (Luôn bật - Nhấp đúp để tắt)",
-    "description": "Tooltip for the microphone button when always-on mode is active."
-  },
-  "appendTooltip": {
-    "message": "[VI] Chế độ nối thêm (Bật/Tắt)\nNối vào văn bản hiện có trong quá trình nhận dạng giọng nói",
-    "description": "Tooltip for the append mode button."
+  "autoSubmitTooltip": {
+    "message": "Tự động gửi (Bật/Tắt)\nTự động gửi sau khi nhận dạng giọng nói",
+    "description": "Tooltip for the auto-submit toggle button."
   },
   "clearTooltip": {
-    "message": "[VI] Xóa trường nhập liệu\nXóa nội dung của trường nhập liệu hiện tại",
+    "message": "Xóa trường nhập liệu\nXóa nội dung của trường nhập liệu hiện tại",
     "description": "Tooltip for the clear button."
   },
   "proofreadTooltip": {
-    "message": "[VI] Đọc và sửa nội dung (GPT-4.1)\nĐọc và sửa toàn bộ nội dung bằng mô hình độ chính xác cao",
+    "message": "Đọc và sửa nội dung (GPT-4.1)\nĐọc và sửa toàn bộ nội dung bằng mô hình độ chính xác cao",
     "description": "Tooltip for the proofread button."
   },
   "editTooltip": {
-    "message": "[VI] Chỉnh sửa văn bản (GPT-4.1)\nChỉnh sửa nội dung trường nhập liệu dựa trên hướng dẫn",
+    "message": "Chỉnh sửa văn bản (GPT-4.1)\nChỉnh sửa nội dung trường nhập liệu dựa trên hướng dẫn",
     "description": "Tooltip for the edit button."
   },
   "settingsTooltip": {
-    "message": "[VI] Đặt khóa API OpenAI (cho GPT-4.1-mini / GPT-4.1)",
+    "message": "Cài đặt\nCấu hình khóa API và ngôn ngữ",
     "description": "Tooltip for the settings button."
   },
   "historyTooltip": {
-    "message": "[VI] Hiển thị lịch sử nhập liệu bằng giọng nói",
+    "message": "Lịch sử\nXem các mục nhập liệu bằng giọng nói trước đây",
     "description": "Tooltip for the history button."
   },
   "statusListening": {
-    "message": "[VI] Đang nghe...",
+    "message": "Đang nghe...",
     "description": "Status message when listening."
   },
   "statusListeningAppend": {
-    "message": "[VI] Đang nghe... (Nối thêm)",
+    "message": "Đang nghe... (Nối thêm)",
     "description": "Status message when listening in append mode."
   },
   "statusInputFound": {
-    "message": "[VI] Đã chọn trường nhập liệu",
+    "message": "Đã chọn trường nhập liệu",
     "description": "Status message when an input field is found/selected."
   },
   "statusInputNotFound": {
-    "message": "[VI] Không tìm thấy trường nhập liệu",
+    "message": "Không tìm thấy trường nhập liệu",
     "description": "Status message when no input field is found."
   },
   "statusClearSuccess": {
-    "message": "[VI] Đã xóa trường nhập liệu",
+    "message": "Đã xóa trường nhập liệu",
     "description": "Status message when input field is cleared."
   },
   "statusClearNotFound": {
-    "message": "[VI] Không tìm thấy trường nhập liệu để xóa",
+    "message": "Không tìm thấy trường nhập liệu để xóa",
     "description": "Status message when no input field is found to clear."
   },
-  "statusAppendOn": {
-    "message": "[VI] Chế độ nối thêm: Bật (Nối vào văn bản hiện có)",
-    "description": "Status message when append mode is turned on."
+  "statusAutoSubmitOn": {
+    "message": "Tự động gửi: Bật (Tự động gửi sau khi nhận dạng giọng nói)",
+    "description": "Status message when auto-submit is turned on."
   },
-  "statusAppendOff": {
-    "message": "[VI] Chế độ nối thêm: Tắt",
-    "description": "Status message when append mode is turned off."
+  "statusAutoSubmitOff": {
+    "message": "Tự động gửi: Tắt (Không tự động gửi sau khi nhận dạng giọng nói)",
+    "description": "Status message when auto-submit is turned off."
   },
   "statusProofreading": {
-    "message": "[VI] Đang đọc và sửa toàn bộ văn bản...",
+    "message": "Đang đọc và sửa toàn bộ văn bản...",
     "description": "Status message during proofreading."
   },
   "statusProofreadingModel": {
-    "message": "[VI] Đang đọc và sửa toàn bộ văn bản bằng $model$...",
+    "message": "Đang đọc và sửa toàn bộ văn bản bằng $model$...",
     "description": "Status message during proofreading indicating the model.",
     "placeholders": {
         "model": {
@@ -90,15 +86,15 @@
     }
   },
   "statusProofreadSuccess": {
-    "message": "[VI] Đọc và sửa hoàn tất",
+    "message": "Đọc và sửa hoàn tất",
     "description": "Status message when proofreading is successful."
   },
   "statusProofreadError": {
-    "message": "[VI] Lỗi trong quá trình đọc và sửa",
+    "message": "Lỗi trong quá trình đọc và sửa",
     "description": "Status message when proofreading fails."
   },
    "statusProofreadErrorDetail": {
-    "message": "[VI] Lỗi đọc và sửa: $error$",
+    "message": "Lỗi đọc và sửa: $error$",
     "description": "Status message when proofreading fails with details.",
     "placeholders": {
       "error": {
@@ -108,51 +104,71 @@
     }
   },
   "statusProofreadNotFound": {
-    "message": "[VI] Không tìm thấy trường nhập liệu để đọc và sửa",
+    "message": "Không tìm thấy trường nhập liệu để đọc và sửa",
     "description": "Status message when no input field is found for proofreading."
   },
   "statusProofreadEmpty": {
-    "message": "[VI] Không có nội dung để đọc và sửa",
+    "message": "Không có nội dung để đọc và sửa",
     "description": "Status message when trying to proofread empty content."
   },
   "statusEditNotFound": {
-    "message": "[VI] Không tìm thấy trường nhập liệu để chỉnh sửa",
+"statusTwitterNotSupported": {
+      "message": "x.com hiện không được hỗ trợ. Hỗ trợ sẽ được thêm vào trong bản cập nhật tương lai.",
+      "description": "Status message shown when trying to use voice input on Twitter/X.com, which is not supported."
+    },
+    "message": "Không tìm thấy trường nhập liệu để chỉnh sửa",
     "description": "Status message when no input field is found for editing."
   },
   "statusEditEmpty": {
-    "message": "[VI] Không có nội dung để chỉnh sửa",
+    "message": "Không có nội dung để chỉnh sửa",
     "description": "Status message when trying to edit empty content."
   },
   "statusEditInstructionEmpty": {
-    "message": "[VI] Hướng dẫn chỉnh sửa trống",
+    "message": "Hướng dẫn chỉnh sửa trống",
     "description": "Status message when edit instruction is empty."
   },
+  "statusEditListening": {
+    "message": "Vui lòng nói hướng dẫn chỉnh sửa của bạn...",
+    "description": "Status message when listening for edit instructions."
+  },
+  "statusEditListeningInterim": {
+    "message": "Đang nhận dạng hướng dẫn chỉnh sửa",
+    "description": "Status message when showing interim results for edit instructions."
+  },
+  "statusEditInstructionReceived": {
+    "message": "Đã nhận hướng dẫn chỉnh sửa",
+    "description": "Status message when edit instruction is received."
+  },
+  "statusEditing": {
+    "message": "Đang chỉnh sửa với GPT-4.1...",
+    "description": "Status message during editing with GPT."
+  },
   "statusEditingError": {
-    "message": "[VI] Đã xảy ra lỗi trong quá trình chỉnh sửa",
+    "message": "Đã xảy ra lỗi trong quá trình chỉnh sửa",
     "description": "Status message when editing fails."
   },
   "statusEditingComplete": {
-    "message": "[VI] Chỉnh sửa văn bản hoàn tất",
+    "message": "Chỉnh sửa văn bản hoàn tất",
     "description": "Status message when editing is complete."
   },
   "statusApiKeyMissing": {
-    "message": "[VI] Chưa đặt khóa API. Vui lòng đặt trong nút cài đặt.",
+    "message": "Chưa đặt khóa API. Vui lòng đặt trong nút cài đặt.",
     "description": "Status message when API key is missing."
   },
   "statusApiKeyInvalid": {
-    "message": "[VI] Khóa API phải bắt đầu bằng 'sk-'",
+    "message": "Khóa API phải bắt đầu bằng 'sk-'",
     "description": "Status message for invalid API key format."
   },
   "statusApiKeySaveSuccess": {
-    "message": "[VI] Đã lưu khóa API",
+    "message": "Đã lưu khóa API",
     "description": "Status message when API key is saved successfully."
   },
   "statusApiKeySaveError": {
-    "message": "[VI] Lưu khóa API thất bại",
+    "message": "Lưu khóa API thất bại",
     "description": "Status message when API key saving fails."
   },
   "statusSpeechError": {
-    "message": "[VI] Lỗi: $error$",
+    "message": "Lỗi: $error$",
     "description": "Generic speech recognition error message.",
     "placeholders": {
       "error": {
@@ -162,35 +178,35 @@
     }
   },
   "statusSpeechErrorNoSpeech": {
-    "message": "[VI] Không phát hiện giọng nói",
+    "message": "Không phát hiện giọng nói",
     "description": "Speech recognition error: no speech detected."
   },
   "statusSpeechErrorAudioCapture": {
-    "message": "[VI] Không thể truy cập micrô",
+    "message": "Không thể truy cập micrô",
     "description": "Speech recognition error: audio capture failed."
   },
   "statusSpeechErrorNotAllowed": {
-    "message": "[VI] Quyền sử dụng micrô bị từ chối",
+    "message": "Quyền sử dụng micrô bị từ chối",
     "description": "Speech recognition error: microphone permission denied."
   },
   "statusSpeechStartError": {
-    "message": "[VI] Không thể bắt đầu nhận dạng giọng nói",
+    "message": "Không thể bắt đầu nhận dạng giọng nói",
     "description": "Error message when speech recognition fails to start."
   },
   "statusSpeechStop": {
-    "message": "[VI] Đã dừng nhập liệu bằng giọng nói",
+    "message": "Đã dừng nhập liệu bằng giọng nói",
     "description": "Status message when speech input is stopped."
   },
   "statusCorrecting": {
-    "message": "[VI] Đang sửa bằng GPT-4.1-mini...",
+    "message": "Đang sửa bằng GPT-4.1-mini...",
     "description": "Status message during GPT correction."
   },
   "statusCorrectionSuccess": {
-    "message": "[VI] Sửa bằng GPT hoàn tất",
+    "message": "Sửa bằng GPT hoàn tất",
     "description": "Status message when GPT correction is successful."
   },
   "statusCorrectionError": {
-    "message": "[VI] Lỗi sửa bằng GPT: $error$",
+    "message": "Lỗi sửa bằng GPT: $error$",
     "description": "Status message when GPT correction fails.",
      "placeholders": {
       "error": {
@@ -200,11 +216,11 @@
     }
   },
   "statusCorrectionSkip": {
-    "message": "[VI] Chưa đặt khóa API. Bỏ qua sửa lỗi.",
+    "message": "Chưa đặt khóa API. Bỏ qua sửa lỗi.",
     "description": "Status message when skipping correction due to missing API key."
   },
   "statusCorrectionApiError": {
-    "message": "[VI] Lỗi API: $status$",
+    "message": "Lỗi API: $status$",
     "description": "Status message for OpenAI API errors.",
      "placeholders": {
       "status": {
@@ -214,27 +230,19 @@
     }
   },
   "statusCorrectionApiKeyInvalid": {
-    "message": "[VI] Khóa API không hợp lệ. Vui lòng kiểm tra cài đặt.",
+    "message": "Khóa API không hợp lệ. Vui lòng kiểm tra cài đặt.",
     "description": "Status message for invalid API key from API response."
   },
   "statusCorrectionResponseError": {
-    "message": "[VI] Lỗi phản hồi GPT. Bỏ qua sửa lỗi.",
+    "message": "Lỗi phản hồi GPT. Bỏ qua sửa lỗi.",
     "description": "Status message for unexpected API response."
   },
-   "statusAlwaysOnEnabled": {
-    "message": "[VI] Chế độ luôn bật đã được kích hoạt (Nhấp đúp mic để tắt)",
-    "description": "Status message when always-on mode is enabled."
-  },
-  "statusAlwaysOnDisabled": {
-    "message": "[VI] Chế độ luôn bật đã bị tắt",
-    "description": "Status message when always-on mode is disabled."
-  },
   "modalSettingsTitle": {
-    "message": "[VI] Cài đặt khóa API OpenAI",
+    "message": "Cài đặt khóa API OpenAI",
     "description": "Title for the settings modal."
   },
   "modalSettingsDescription": {
-    "message": "[VI] Nhập khóa API của bạn cho việc sửa lỗi nhận dạng giọng nói tự động (GPT-4.1-mini) và đọc sửa thủ công (GPT-4.1). Khóa được lưu trữ cục bộ trong bộ nhớ của tiện ích mở rộng và chỉ được sử dụng cho các lệnh gọi API OpenAI.",
+    "message": "Nhập khóa API của bạn cho việc sửa lỗi nhận dạng giọng nói tự động (GPT-4.1-mini) và đọc sửa thủ công (GPT-4.1). Khóa được lưu trữ cục bộ trong bộ nhớ của tiện ích mở rộng và chỉ được sử dụng cho các lệnh gọi API OpenAI.",
     "description": "Description text in the settings modal."
   },
   "modalSettingsInputPlaceholder": {
@@ -242,91 +250,127 @@
     "description": "Placeholder for the API key input field."
   },
   "modalSettingsLangLabel": {
-    "message": "[VI] Ngôn ngữ nhận dạng:",
+    "message": "Ngôn ngữ nhận dạng",
     "description": "Label for the language selection dropdown in settings."
   },
   "modalSettingsLangJa": {
-    "message": "[VI] Tiếng Nhật (ja-JP)",
+    "message": "Tiếng Nhật (ja-JP)",
     "description": "Japanese language option in settings."
   },
   "modalSettingsLangEn": {
-    "message": "[VI] Tiếng Anh (en-US)",
+    "message": "Tiếng Anh (en-US)",
     "description": "English language option in settings."
   },
   "modalSettingsLangVi": {
-    "message": "[VI] Tiếng Việt (vi-VN)",
+    "message": "Tiếng Việt (vi-VN)",
     "description": "Vietnamese language option in settings."
   },
+  "settingAutoDetectInputFieldsLabel": {
+    "message": "Tự động phát hiện trường nhập liệu",
+    "description": "Label for the setting to enable/disable automatic input field detection."
+  },
+  "settingAutoDetectTooltipOn": {
+    "message": "Tự động phát hiện trường nhập BẬT",
+    "description": "Tooltip for the auto-detect setting when ON."
+  },
+  "settingAutoDetectTooltipOff": {
+    "message": "Tự động phát hiện trường nhập TẮT",
+    "description": "Tooltip for the auto-detect setting when OFF."
+  },
+  "settingAutoCorrectionLabel": {
+    "message": "Tự động hiệu chỉnh sau khi nhận dạng giọng nói",
+    "description": "Label for the setting to enable/disable automatic correction after voice recognition."
+  },
+  "settingAutoCorrectionTooltipOn": {
+    "message": "Tự động hiệu chỉnh sau khi nhận dạng giọng nói BẬT",
+    "description": "Tooltip for the auto-correction setting when ON."
+  },
+  "settingAutoCorrectionTooltipOff": {
+    "message": "Tự động hiệu chỉnh sau khi nhận dạng giọng nói TẮT",
+    "description": "Tooltip for the auto-correction setting when OFF."
+  },
+  "settingUseHistoryContextLabel": {
+    "message": "Bao gồm đầu vào trước đó trong ngữ cảnh tự động hiệu chỉnh",
+    "description": "Label for the setting to enable/disable including past input in context during auto-correction."
+  },
+  "settingUseHistoryContextTooltipOn": {
+    "message": "Bao gồm đầu vào trước đó trong ngữ cảnh tự động hiệu chỉnh BẬT",
+    "description": "Tooltip for the use-history-context setting when ON."
+  },
+  "settingUseHistoryContextTooltipOff": {
+    "message": "Bao gồm đầu vào trước đó trong ngữ cảnh tự động hiệu chỉnh TẮT",
+    "description": "Tooltip for the use-history-context setting when OFF."
+  },
   "modalSettingsButtonCancel": {
-    "message": "[VI] Hủy",
+    "message": "Hủy",
     "description": "Cancel button text in the settings modal."
   },
   "modalSettingsButtonSave": {
-    "message": "[VI] Lưu",
+    "message": "Lưu",
     "description": "Save button text in the settings modal."
   },
   "historyPanelTitle": {
-    "message": "[VI] Lịch sử nhập liệu bằng giọng nói:",
+    "message": "Lịch sử nhập liệu bằng giọng nói:",
     "description": "Title for the history panel."
   },
   "historyPanelEmpty": {
-    "message": "[VI] Chưa có lịch sử",
+    "message": "Chưa có lịch sử",
     "description": "Message shown when history is empty."
   },
   "logDomObserverStart": {
-    "message": "[VI] Bắt đầu theo dõi thay đổi DOM (hỗ trợ SPA)",
+    "message": "Bắt đầu theo dõi thay đổi DOM (hỗ trợ SPA)",
     "description": "Log message when the DOM observer starts."
   },
   "logSpaNavigationDetected": {
-    "message": "[VI] Phát hiện điều hướng SPA: Tìm thấy các vùng văn bản mới",
+    "message": "Phát hiện điều hướng SPA: Tìm thấy các vùng văn bản mới",
     "description": "Log message when SPA navigation is detected."
   },
   "logSpaUiReinit": {
-    "message": "[VI] Thực hiện khởi tạo lại giao diện người dùng sau khi điều hướng SPA",
+    "message": "Thực hiện khởi tạo lại giao diện người dùng sau khi điều hướng SPA",
     "description": "Log message when reinitializing UI after SPA navigation."
   },
   "logPollingUiNotFound": {
-    "message": "[VI] Kiểm tra định kỳ: Không tìm thấy giao diện người dùng, đang khởi tạo lại",
+    "message": "Kiểm tra định kỳ: Không tìm thấy giao diện người dùng, đang khởi tạo lại",
     "description": "Log message when UI is not found during polling check."
   },
   "logForceSetSuccess": {
-    "message": "[VI] Đặt giá trị vùng văn bản bắt buộc thành công:",
+    "message": "Đặt giá trị vùng văn bản bắt buộc thành công:",
     "description": "Log message when force setting textarea value succeeds."
   },
   "logForceSetError": {
-    "message": "[VI] Đặt giá trị vùng văn bản bắt buộc thất bại:",
+    "message": "Đặt giá trị vùng văn bản bắt buộc thất bại:",
     "description": "Log message when force setting textarea value fails."
   },
   "logTypingSimulateError": {
-    "message": "[VI] Lỗi mô phỏng gõ phím:",
+    "message": "Lỗi mô phỏng gõ phím:",
     "description": "Log message when typing simulation fails."
   },
   "logPaperPlaneButtonFound": {
-    "message": "[VI] Tìm thấy nút gửi có biểu tượng máy bay giấy",
+    "message": "Tìm thấy nút gửi có biểu tượng máy bay giấy",
     "description": "Log message when the paper plane submit button is found."
   },
   "logBgPrimaryButtonFound": {
-    "message": "[VI] Tìm thấy nút gửi có lớp bg-primary/40",
+    "message": "Tìm thấy nút gửi có lớp bg-primary/40",
     "description": "Log message when a submit button with bg-primary/40 class is found."
   },
   "logPaperPlaneButtonDisabled": {
-    "message": "[VI] Nút gửi máy bay giấy bị vô hiệu hóa. Kích hoạt cập nhật trạng thái React...",
+    "message": "Nút gửi máy bay giấy bị vô hiệu hóa. Kích hoạt cập nhật trạng thái React...",
     "description": "Log message when the paper plane button is disabled."
   },
   "logSubmitButtonDisabled": {
-    "message": "[VI] Nút gửi bị vô hiệu hóa. Kích hoạt cập nhật trạng thái React...",
+    "message": "Nút gửi bị vô hiệu hóa. Kích hoạt cập nhật trạng thái React...",
     "description": "Log message when the submit button is disabled."
   },
   "logStateUpdateError": {
-    "message": "[VI] Lỗi kích hoạt cập nhật trạng thái:",
+    "message": "Lỗi kích hoạt cập nhật trạng thái:",
     "description": "Log message when triggering state update fails."
   },
   "logSubmitButtonCandidates": {
-    "message": "[VI] Các ứng viên nút gửi:",
+    "message": "Các ứng viên nút gửi:",
     "description": "Log message showing submit button candidates."
   },
   "logInitializing": {
-    "message": "[VI] Đang khởi tạo Enhanced Voice Input Script v$version$ (Extension)...",
+    "message": "Đang khởi tạo Enhanced Voice Input Script v$version$ (Extension)...",
     "description": "Log message during initialization.",
     "placeholders": {
       "version": {
@@ -336,19 +380,19 @@
     }
   },
   "logSpeechNotSupported": {
-    "message": "[VI] Trình duyệt này không hỗ trợ Nhận dạng giọng nói.",
+    "message": "Trình duyệt này không hỗ trợ Nhận dạng giọng nói.",
     "description": "Log message when Speech Recognition API is not supported."
   },
   "alertSpeechNotSupported": {
-    "message": "[VI] Trình duyệt của bạn không hỗ trợ Nhận dạng giọng nói.",
+    "message": "Trình duyệt của bạn không hỗ trợ Nhận dạng giọng nói.",
     "description": "Alert message when Speech Recognition API is not supported."
   },
   "logUiAlreadyExists": {
-    "message": "[VI] Giao diện người dùng đã tồn tại.",
+    "message": "Giao diện người dùng đã tồn tại.",
     "description": "Log message when UI elements already exist."
   },
   "logInitializationComplete": {
-    "message": "[VI] Khởi tạo Enhanced Voice Input Script v$version$ (Extension) hoàn tất.",
+    "message": "Khởi tạo Enhanced Voice Input Script v$version$ (Extension) hoàn tất.",
     "description": "Log message when initialization is complete.",
     "placeholders": {
       "version": {
@@ -358,147 +402,139 @@
     }
   },
   "logSettingsLoaded": {
-    "message": "[VI] Đã tải cài đặt:",
+    "message": "Đã tải cài đặt:",
     "description": "Log message when settings are loaded."
   },
   "logApiKeySet": {
-    "message": "[VI] Đã đặt",
+    "message": "Đã đặt",
     "description": "Log part indicating API key is set."
   },
   "logApiKeyNotSet": {
-    "message": "[VI] Chưa đặt",
+    "message": "Chưa đặt",
     "description": "Log part indicating API key is not set."
   },
   "logSettingsLoadError": {
-    "message": "[VI] Lỗi tải cài đặt:",
+    "message": "Lỗi tải cài đặt:",
     "description": "Log message when loading settings fails."
   },
   "logSettingsSaved": {
-    "message": "[VI] Đã lưu cài đặt:",
+    "message": "Đã lưu cài đặt:",
     "description": "Log message when settings (API key, language) are saved."
   },
   "logSettingsSaveError": {
-    "message": "[VI] Lưu cài đặt thất bại:",
+    "message": "Lưu cài đặt thất bại:",
     "description": "Log message when saving settings fails."
   },
-  "logAlwaysOnModeSaved": {
-    "message": "[VI] Đã lưu cài đặt chế độ luôn bật:",
-    "description": "Log message when the always-on mode setting is saved."
-  },
-  "logAlwaysOnModeSaveError": {
-    "message": "[VI] Lưu cài đặt chế độ luôn bật thất bại:",
-    "description": "Log message when saving the always-on mode setting fails."
-  },
   "alertApiKeyMissing": {
-    "message": "[VI] Chưa đặt khóa API. Vui lòng đặt trong nút cài đặt.",
+    "message": "Chưa đặt khóa API. Vui lòng đặt trong nút cài đặt.",
     "description": "Alert message when API key is missing during save attempt."
   },
   "alertApiKeyInvalid": {
-    "message": "[VI] Định dạng khóa API không hợp lệ. Phải bắt đầu bằng 'sk-'.",
+    "message": "Định dạng khóa API không hợp lệ. Phải bắt đầu bằng 'sk-'.",
     "description": "Alert message for invalid API key format during save attempt."
   },
   "logApiKeySaveError": {
-    "message": "[VI] Lỗi lưu khóa API:",
+    "message": "Lỗi lưu khóa API:",
     "description": "Log message when saving API key fails."
   },
   "statusSettingsSaveSuccess": {
-    "message": "[VI] Đã lưu cài đặt thành công",
+    "message": "Đã lưu cài đặt thành công",
     "description": "Status message when settings are saved successfully."
   },
   "statusSettingsSaveError": {
-    "message": "[VI] Lưu cài đặt thất bại",
+    "message": "Lưu cài đặt thất bại",
     "description": "Status message when saving settings fails."
   },
   "alertSpeechApiNotAvailable": {
-    "message": "[VI] API Nhận dạng giọng nói không khả dụng.",
+    "message": "API Nhận dạng giọng nói không khả dụng.",
     "description": "Alert message when Speech Recognition API is not available."
   },
+  "logCorrectionError": {
+    "message": "Lỗi xử lý sửa lỗi:",
+    "description": "Log message for general correction error."
+  },
   "logCorrectionErrorAppend": {
-    "message": "[VI] Lỗi xử lý sửa lỗi (chế độ nối thêm):",
+    "message": "Lỗi xử lý sửa lỗi (chế độ nối thêm):",
     "description": "Log message for correction error in append mode."
   },
   "logCorrectionErrorOverwrite": {
-    "message": "[VI] Lỗi xử lý sửa lỗi (chế độ ghi đè):",
+    "message": "Lỗi xử lý sửa lỗi (chế độ ghi đè):",
     "description": "Log message for correction error in overwrite mode."
   },
   "logSpeechRecognitionError": {
-    "message": "[VI] Lỗi nhận dạng giọng nói:",
+    "message": "Lỗi nhận dạng giọng nói:",
     "description": "Log message for speech recognition error."
   },
   "logSpeechStartError": {
-    "message": "[VI] Lỗi bắt đầu nhận dạng giọng nói:",
+    "message": "Lỗi bắt đầu nhận dạng giọng nói:",
     "description": "Log message when starting speech recognition fails."
   },
   "logSpeechStopError": {
-    "message": "[VI] Dừng nhận dạng giọng nói thất bại:",
+    "message": "Dừng nhận dạng giọng nói thất bại:",
     "description": "Log message when stopping speech recognition fails."
   },
   "logSpecificTextareaFound": {
-    "message": "[VI] Tìm thấy vùng văn bản được chỉ định cụ thể",
+    "message": "Tìm thấy vùng văn bản được chỉ định cụ thể",
     "description": "Log message when the specific textarea is found."
   },
   "logSimilarTextareaFound": {
-    "message": "[VI] Tìm thấy vùng văn bản có thông số kỹ thuật tương tự",
+    "message": "Tìm thấy vùng văn bản có thông số kỹ thuật tương tự",
     "description": "Log message when a similar textarea is found."
   },
   "logTailwindTextareaFound": {
-    "message": "[VI] Tìm thấy vùng văn bản kiểu Tailwind",
+    "message": "Tìm thấy vùng văn bản kiểu Tailwind",
     "description": "Log message when a Tailwind styled textarea is found."
   },
   "logMessageTextareaFound": {
-    "message": "[VI] Tìm thấy vùng văn bản tin nhắn",
+    "message": "Tìm thấy vùng văn bản tin nhắn",
     "description": "Log message when a message textarea is found."
   },
   "logEventDispatchErrorAppend": {
-    "message": "[VI] Lỗi gửi sự kiện (nối thêm):",
+    "message": "Lỗi gửi sự kiện (nối thêm):",
     "description": "Log message for event dispatch error in append mode."
   },
   "logProofreadError": {
-    "message": "[VI] Lỗi xử lý đọc và sửa:",
+    "message": "Lỗi xử lý đọc và sửa:",
     "description": "Log message for proofreading error."
   },
   "logOpenAiApiError": {
-    "message": "[VI] Lỗi API OpenAI:",
+    "message": "Lỗi API OpenAI:",
     "description": "Log message for OpenAI API error."
   },
   "logOpenAiApiResponseUnexpected": {
-    "message": "[VI] Phản hồi không mong đợi từ API OpenAI:",
+    "message": "Phản hồi không mong đợi từ API OpenAI:",
     "description": "Log message for unexpected OpenAI API response."
   },
   "logProofreadRequestError": {
-    "message": "[VI] Lỗi yêu cầu đọc và sửa GPT:",
+    "message": "Lỗi yêu cầu đọc và sửa GPT:",
     "description": "Log message for GPT proofread request error."
   },
   "logReactTypingSimulated": {
-    "message": "[VI] Hỗ trợ React: Nhập liệu qua mô phỏng gõ phím",
+    "message": "Hỗ trợ React: Nhập liệu qua mô phỏng gõ phím",
     "description": "Log message when React typing simulation is used."
   },
   "logFallbackMethod": {
-    "message": "[VI] Dự phòng: Nhập liệu bằng phương pháp thông thường",
+    "message": "Dự phòng: Nhập liệu bằng phương pháp thông thường",
     "description": "Log message when using the fallback input method."
   },
   "logEventDispatchErrorFallback": {
-    "message": "[VI] Lỗi gửi sự kiện (dự phòng):",
+    "message": "Lỗi gửi sự kiện (dự phòng):",
     "description": "Log message for event dispatch error in fallback mode."
   },
   "logUiNotFoundHealing": {
-    "message": "[VI] Không tìm thấy các yếu tố giao diện người dùng. Đang thử tạo lại...",
+    "message": "Không tìm thấy các yếu tố giao diện người dùng. Đang thử tạo lại...",
     "description": "Log message when UI elements are not found during self-healing."
   },
-  "logRestartingAlwaysOn": {
-    "message": "[VI] Đang khởi động lại nhận dạng giọng nói do chế độ Luôn bật...",
-    "description": "Log message when restarting recognition in always-on mode."
-  },
   "logExtensionLoaded": {
-    "message": "[VI] Enhanced Universal Voice Input (Chrome Extension) loaded.",
+    "message": "Enhanced Universal Voice Input (Chrome Extension) loaded.",
     "description": "Log message when the extension has finished loading."
   },
   "logApiKeyMissingSkip": {
-    "message": "[VI] Chưa đặt khóa API, bỏ qua sửa lỗi GPT.",
+    "message": "Chưa đặt khóa API, bỏ qua sửa lỗi GPT.",
     "description": "Log message when skipping GPT correction due to missing API key."
   },
   "logApiRequestFailedUseOriginal": {
-    "message": "[VI] Yêu cầu API thất bại ($status$). Sử dụng văn bản gốc.",
+    "message": "Yêu cầu API thất bại ($status$). Sử dụng văn bản gốc.",
     "description": "Log message when API request fails and original text is used.",
     "placeholders": {
       "status": {
@@ -508,11 +544,203 @@
     }
   },
   "logApiResponseUnexpected": {
-    "message": "[VI] Phản hồi không mong đợi từ API OpenAI. Sử dụng văn bản gốc.",
+    "message": "Phản hồi không mong đợi từ API OpenAI. Sử dụng văn bản gốc.",
     "description": "Log message when API response is unexpected and original text is used."
   },
   "logCorrectionRequestErrorUseOriginal": {
-    "message": "[VI] Lỗi trong quá trình yêu cầu sửa lỗi GPT. Sử dụng văn bản gốc.",
+    "message": "Lỗi trong quá trình yêu cầu sửa lỗi GPT. Sử dụng văn bản gốc.",
     "description": "Log message when correction request fails and original text is used."
+  },
+  "statusProcessingInProgress": {
+    "message": "Một quá trình khác đang diễn ra. Vui lòng đợi cho đến khi hoàn tất.",
+    "description": "Status message when another processing is already in progress."
+  },
+  "statusSubmitDisabled": {
+    "message": "Nút gửi bị vô hiệu hóa",
+    "description": "Status message when the submit button is disabled."
+  },
+  "statusSubmitClicked": {
+    "message": "Đã nhấp vào nút gửi",
+    "description": "Status message when the submit button is clicked."
+  },
+  "statusAutoDetectOff": {
+    "message": "Tự động phát hiện trường nhập liệu đang TẮT. Vui lòng nhấp trực tiếp vào trường nhập liệu.",
+    "description": "Status message when auto-detect input fields is turned off."
+  },
+  "statusUsingModalDialog": {
+    "message": "Không tìm thấy trường nhập liệu. Kết quả nhận dạng giọng nói sẽ được hiển thị trong cửa sổ phương thức.",
+    "description": "Status message shown when no input field is found and modal dialog will be used."
+  },
+  "recognitionModalTitle": {
+    "message": "Kết quả nhận dạng giọng nói",
+    "description": "Title for the recognition result modal dialog."
+  },
+  "recognitionModalCopyButton": {
+    "message": "Sao chép",
+    "description": "Copy button text in the recognition result modal dialog."
+  },
+  "recognitionModalCopied": {
+    "message": "Đã sao chép!",
+    "description": "Text shown after copying in the recognition result modal dialog."
+  },
+  "recognitionModalCloseButton": {
+    "message": "Đóng",
+    "description": "Close button text in the recognition result modal dialog."
+  },
+  "modalToggleTooltip": {
+    "message": "Chuyển đổi cửa sổ\nChuyển đổi giữa chế độ cửa sổ và nhập trực tiếp",
+    "description": "Tooltip for the modal toggle button."
+  },
+  "modalShowTooltip": {
+    "message": "Hiển thị cửa sổ",
+    "description": "Tooltip for showing the modal window."
+  },
+  "modalHideTooltip": {
+    "message": "Ẩn cửa sổ",
+    "description": "Tooltip for hiding the modal window."
+  },
+  "recognitionModalPlaceholder": {
+    "message": "Đang nghe giọng nói...",
+    "description": "Placeholder text shown in the recognition modal while listening."
+  },
+  "statusModalVisible": {
+    "message": "Hiển thị cửa sổ: BẬT (kết quả hiển thị trong cửa sổ)",
+    "description": "Status message when modal window is visible."
+  },
+  "statusModalHidden": {
+    "message": "Hiển thị cửa sổ: TẮT (nhập trực tiếp vào trường)",
+    "description": "Status message when modal window is hidden."
+  },
+  "themeToggleTooltip": {
+    "message": "Chuyển đổi chủ đề\nChuyển đổi giữa chủ đề sáng và tối",
+    "description": "Tooltip for the theme toggle button."
+  },
+  "themeToggleToLight": {
+    "message": "Chuyển sang chủ đề sáng",
+    "description": "Tooltip for the theme toggle button when in dark mode."
+  },
+  "themeToggleToDark": {
+    "message": "Chuyển sang chủ đề tối",
+    "description": "Tooltip for the theme toggle button when in light mode."
+  },
+  "statusThemeLight": {
+    "message": "Đã chuyển sang chủ đề sáng",
+    "description": "Status message when theme is switched to light."
+  },
+  "statusThemeDark": {
+    "message": "Đã chuyển sang chủ đề tối",
+    "description": "Status message when theme is switched to dark."
+  },
+  "modalSettingsThemeLabel": {
+    "message": "Chủ đề",
+    "description": "Label for the theme selection dropdown in settings."
+  },
+  "modalSettingsThemeDark": {
+    "message": "Chủ đề tối",
+    "description": "Dark theme option in settings."
+  },
+  "modalSettingsThemeLight": {
+    "message": "Chủ đề sáng",
+    "description": "Light theme option in settings."
+  },
+  "errorNetworkFetchFailed": {
+    "message": "Lỗi kết nối mạng: Không thể tải dữ liệu",
+    "description": "Error message for network fetch failure"
+  },
+  "errorNetworkTimeout": {
+    "message": "Hết thời gian kết nối: Kết nối quá lâu",
+    "description": "Error message for network timeout"
+  },
+  "errorNetworkOffline": {
+    "message": "Lỗi ngoại tuyến: Vui lòng kiểm tra kết nối internet",
+    "description": "Error message for offline status"
+  },
+  "errorApiInvalidKey": {
+    "message": "Khóa API không hợp lệ",
+    "description": "Error message for invalid API key"
+  },
+  "errorApiUnauthorized": {
+    "message": "Lỗi xác thực API: Vui lòng kiểm tra khóa API",
+    "description": "Error message for API unauthorized access"
+  },
+  "errorApiRateLimit": {
+    "message": "Đã đạt giới hạn tốc độ API. Vui lòng đợi và thử lại sau",
+    "description": "Error message for API rate limit"
+  },
+  "errorApiBadRequest": {
+    "message": "Lỗi yêu cầu API: Yêu cầu không hợp lệ",
+    "description": "Error message for API bad request"
+  },
+  "errorApiServerError": {
+    "message": "Lỗi máy chủ API: Dịch vụ đang gặp sự cố",
+    "description": "Error message for API server error"
+  },
+  "errorApiUnexpectedResponse": {
+    "message": "Lỗi phản hồi API: Nhận phản hồi không mong đợi",
+    "description": "Error message for unexpected API response"
+  },
+  "errorInputEmptyContent": {
+    "message": "Nội dung trống",
+    "description": "Error message for empty content"
+  },
+  "errorInputFieldNotFound": {
+    "message": "Không tìm thấy trường nhập liệu",
+    "description": "Error message for input field not found"
+  },
+  "errorSpeechNotSupported": {
+    "message": "Trình duyệt của bạn không hỗ trợ nhận dạng giọng nói",
+    "description": "Error message for speech recognition not supported"
+  },
+  "errorSpeechAborted": {
+    "message": "Nhận dạng giọng nói đã bị hủy",
+    "description": "Error message for aborted speech recognition"
+  },
+  "errorSpeechStopFailed": {
+    "message": "Không thể dừng nhận dạng giọng nói",
+    "description": "Error message for failed speech recognition stop"
+  },
+  "errorStorageSaveFailed": {
+    "message": "Không thể lưu cài đặt",
+    "description": "Error message for storage save failure"
+  },
+  "errorStorageLoadFailed": {
+    "message": "Không thể tải cài đặt",
+    "description": "Error message for storage load failure"
+  },
+  "errorDomElementNotFound": {
+    "message": "Không tìm thấy phần tử",
+    "description": "Error message for DOM element not found"
+  },
+  "errorDomEventDispatchFailed": {
+    "message": "Không thể gửi sự kiện",
+    "description": "Error message for DOM event dispatch failure"
+  },
+  "errorDomManipulationFailed": {
+    "message": "Thao tác DOM thất bại",
+    "description": "Error message for DOM manipulation failure"
+  },
+  "errorUnknown": {
+    "message": "Đã xảy ra lỗi không xác định",
+    "description": "Error message for unknown errors"
+  },
+  "autoCorrectionPromptLabel": {
+    "message": "Lời nhắc tự động sửa lỗi",
+    "description": "Label for the auto-correction prompt textarea in settings"
+  },
+  "proofreadingPromptLabel": {
+    "message": "Lời nhắc hiệu đính",
+    "description": "Label for the proofreading prompt textarea in settings"
+  },
+  "promptPlaceholder": {
+    "message": "Nhập lời nhắc của bạn ở đây. Nếu để trống, lời nhắc mặc định sẽ được sử dụng.",
+    "description": "Placeholder text for prompt textareas in settings"
+  },
+  "errorInvalidPrompt": {
+    "message": "Định dạng lời nhắc không hợp lệ",
+    "description": "Error message for invalid prompt format"
+  },
+  "statusPreparingRecognition": {
+    "message": "Đang chuẩn bị nhận dạng giọng nói...",
+    "description": "Status message when preparing speech recognition"
   }
 }
