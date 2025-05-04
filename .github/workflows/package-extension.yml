@@ -3,10 +3,18 @@ name: Package Chrome Extension
 on:
   push:
     branches: [ main ]
-    paths-ignore:
-      - '**.md'
+    paths:
+      - 'src/**'
+      - 'manifest.json'
+      - 'style.css'
+      - '_locales/**'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'manifest.json'
+      - 'style.css'
+      - '_locales/**'
   workflow_dispatch:  # 手動実行用
 
 jobs:
