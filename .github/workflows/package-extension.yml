@@ -89,9 +89,13 @@ jobs:
       env:
         EXTENSION_KEY: ${{ secrets.EXTENSION_KEY }}
     
+    - name: Install npm dependencies and build
+      run: |
+        npm install
+        npm run build
+        
     - name: Package extension
       run: |
-        mkdir -p dist
         echo "Packaging extension files..."
         
         # Generate timestamp for unique filenames
@@ -103,10 +107,12 @@ jobs:
         
         # Create a temporary directory for unpacked extension
         mkdir -p temp_ext
-        cp -r manifest.json src/content.js src/background.js style.css _locales otak-voice-128.png temp_ext/
+        cp -r dist/* temp_ext/
         
         # Create ZIP file
-        zip -r "dist/${FILE_PREFIX}.zip" manifest.json src/content.js src/background.js style.css _locales/ otak-voice-128.png
+        cd dist
+        zip -r "../dist/${FILE_PREFIX}.zip" *
+        cd ..
         echo "ZIP file created successfully."
         
         # Create CRX file using OpenSSL
@@ -121,7 +127,7 @@ jobs:
         
         # Create a temporary directory for the extension
         mkdir -p temp_ext_dir
-        cp -r manifest.json src/content.js src/background.js style.css _locales otak-voice-128.png temp_ext_dir/
+        cp -r dist/* temp_ext_dir/
         
         # Generate CRX file using crx tool
         echo "Generating CRX file using crx tool..."
