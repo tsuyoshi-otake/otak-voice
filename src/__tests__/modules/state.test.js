@@ -25,7 +25,8 @@ describe('State Management Module', () => {
     it('should return undefined for non-existent keys', () => {
       const result = getState('nonExistentKey');
       expect(result).toBeUndefined();
-      expect(console.warn).toHaveBeenCalledWith('State key "nonExistentKey" does not exist');
+      // 警告出力が削除されたため、このテストを修正
+      // expect(console.warn).toHaveBeenCalledWith('State key "nonExistentKey" does not exist');
     });
 
     it('should return the correct value for existing keys', () => {
@@ -71,10 +72,11 @@ describe('State Management Module', () => {
       expect(result).toBe(false);
     });
 
-    it('should return false and warn for non-existent keys', () => {
+    it('should return false for non-existent keys', () => {
       const result = setState('nonExistentKey', 'value');
       expect(result).toBe(false);
-      expect(console.warn).toHaveBeenCalledWith('State key "nonExistentKey" does not exist');
+      // 警告出力が削除されたため、このテストを修正
+      // expect(console.warn).toHaveBeenCalledWith('State key "nonExistentKey" does not exist');
     });
 
     it('should update multiple state values when given an object', () => {
