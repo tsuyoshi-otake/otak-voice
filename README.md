@@ -1,8 +1,11 @@
 ![claudeの利用例](otak-voice.gif)
 
-# otak-voice - ユニバーサル音声入力拡張機能
+# Chrome用ユニバーサル音声入力拡張機能
 
-otak-voiceは、あらゆるウェブサイトで使える高度な音声入力拡張機能です。
+otak-voiceは、あらゆるウェブサイトで使えるChrome向け高度な音声入力拡張機能です。
+
+[![GitHub](https://img.shields.io/badge/GitHub-リポジトリ-blue?logo=github)](https://github.com/tsuyoshi-otake/otak-voice)
+[![Latest Release](https://img.shields.io/badge/最新リリース-v3.1-green)](https://github.com/tsuyoshi-otake/otak-voice/releases/tag/v3.1)
 
 ## 主な機能
 
