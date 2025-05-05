@@ -12,11 +12,9 @@
     "type": "module"
   },
   "permissions": [
-    "storage",
-    "scripting"
+    "storage"
   ],
   "host_permissions": [
-    "<all_urls>",
     "https://api.openai.com/"
   ],
   "content_scripts": [
