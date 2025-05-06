@@ -105,9 +105,39 @@ Provides a secure, automated solution for generating ZIP and CRX files with vers
         *   `ui.js`: UI creation and management
         *   `utils.js`: Common utility functions
         *   `icons.js`: Centralized SVG icon definitions
-    *   Isolated site-specific behavior into dedicated handlers:
-        *   `site-detector.js`: Site detection logic
-        *   `systemexe.js`, `ai-chat.js`, `twitter.js`, `default.js`: Specific site handlers
+    *   **共通インターフェース**: 全サイトハンドラーが実装する標準メソッド：
+        *   `findBestInputField()` - 最適な入力フィールドを特定
+        *   `findSubmitButtonForInput()` - 入力フィールドに関連する送信ボタンを特定
+        *   `submitAfterVoiceInput()` - 音声入力後の送信処理と障害処理
+    
+    *   **サイト別ハンドラー**: ファイル名はドメイン名に対応（理想的には）
+        *   `site-detector.js`: サイト検出モジュール（共通機能）
+            - 複数の検出方法（URL、DOM要素、SVGパターン）を組み合わせてサイトタイプを判定
+            - 適切なドメインハンドラーを返す`getSiteHandler()`関数
+            
+        *   `systemexe.js`: systemexe-research-and-development.comドメイン専用
+            - 共通: 標準インターフェースの実装
+            - 特殊: システム固有のボタン検出（#buttonSubmitMessageConversation）
+            - 特殊: cursor-not-allowedスタイルの特殊処理（実際は有効な要素）
+            - 特殊: 日英両対応のプレースホルダーを持つテキストエリア検出
+            
+        *   `twitter.js`: twitter.com/x.comドメイン専用
+            - 共通: 標準インターフェースの実装
+            - 特殊: 非対応プラットフォームとしてマーク（React/Draft.jsの複雑さにより）
+            - 特殊: モーダルダイアログでの認識テキスト表示機能
+            - 特殊: Twitterの内部React状態を壊さないための保護措置
+            
+        *   `ai-chat.js`: 複数のAIチャットプラットフォーム用（理想的には個別ドメインごとのファイルに分割すべき）
+            - 共通: 標準インターフェースの実装
+            - 特殊: 多様なAIアシスタントUI対応（ChatGPT、Claude、Gemini、Bardなど）
+            - 特殊: ペーパーエアプレーンアイコン検出機能
+            - 特殊: ボタン状態検出の高度なロジック
+            - 特殊: ReactやVueフレームワークの状態更新を待機する遅延処理
+            
+        *   `default.js`: 未知のドメイン用フォールバックハンドラー
+            - 共通: 標準インターフェースの実装
+            - 特殊: Tailwind CSSコンポーネント検出
+            - 特殊: 汎用的な入力フィールド・送信ボタン検出アルゴリズム
     *   **Added `background.js` for background tasks (e.g., context menus, settings synchronization, potentially long-running operations).**
 
 23. **Architecture Improvements:**
@@ -158,7 +188,44 @@ Provides a secure, automated solution for generating ZIP and CRX files with vers
 
 #### `site-handlers/` Directory
 
-*   `ai-chat.js`, `default.js`, `site-detector.js`, `systemexe.js`, `twitter.js`: Implement site-specific logic for finding elements and handling submission.
+**サイトハンドラーモジュール共通構造**:
+* 各ハンドラーは共通インターフェースを実装（サイト固有の処理を汎用メソッドでラップ）
+* 共通の入力フィールド検出と送信ボタン検出ロジックを各サイトに最適化
+* 各ハンドラーはドメイン名に対応したファイル名を持つ（理想的には）
+
+**各サイトハンドラーの役割**:
+
+*   **`site-detector.js`**: サイト検出エンジン（共通機能）
+    * URL解析による既知サイト検出
+    * DOM要素に基づくAIチャットインターフェース検出（20以上のセレクター）
+    * SVGパターン認識によるペーパーエアプレーンアイコン検出
+    * `constants.js`からのサイトタイプ定数の返却
+    * 適切なハンドラーモジュールの提供
+
+*   **`systemexe.js`**: systemexe-research-and-development.comドメイン専用
+    * System.exe独自のボタン検出ロジック
+    * cursor-not-allowedスタイルのSVGアイコン特殊処理
+    * 日英バイリンガル対応のプレースホルダー検出
+    * ホスト名とドキュメントタイトルに基づくSystem.exeサイト検出
+
+*   **`twitter.js`**: twitter.com/x.comドメイン専用
+    * Twitter/X.comページ検出と非対応表示
+    * React/Draft.jsエディタの内部状態保護
+    * 音声認識テキスト表示用モーダルダイアログ
+    * ユーザー向け互換性制限通知
+
+*   **`ai-chat.js`**: 複数のAIチャットプラットフォーム対応（将来的には個別ドメイン名のファイルに分割が望ましい）
+    * ChatGPT、Claude、Gemini、Bard、Perplexityなど多様なUI対応
+    * 様々な実装のペーパーエアプレーンボタン検出
+    * ボタン有効/無効状態の高度な検出ロジック
+    * ボタンクリック時の視覚的フィードバック
+    * Reactフレームワーク状態更新待機のための遅延処理
+
+*   **`default.js`**: 未知のドメイン用汎用ハンドラー
+    * Tailwind CSSスタイルコンポーネント検出
+    * プレースホルダーテキストに基づく入力フィールド検出
+    * 入力フィールドとの近接性に基づく送信ボタン検出
+    * フォーカス管理とステータス更新イベント発行
 
 #### **`scripts/` Directory**
 
@@ -204,7 +271,23 @@ This project is a Chrome extension enabling voice input on web pages. Main featu
 *   **Settings:** Loaded/saved via `settings.js`, likely involving messaging with `background.js` to interact with `chrome.storage`. Settings data flows to modules needing configuration.
 *   **State:** Managed by `state.js`. Changes are often triggered by UI interactions (`ui.js`, `input-handler.js`) or speech events (`speech.js`). Other modules read state from `state.js` or subscribe to state change events via `event-bus.js`.
 *   **Voice Input:** `speech.js` → (optional `gpt-service.js`) → `input-handler.js` → Target Element. Events emitted via `event-bus.js`.
-*   **Site Handling:** `site-detector.js` → Specific Handler → `input-handler.js`.
+*   **Site Handling 処理フロー:**
+    1. `site-detector.js`がサイトタイプを検出
+    2. 適切なドメインハンドラー（`systemexe.js`, `twitter.js`, `ai-chat.js`など）を選択
+    3. ドメインハンドラーが`input-handler.js`と連携して入力処理を実行
+    
+    **共通インターフェース**:
+    * `findBestInputField()` - サイトに最適な入力フィールド検出
+    * `findSubmitButtonForInput()` - 入力フィールドに関連する送信ボタン検出
+    * `submitAfterVoiceInput()` - 音声入力後の送信ロジック処理
+    
+    **サイト固有の独自機能**:
+    * systemexe.js: `isSystemExePage()`, `findSubmitButton()`
+    * twitter.js: `isTwitterPage()`
+    * ai-chat.js: `findPaperPlaneButton()`, `findAIChatSubmitButton()`
+    
+    **将来的な改善**:
+    * `ai-chat.js`を個別ドメイン名のファイル（`openai-chatgpt.js`, `anthropic-claude.js`, `google-gemini.js`など）に分割することが望ましい
 *   **Background Communication:** Content script modules send messages (e.g., for storage) to `background.js`, potentially receiving responses.
 
 ## UI Components and Elements
