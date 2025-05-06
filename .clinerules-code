@@ -4,687 +4,282 @@
 
 **IMPORTANT:** After making code modifications, always run the following commands:
 
-1. **Build the project:**
-   ```
-   npm run build
-   ```
-   This generates bundled files in the `dist` directory, which is mandatory as the extension loads files from there.
+1.  **Build the project:**
+    ```
+    npm run build
+    ```
+    This command performs the following steps:
+    *   Bundles `src/content.js` into `dist/content.js` using esbuild.
+    *   Bundles `src/background.js` into `dist/background.js` using esbuild.
+    *   Copies necessary assets (like `manifest.json`, `_locales`, `*.png`, `style.css`) to the `dist` directory using `scripts/copy-assets.js`.
+    **This build step is mandatory as the extension loads files from the `dist` directory.**
 
-2. **Run tests:**
-   ```
-   npm test
-   ```
-   This ensures your changes don't break existing functionality. For more detailed testing options:
-   - `npm run test:watch` - Run tests in watch mode (automatically re-run on file changes)
-   - `npm run test:coverage` - Run tests with coverage report
+2.  **Run tests:**
+    ```
+    npm test
+    ```
+    This ensures your changes don't break existing functionality. Tests are configured using `jest.config.js`, `jest.setup.js`, and `babel.config.js`. For more detailed testing options:
+    *   `npm run test:watch` - Run tests in watch mode (automatically re-run on file changes)
+    *   `npm run test:coverage` - Run tests with coverage report
 
 Failure to follow these steps may result in broken functionality or undetected regressions.
 
 ## Task Summary (voice.js Chrome Extension Conversion)
 
+(This section summarizes the historical evolution. Adjust if needed for clarity.)
+
 1.  **Objective:** Convert the Tampermonkey script `voice.js` into a functional Chrome Extension.
-2.  **`manifest.json` Creation & Refinement:**
-    *   Created `manifest.json` (v3) defining necessary permissions (`storage`, `scripting`), host permissions (`<all_urls>`, `https://api.openai.com/`), and content script injection (`content.js`, `style.css`).
-    *   Corrected JSON errors by removing comments.
-    *   Removed `icons` definition due to missing files causing loading errors.
-    *   Set `"default_locale": "ja"` and removed duplicate `description`.
-3.  **CSS Extraction (`style.css`):**
-    *   Extracted CSS rules previously defined within `GM_addStyle` in `voice.js` into `style.css`.
-4.  **JavaScript Adaptation (`content.js`):**
-    *   Renamed `voice.js` to `content.js` as specified in the manifest.
-    *   Removed Tampermonkey-specific headers and `GM_addStyle` call.
-    *   Replaced `localStorage` with `chrome.storage.local` for API key persistence, adapting related functions (`loadSettings`, `saveApiKey`, `proofreadCurrentInput`, `correctWithGPT`, `proofreadWithGPT`) to be asynchronous (`async/await`).
-    *   Replaced `GM_xmlhttpRequest` with the standard `fetch` API within the GPT interaction functions (`correctWithGPT`, `proofreadWithGPT`).
-    *   Updated the OpenAI model for automatic correction (in `correctWithGPT`) to `gpt-4.1-mini`.
-    *   Updated the OpenAI model for manual proofreading (in `proofreadWithGPT`) to `gpt-4.1` for higher accuracy and context handling, adjusting `max_tokens`.
-    *   Removed the surrounding IIFE and `'use strict';`.
-    *   Fixed a `ReferenceError` by removing a redundant `loadApiKey()` call inside `initVoiceInput`.
-5.  **Feature Modifications (Based on Feedback):**
-    *   Initially added an auto-submit toggle feature (button, state variable, storage).
-    *   Disabled auto-submission when `appendMode` is active.
-    *   Removed the auto-submit toggle feature entirely (button, styles, logic, storage key) as it was deemed unnecessary.
-    *   Removed the manual submit button (➤) from the UI and its associated event listener as it was also deemed unnecessary.
-6.  **UI Design Update:**
-    *   Modified `style.css` to use a monochromatic color scheme (grays, black, white) for better visibility in both light and dark modes. Adjusted background colors, text colors, borders, and hover states.
-    *   Initially used simpler text-based symbols (🎙, +, ✕, ✔, ⚙, 🕒) for design consistency.
-    *   Later created `icons.js` to centralize SVG icon definitions, replacing text-based symbols with clean, scalable SVG icons for better rendering and consistency across all environments.
-7.  **Internationalization (i18n):**
-    *   Created `_locales` directory with `messages.json` files for Japanese (`ja`), English (`en`), and Vietnamese (`vi`).
-    *   Replaced hardcoded strings (UI tooltips, status messages, console logs, alerts) in `content.js` with `chrome.i18n.getMessage()` calls.
-    *   Added/updated corresponding message keys (including new `statusProofreadingModel`) in all three `messages.json` files, also updating tooltips and descriptions to reflect the different GPT models used.
-    *   Changed the log level for skipping correction due to missing API key from `warn` to `log` as it's expected behavior.
-8.  **UI/UX Refinements:**
-    *   Adjusted tooltip (`.voice-menu-label`) position in `style.css` to appear above and right-aligned with the button, preventing it from going off-screen.
-    *   Modified `content.js` and `style.css` to handle the main menu button's expanded state (`#voice-menu-btn`) using CSS classes instead of inline styles, ensuring consistency with the monochromatic theme.
+2.  **`manifest.json` Creation & Refinement:** Initial setup and permission definition.
+3.  **CSS Extraction (`style.css`):** Moved styles to a dedicated file.
+4.  **JavaScript Adaptation (`content.js`):** Replaced Tampermonkey APIs with WebExtension APIs (`chrome.storage`, `fetch`), handled async operations.
+5.  **Feature Modifications:** Added and later removed auto-submit toggle and manual submit button based on feedback.
+6.  **UI Design Update:** Implemented monochromatic theme and SVG icons (`icons.js`).
+7.  **Internationalization (i18n):** Added support for multiple languages using `_locales`.
+8.  **UI/UX Refinements:** Improved tooltip positioning and menu state handling.
 
 ## Current State
 
-*   The extension loads correctly in Chrome with version 1.8.
-*   Core functionality (voice input, SPA handling, GPT correction, UI) is fully adapted for the extension environment.
+*   The extension loads correctly in Chrome with version **3.1** (as per `manifest.json`).
+*   Core functionality (voice input, SPA handling, GPT correction, UI) is fully adapted for the extension environment, **utilizing a background script (`background.js`) and content script (`content.js`)**.
 *   Auto-submit only triggers in normal mode (not append mode).
 *   Manual submit button and auto-submit toggle button have been removed.
 *   UI uses a clean monochromatic theme with SVG icons for better rendering across all environments.
 *   The extension is internationalized for Japanese (default), English, and Vietnamese.
-*   Modular architecture with specialized handlers for different website types.
+*   **Modular architecture with specialized modules (`src/modules/`), site-specific handlers (`src/site-handlers/`), and state management (`src/modules/state.js`).**
 *   X.com (Twitter) is explicitly marked as non-supported with appropriate user notifications.
-*   Build process implemented with esbuild for JavaScript bundling and optimization.
+*   **Build process implemented with esbuild for JavaScript bundling and a custom script (`scripts/copy-assets.js`) for asset handling.**
 
 ## Extension Packaging and Distribution
 
-9.  **Migration to GitHub Actions:**
-    *   Removed local packaging scripts and files (`generate_key.ps1`, `package_extension.ps1`, `packaging_guide.md`).
-    *   Moved all packaging functionality to GitHub Actions for complete automation.
-    *   Eliminated the need for local OpenSSL installation and manual key management.
-    *   Secured the signing key in GitHub Secrets instead of local storage.
-
-10. **Distribution Options:**
-    *   **Chrome Web Store:** The GitHub Actions-generated ZIP file can be downloaded from workflow artifacts and uploaded to the Chrome Web Store.
-    *   **Organizational Distribution:** The GitHub Actions-generated CRX file can be downloaded from workflow artifacts for internal distribution.
-    *   **Update Management:** The signing key stored in GitHub Secrets is used consistently for all builds to ensure seamless updates.
+9.  **Migration to GitHub Actions:** Automated packaging, removed local scripts.
+10. **Distribution Options:** Chrome Web Store (ZIP) and Organizational (CRX) via Actions artifacts.
+11. **Update Management:** Consistent signing key via GitHub Secrets.
 
 ## Tools and Resources Created
 
-*   `.github/workflows/package-extension.yml`: GitHub Actions workflow for automated packaging
-*   `github-actions-guide.md`: Comprehensive guide for using GitHub Actions and managing keys in GitHub Secrets
-*   `.gitignore`: Configuration to exclude sensitive files and build artifacts from Git
+*   `.github/workflows/package-extension.yml`: GitHub Actions workflow for automated packaging.
+*   **`README.md`**: Contains project overview, features, usage, **privacy policy**, etc.
+*   **`RELEASE_GUIDE.md`**: Guide for creating new releases.
+*   **`release_notes.md`**: Notes for past releases.
+*   `.gitignore`: Configuration to exclude sensitive files and build artifacts from Git.
+*   **`scripts/copy-assets.js`**: Node script to copy assets during the build process.
+*   **Test configuration files (`jest.config.js`, `jest.setup.js`, `babel.config.js`)**
 
 ## GitHub Actions Integration
 
-12. **GitHub Actions Workflow Setup:**
-    *   Created `.github/workflows/package-extension.yml` to automate the extension packaging process.
-    *   Configured the workflow to run on pushes to main branch, pull requests, and manual triggers.
-    *   Set up the workflow to install necessary dependencies (Node.js, OpenSSL, zip) in an Ubuntu environment.
-    *   Implemented key management using GitHub Secrets for secure storage of the extension signing key.
-    *   Added build step using esbuild to bundle JavaScript modules before packaging.
-    *   Included icon file in the packaging process for Chrome Web Store compliance.
-    *   Added artifact upload to make the packaged extension available for download after workflow completion.
-
-13. **Security Improvements:**
-    *   Created `.gitignore` file to exclude sensitive files (keys directory, .pem files) and build artifacts from Git.
-    *   Removed accidentally committed keys from Git history using `git filter-branch`.
-    *   Added comprehensive documentation on secure key management in `github-actions-guide.md`.
-    *   Implemented Base64 encoding support for storing keys in GitHub Secrets to handle multiline content.
-
-14. **Documentation Updates:**
-    *   Created `github-actions-guide.md` with detailed instructions for:
-      - Setting up and using the GitHub Actions workflow
-      - Securely storing and managing extension signing keys in GitHub Secrets
-      - Retrieving packaged extensions from workflow artifacts
-      - Troubleshooting common issues with the automated packaging process
-
-15. **CRX File Generation Improvements:**
-    *   Resolved CRX_HEADER_INVALID error by implementing proper CRX file generation:
-        - Added `node-crx` package integration for standards-compliant CRX file creation
-        - Implemented fallback mechanism using improved manual OpenSSL-based generation
-        - Fixed binary format issues in CRX header generation
-        - Ensured proper concatenation of header, public key, signature, and ZIP content
-    *   Created both ZIP and CRX formats for maximum compatibility and distribution options
-
-16. **Unique Filename Generation:**
-    *   Implemented timestamp and version-based filenames to prevent overwriting:
-        - Extracted version number from manifest.json
-        - Generated timestamps in YYYYMMDD_HHMMSS format
-        - Created files with pattern `otak-voice-v{version}-{timestamp}.{extension}`
-    *   Added "latest" version files with consistent names for easy reference:
-        - `otak-voice-latest.zip` and `otak-voice-latest.crx`
-    *   Generated version information file (`version-info.json`) containing:
-        - Version number
-        - Build timestamp (in ISO format)
-        - List of generated files
-
-17. **Artifact Management Enhancements:**
-    *   Added GitHub run ID to artifact names for uniqueness:
-        - `otak-voice-extension-{run_id}` format
-    *   Uploaded entire dist directory to include all generated files:
-        - Timestamped ZIP and CRX files
-        - Latest version files
-        - Version information file
-    *   Set 7-day retention period for artifacts to manage storage usage
+12. **GitHub Actions Workflow Setup:** Automation for build, packaging, key management, artifact upload.
+13. **Security Improvements:** `.gitignore`, key removal from history, Base64 secret encoding.
+14. **Documentation Updates:** (Previous `github-actions-guide.md` content likely merged into README or other docs).
+15. **CRX File Generation Improvements:** Standards-compliant CRX generation.
+16. **Unique Filename Generation:** Timestamp and version-based naming, plus "latest" files.
+17. **Artifact Management Enhancements:** Unique artifact names, upload of `dist`, retention policy.
 
 ## Final Extension Packaging Solution
 
-The extension packaging process now provides a complete, automated solution with the following features:
+Provides a secure, automated solution for generating ZIP and CRX files with versioning and easy distribution via GitHub Actions artifacts.
 
-1. **Security:**
-   * Secure key management through GitHub Secrets
-   * Protection against accidental key commits via .gitignore
-   * Proper file permissions for sensitive key files
-
-2. **Automation:**
-   * Fully automated packaging triggered by code changes
-   * Support for manual workflow execution
-   * Consistent build environment in GitHub Actions
-
-3. **File Generation:**
-   * Standards-compliant CRX files that install without errors
-   * ZIP files for Chrome Web Store submission
-   * Version-specific and "latest" files for different use cases
-   * Version information for tracking and auditing
-
-4. **Distribution:**
-   * Easy artifact retrieval from GitHub Actions
-   * Support for both Chrome Web Store and organizational distribution
-   * Consistent naming for automated deployment scripts
-|
 ## Chrome Web Store Publication
-|
-18. **Chrome Web Store Upload Requirements:**
-    * Added icon definition to `manifest.json` to meet Chrome Web Store requirements
-    * Created and referenced `otak-voice-128.png` as the extension icon
-    * Updated GitHub Actions workflow to include the icon file in packaging
-|
-19. **Extension Naming Standardization:**
-    * Changed extension name from "拡張ユニバーサル音声入力" to "otak-voice" across all locales:
-      - Updated `extName` in `_locales/ja/messages.json`
-      - Updated `extName` in `_locales/en/messages.json`
-      - Updated `extName` in `_locales/vi/messages.json`
-    * Maintained consistent branding between Chrome Web Store listing and extension UI
-|
-20. **Privacy Policy Implementation:**
-    * Created `README.md` with comprehensive privacy policy
-    * Designed for hosting on GitHub Pages to provide required privacy policy URL
-    * Included detailed information on:
-      - Data collection practices (website content for voice input and correction)
-      - Data usage purposes (text input efficiency and quality improvement)
-      - Data sharing (limited to OpenAI API with user-provided key)
-      - Data storage (local browser storage only)
-      - User rights and security measures
-|
-21. **Chrome Web Store Compliance:**
-    * Provided detailed justifications for required permissions:
-      - `storage`: For saving API key and user preferences
-      - `scripting`: For detecting and interacting with text input fields
-      - Host permissions: For universal website compatibility and OpenAI API access
-    * Documented remote code usage (OpenAI API)
-    * Declared single-purpose nature of the extension
-    * Completed data usage declarations in compliance with Google's Developer Program Policies
+
+18. **Chrome Web Store Upload Requirements:** Icon definition (`otak-voice-128.png`) added.
+19. **Extension Naming Standardization:** Consistent "otak-voice" name across locales.
+20. **Privacy Policy Implementation:** Comprehensive policy in `README.md`.
+21. **Chrome Web Store Compliance:** Permission justifications, remote code documentation, data usage declarations.
 
 ## Code Modularization
 
-22. **Content.js Modularization:**
-   * Restructured the monolithic `content.js` (2422 lines) into a modular architecture:
-     - Created a logical directory structure with `src/modules/` and `src/site-handlers/`
-     - Extracted constants into `constants.js` for centralized management
-     - Separated core functionality into specialized modules:
-       - `dom-observer.js`: DOM monitoring and SPA support
-       - `ui.js`: UI creation and management
-       - `speech.js`: Voice recognition functionality
-       - `gpt-service.js`: OpenAI API integration
-       - `input-handler.js`: Input field operations
-       - `settings.js`: Configuration management
-       - `history.js`: Voice input history tracking
-       - `utils.js`: Common utility functions
-       - `icons.js`: Centralized SVG icon definitions
-     - Isolated site-specific behavior into dedicated handlers:
-       - `site-detector.js`: Site detection logic with advanced pattern matching
-       - `systemexe.js`: System.exe Research and Development site handler
-       - `ai-chat.js`: AI chat interfaces handler with support for multiple platforms
-       - `twitter.js`: X.com (Twitter) site handler (marked as non-supported)
-       - `default.js`: Generic site handler
+22. **Content.js and Background.js Modularization:**
+    *   Restructured the monolithic `content.js` and introduced `background.js`.
+    *   Created a logical directory structure: `src/`, `src/modules/`, `src/site-handlers/`, **`src/__tests__/`**, **`scripts/`**.
+    *   Extracted constants into `constants.js`.
+    *   Separated core functionality into specialized modules:
+        *   `dom-observer.js`: DOM monitoring and SPA support
+        *   **`dom-utils.js`**: DOM manipulation utilities
+        *   **`error-handler.js`**: Centralized error handling
+        *   **`event-bus.js`**: Simple event bus for inter-module communication
+        *   `gpt-service.js`: OpenAI API integration
+        *   `history.js`: Voice input history tracking
+        *   `input-handler.js`: Input field operations
+        *   `settings.js`: Configuration management (**likely interacts with `background.js` via messaging**)
+        *   `speech.js`: Voice recognition functionality
+        *   **`state.js`**: Centralized state management for the content script
+        *   `ui.js`: UI creation and management
+        *   `utils.js`: Common utility functions
+        *   `icons.js`: Centralized SVG icon definitions
+    *   Isolated site-specific behavior into dedicated handlers:
+        *   `site-detector.js`: Site detection logic
+        *   `systemexe.js`, `ai-chat.js`, `twitter.js`, `default.js`: Specific site handlers
+    *   **Added `background.js` for background tasks (e.g., context menus, settings synchronization, potentially long-running operations).**
 
 23. **Architecture Improvements:**
-   * Implemented a site detection system that automatically applies appropriate handlers
-   * Reduced code duplication by centralizing common functionality
-   * Improved maintainability through clear separation of concerns
-   * Enhanced extensibility for adding support for new websites
-   * Organized dependencies to prevent circular references
-   * Maintained backward compatibility with existing functionality
-   * Added sophisticated AI chat site detection with SVG pattern matching for paper airplane icons
-   * Explicitly marked X.com (Twitter) as non-supported with appropriate user notifications
+    *   Implemented a site detection system.
+    *   Reduced code duplication.
+    *   Improved maintainability.
+    *   Enhanced extensibility.
+    *   Organized dependencies.
+    *   Maintained backward compatibility.
+    *   Added AI chat site detection.
+    *   Marked X.com as non-supported.
+    *   **Introduced centralized state management (`state.js`) and an event bus (`event-bus.js`) for better organization.**
 
 24. **Build Process Implementation:**
-   * Added esbuild for JavaScript bundling and optimization
-   * Created build script in package.json for generating production-ready files
-   * Updated manifest.json to reference bundled files from dist directory
-   * Configured GitHub Actions workflow to include build step
-   * Improved extension versioning (current version: 1.8)
-   * **Required Build Command:** Developers must run `npm run build` after making changes to generate the bundled files in the dist directory before testing or packaging the extension
-  
+    *   Added esbuild for JavaScript bundling.
+    *   **Added `scripts/copy-assets.js` for copying static assets.**
+    *   Created build script (`npm run build`) in `package.json`.
+    *   Updated `manifest.json` to reference bundled files from `dist` directory.
+    *   Configured GitHub Actions workflow to include build step.
+    *   Improved extension versioning (current version: 3.1).
+    *   **Required Build Command:** Developers must run `npm run build` after making changes.
+
 ## Code Structure Analysis of the otak-voice Project
 
 ### Key Modules and Functions
 
-#### Top-level Files
+#### Top-level Files (`src/`)
 
-**constants.js:**
-* SITE_TYPES: Definition of site types
-* GPT_MODELS: Definition of GPT models
-* DEFAULT_SETTINGS: Definition of default settings
-* PROCESSING_STATE: Definition of processing states
+*   **`background.js`**: Handles background tasks, event listeners (e.g., `chrome.runtime.onInstalled`), potentially context menus, and communication with content scripts.
+*   `constants.js`: Defines constants (SITE_TYPES, GPT_MODELS, DEFAULT_SETTINGS, PROCESSING_STATE).
+*   `content.js`: Main entry point for the content script, initializes modules, orchestrates UI and voice input logic within the web page context. Key functions: `initVoiceInput()`, `setupPeriodicSelfHealing()`, `runInitialization()`.
+*   `icons.js`: Defines SVG icons used in the UI.
 
-**content.js:**
-* initVoiceInput(): Initialization of voice input
-* setupPeriodicSelfHealing(): Periodic self-healing functionality
-* runInitialization(): Execution of initialization process
+#### `modules/` Directory
 
-#### modules/ Directory
+*   `dom-observer.js`: `setupDOMObserver()` for monitoring DOM changes.
+*   **`dom-utils.js`**: Utility functions for DOM manipulation (e.g., finding elements, checking visibility).
+*   **`error-handler.js`**: Functions for handling and reporting errors consistently.
+*   **`event-bus.js`**: Provides `on()`, `off()`, `emit()` for simple event handling between modules.
+*   `gpt-service.js`: `correctWithGPT()`, `proofreadWithGPT()`, `editWithGPT()` for interacting with OpenAI API.
+*   `history.js`: `addToHistory()`, `updateHistoryPanel()`, `toggleHistoryPanel()` for managing input history.
+*   `input-handler.js`: Manages interactions with input fields (`findBestInputField()`, `writeToInputField()`, etc.) and UI menu state (`loadMenuState()`, `saveMenuState()`, `toggleMenu()`).
+*   `settings.js`: `loadSettings()`, `saveSettings()` (likely uses `chrome.storage` via messages to `background.js` or directly if permissions allow).
+*   `speech.js`: Handles speech recognition lifecycle (`startSpeechRecognition()`, `stopSpeechRecognition()`, `processEditInstruction()`).
+*   **`state.js`**: Manages the state of the content script (e.g., `isListening`, `appendMode`, `currentInputElement`). Provides functions to get and set state.
+*   `ui.js`: Creates and manages UI elements (`createUI()`, `showStatus()`, `createSettingsModal()`, `updateProcessingState()`).
+*   `utils.js`: Common utility functions (`basicCleanup()`, `retryInputEvents()`).
 
-**dom-observer.js:**
-* setupDOMObserver(): Setup for DOM change monitoring
+#### `site-handlers/` Directory
 
-**gpt-service.js:**
-* correctWithGPT(): Text correction using GPT
-* proofreadWithGPT(): Proofreading using GPT
-* editWithGPT(): Text editing using GPT
+*   `ai-chat.js`, `default.js`, `site-detector.js`, `systemexe.js`, `twitter.js`: Implement site-specific logic for finding elements and handling submission.
 
-**history.js:**
-* addToHistory(): Adding to history
-* updateHistoryPanel(): Updating history panel
-* toggleHistoryPanel(): Toggling history panel display
+#### **`scripts/` Directory**
 
-**input-handler.js:**
-* loadMenuState(): Loading menu state
-* saveMenuState(): Saving menu state
-* toggleMenu(): Toggling menu display
-* toggleSettingsModal(): Toggling settings modal display
-* toggleAppendMode(): Toggling append mode
-* clearCurrentInput(): Clearing current input
-* findBestInputField(): Finding the optimal input field
-* writeToInputField(): Writing to input field
-* writeAppendedText(): Writing appended text
-* simulateTypingIntoElement(): Simulating typing into an element
-* enhanceInputElementHandlers(): Enhancing input element handlers
-* proofreadCurrentInput(): Proofreading current input
-
-**settings.js:**
-* loadSettings(): Loading settings
-* saveAlwaysOnMode(): Saving always-on mode
-* saveSettings(): Saving settings
-* toggleAlwaysOnMode(): Toggling always-on mode
-
-**speech.js:**
-* handleMicButtonInteraction(): Handling mic button interaction
-* handleMicButtonClick(): Handling mic button click
-* toggleSpeechRecognition(): Toggling speech recognition
-* startSpeechRecognition(): Starting speech recognition
-* stopSpeechRecognition(): Stopping speech recognition
-* updateMicButtonState(): Updating mic button state
-* handleEditButtonClick(): Handling edit button click
-* startEditInstructionRecognition(): Starting edit instruction recognition
-* processEditInstruction(): Processing edit instruction
-* basicCleanup(): Basic text cleanup
-* forceSetTextAreaValue(): Forcing text area value
-
-**ui.js:**
-* showStatus(): Displaying status
-* createUI(): Creating UI
-* createMenuItem(): Creating menu item
-* removeExistingElements(): Removing existing elements
-* createSettingsModal(): Creating settings modal
-* createHistoryPanel(): Creating history panel
-* setupEventListeners(): Setting up event listeners
-* updateProcessingState(): Updating processing state
-
-**utils.js:**
-* basicCleanup(): Basic text cleanup
-* retryInputEvents(): Retrying input events
-* isInputElement(): Checking if element is an input element
-* forceSetTextAreaValue(): Forcing text area value
-
-#### site-handlers/ Directory
-
-**ai-chat.js:**
-* findPaperPlaneButton(): Finding paper plane button
-* findAIChatSubmitButton(): Finding AI chat submit button
-* isButtonDisabled(): Checking if button is disabled
-* submitAfterVoiceInput(): Submitting after voice input
-* findSubmitButtonForInput(): Finding submit button for input
-
-**default.js:**
-* findSubmitButtonForInput(): Finding submit button for input
-* findBestInputField(): Finding the best input field
-* isButtonDisabled(): Checking if button is disabled
-* submitAfterVoiceInput(): Submitting after voice input
-
-**site-detector.js:**
-* detectSiteType(): Detecting site type (System.exe, X.com, AI chat sites, etc.)
-* getSiteHandler(): Getting site handler
-
-**systemexe.js:**
-* findSubmitButton(): Finding submit button
-* isButtonDisabled(): Checking if button is disabled
-* submitAfterVoiceInput(): Submitting after voice input
-* findSubmitButtonForInput(): Finding submit button for input
-
-**twitter.js:**
-* findBestInputField(): Finding the best input field (displays non-supported message)
-* findSubmitButtonForInput(): Finding submit button for input (non-supported)
-* submitAfterVoiceInput(): Submitting after voice input (displays non-supported message)
+*   **`copy-assets.js`**: Node.js script executed during build to copy necessary files (`manifest.json`, `_locales`, images, CSS) to the `dist` folder.
 
 ### Project Overview
 
-This project is a Chrome extension that enables voice input on web pages. The main features are:
-
-* Voice recognition and input: Allows voice input into text input fields on web pages
-* GPT integration: Uses OpenAI's GPT API for text correction, proofreading, and editing
-* Site-specific handling: Has handlers for specific sites like Twitter, AI chat platforms, and SystemExe
-* UI management: Provides UI elements like mic button, settings modal, and history panel
-* Settings management: Saves and loads user settings
-
-The extension has mechanisms to detect input fields and submit buttons on different websites and process voice input appropriately.
+This project is a Chrome extension enabling voice input on web pages. Main features:
+*   Voice recognition and input.
+*   GPT integration (correction, proofreading, editing).
+*   Site-specific handling.
+*   UI management (mic button, settings, history).
+*   Settings management (**synced via `chrome.storage` likely managed by `background.js`**).
+*   **Background script (`background.js`) manages extension lifecycle events and potentially persistent settings.**
+*   **Content script (`content.js`) injects UI and handles interactions within web pages.**
+*   **Modular design using specialized modules and site handlers.**
+*   **Build process using esbuild and custom scripts.**
 
 ## Module Relationships and Dependencies
 
-The otak-voice extension follows a modular architecture with clear separation of concerns, but also includes strategic interdependencies to enable complex functionality. Below is an analysis of the key module relationships:
-
 ### Core Initialization Flow
 
-1. **Entry Point (`content.js`):**
-   * Serves as the main entry point and orchestrator
-   * Initializes all other modules in sequence:
-     1. `loadSettings()` - Loads user configuration
-     2. `initInputHandler()` - Prepares input field handling
-     3. `initVoiceInput()` - Sets up voice recognition
-     4. `setupDOMObserver()` - Establishes SPA support
-     5. `setupPeriodicSelfHealing()` - Creates self-repair mechanism
+1.  **Background Script (`background.js`):**
+    *   Listens for browser events (`onInstalled`, `onMessage`).
+    *   May initialize context menus or perform initial setup.
+    *   Handles storage operations (`chrome.storage`).
+2.  **Content Script (`content.js`):**
+    *   Entry point injected into web pages.
+    *   Initializes modules: `settings`, `state`, `event-bus`, `ui`, `input-handler`, `speech`, `history`, `dom-observer`, `site-detector`.
+    *   Communicates with `background.js` using `chrome.runtime.sendMessage` (likely via `event-bus.js` or dedicated functions).
 
-2. **UI Creation and Event Binding:**
-   * `createUI()` - Generates all UI elements
-   * `setupEventListeners()` - Binds events to UI elements
-   * `updateMenuState()` - Applies saved menu configuration
+### Key Module Dependencies (within Content Script)
 
-### Key Module Dependencies
-
-1. **UI Module (`ui.js`):**
-   * **Depends on:**
-     * `input-handler.js` for menu toggling and input operations
-     * `speech.js` for microphone button handling
-     * `history.js` for history panel management
-     * `settings.js` for configuration persistence
-     * `icons.js` for SVG icon definitions
-   * **Provides to other modules:**
-     * Status display functionality
-     * UI element creation and management
-     * Processing state visualization
-
-2. **Input Handler Module (`input-handler.js`):**
-   * **Depends on:**
-     * `ui.js` for status updates (circular dependency)
-     * `site-detector.js` for site-specific behavior
-     * `gpt-service.js` for text correction
-     * `settings.js` for API key access
-   * **Provides to other modules:**
-     * Input field detection and manipulation
-     * Menu state management
-     * Text writing operations
-
-3. **Speech Module (`speech.js`):**
-   * **Depends on:**
-     * `ui.js` for status updates
-     * `input-handler.js` for writing recognized text
-     * `gpt-service.js` for text correction
-   * **Provides to other modules:**
-     * Speech recognition initialization and control
-     * Voice input processing
-     * Edit instruction handling
-
-4. **Site Handlers:**
-   * **Hierarchical relationship:**
-     * `site-detector.js` determines the appropriate handler
-     * Specific handlers (`systemexe.js`, `ai-chat.js`, `twitter.js`) implement site-specific behavior
-     * `default.js` provides fallback functionality
-   * **Common interface methods:**
-     * `findBestInputField()` - Locates optimal input field
-     * `findSubmitButtonForInput()` - Finds associated submit button
-     * `submitAfterVoiceInput()` - Handles post-input submission
+*   **`state.js`**: Central repository for content script state, accessed by `ui.js`, `input-handler.js`, `speech.js`.
+*   **`event-bus.js`**: Facilitates communication between modules, reducing direct dependencies. Used by various modules to signal events (e.g., state change, recognition start/stop).
+*   `ui.js`: Depends on `state.js`, `input-handler.js`, `speech.js`, `history.js`, `settings.js`, `icons.js`, `event-bus.js`.
+*   `input-handler.js`: Depends on `state.js`, `ui.js`, `site-detector.js`, `gpt-service.js`, `settings.js`, `event-bus.js`.
+*   `speech.js`: Depends on `state.js`, `ui.js`, `input-handler.js`, `gpt-service.js`, `event-bus.js`.
+*   Other modules depend on `state.js`, `settings.js`, `utils.js`, `event-bus.js` as needed.
 
 ### Data Flow Patterns
 
-1. **Settings Management:**
-   * Settings loaded at initialization from Chrome storage
-   * Accessed by multiple modules (UI, input handler, speech, GPT service)
-   * Changes persisted back to Chrome storage
-
-2. **Voice Input Processing:**
-   * Speech recognition results flow from `speech.js` → `input-handler.js` → target input field
-   * Optional GPT correction: `speech.js` → `gpt-service.js` → `input-handler.js` → target input field
-
-3. **Site-Specific Behavior:**
-   * Site detection: `site-detector.js` analyzes current page
-   * Appropriate handler selected based on detection
-   * Handler methods called by `input-handler.js` for input field operations
-
-4. **UI State Management:**
-   * UI state stored in Chrome storage
-   * Loaded at initialization
-   * Updated when user interacts with UI elements
-   * Persisted when changed
-
-This modular architecture with clear responsibilities enables the extension to handle complex voice input scenarios across diverse websites while maintaining maintainable code organization.
+*   **Settings:** Loaded/saved via `settings.js`, likely involving messaging with `background.js` to interact with `chrome.storage`. Settings data flows to modules needing configuration.
+*   **State:** Managed by `state.js`. Changes are often triggered by UI interactions (`ui.js`, `input-handler.js`) or speech events (`speech.js`). Other modules read state from `state.js` or subscribe to state change events via `event-bus.js`.
+*   **Voice Input:** `speech.js` → (optional `gpt-service.js`) → `input-handler.js` → Target Element. Events emitted via `event-bus.js`.
+*   **Site Handling:** `site-detector.js` → Specific Handler → `input-handler.js`.
+*   **Background Communication:** Content script modules send messages (e.g., for storage) to `background.js`, potentially receiving responses.
 
 ## UI Components and Elements
 
-The extension provides a comprehensive user interface with multiple interactive elements:
+(No major changes expected here unless `background.js` adds UI elements like context menus)
 
-### Main UI Components
+1.  **Main Menu Button (`#otak-voice-menu-btn`)**
+2.  **Menu Container (`#otak-voice-menu-container`)**
+3.  **Status Display (`#otak-voice-status`)**
+4.  **Settings Modal (`#otak-voice-settings-modal`)**
+5.  **History Panel (`#otak-voice-history-panel`)**
+6.  **Recognition Result Modal (`#otak-voice-recognition-modal`)**
 
-1. **Main Menu Button:**
-   * Floating button positioned at the bottom-right corner of the page
-   * Displays a hamburger menu icon (SVG)
-   * Toggles the visibility of the menu container
-   * Maintains its state across page reloads via Chrome storage
+### Button Elements (within Menu Container)
 
-2. **Menu Container:**
-   * Expandable panel containing all control buttons
-   * Appears when the main menu button is clicked
-   * Contains buttons for voice input, append mode, proofreading, editing, settings, and history
-
-3. **Status Display:**
-   * Floating notification area that shows operation status
-   * Changes background color based on processing state
-   * Displays internationalized messages for user feedback
-   * Auto-hides after a configurable duration unless set to persistent
-
-4. **Settings Modal:**
-   * Dialog for configuring extension options
-   * Contains:
-     * API Key input field for OpenAI integration
-     * Language selection dropdown (Japanese, English, Vietnamese)
-     * Toggle switches for auto-detection, auto-correction, and history context
-     * Save and Cancel buttons
-
-5. **History Panel:**
-   * Collapsible panel showing previous voice input entries
-   * Allows users to review and reuse past inputs
-   * Updates dynamically as new voice inputs are processed
-
-### Button Elements
-
-1. **Microphone Button (`voice-input-btn`):**
-   * Primary button for initiating voice recognition
-   * Changes appearance based on recognition state (idle, listening, processing)
-   * Handles single-click for standard voice input
-   * Handles double-click for always-on mode
-
-2. **Append Mode Button (`voice-append-btn`):**
-   * Toggles append mode for adding text to existing content
-   * Visually indicates when append mode is active
-   * Prevents auto-submission when active
-
-3. **Clear Button (`voice-clear-btn`):**
-   * Clears the current input field
-   * Provides quick reset functionality
-
-4. **Proofread Button (`voice-proofread-btn`):**
-   * Sends current input text to GPT for proofreading
-   * Uses more comprehensive GPT model for higher accuracy
-
-5. **Edit Button (`voice-edit-btn`):**
-   * Initiates voice-based editing instructions
-   * Allows natural language commands to modify text
-
-6. **Settings Button (`voice-settings-btn`):**
-   * Opens the settings modal
-   * Provides access to configuration options
-
-7. **History Button (`voice-history-btn`):**
-   * Toggles the history panel visibility
-   * Shows previous voice input entries
+1.  **Microphone Button (`#otak-voice-input-btn`)**
+2.  **Append Mode Button (`#otak-voice-append-btn`)**
+3.  **Clear Button (`#otak-voice-clear-btn`)**
+4.  **Proofread Button (`#otak-voice-proofread-btn`)**
+5.  **Edit Button (`#otak-voice-edit-btn`)**
+6.  **Theme Toggle Button (`#otak-voice-theme-toggle-btn`)**
+7.  **Settings Button (`#otak-voice-settings-btn`)**
+8.  **History Button (`#otak-voice-history-btn`)**
 
 ### UI State Management
 
-* All UI elements are created dynamically and injected into the page DOM
-* Element states (active/inactive) are visually indicated through CSS classes
-* Button availability changes based on context (e.g., disabled during processing)
-* The UI adapts to different websites while maintaining consistent appearance
-* SVG icons ensure crisp rendering at any zoom level
-* Monochromatic color scheme provides good visibility in both light and dark modes
-
-The UI is designed to be minimally intrusive while providing comprehensive functionality, with careful attention to accessibility and user experience across different websites and environments.
+*   Dynamically created and injected.
+*   States indicated via CSS classes.
+*   Context-dependent button availability.
+*   Adapts to websites, consistent appearance.
+*   SVG icons for crisp rendering.
+*   Synced light/dark theme.
 
 ## Development Workflow
 
 ### Local Development Process
 
-1. **Setup:**
-   * Clone the repository
-   * Run `npm install` to install dependencies (primarily esbuild)
+1.  **Setup:**
+    *   Clone the repository
+    *   Run `npm install`
 
-2. **Making Changes:**
-   * Modify source files in the `src` directory
-   * Update styles in `style.css` as needed
-   * Add or modify localization strings in `_locales` directory
+2.  **Making Changes:**
+    *   Modify source files in `src`
+    *   Update styles in `style.css`
+    *   Update localization in `_locales`
 
-3. **Building:**
-   * Run `npm run build` to generate bundled files in the `dist` directory
-   * This step is **mandatory** after any JavaScript changes as the extension loads files from the dist directory
+3.  **Building:**
+    *   Run `npm run build` to generate bundled files and copy assets to `dist` directory.
+    *   **Mandatory after any changes in `src` or static assets.**
 
-4. **Testing:**
-   * Load the extension in Chrome using "Load unpacked" and pointing to the project directory
-   * Ensure the extension icon appears in the toolbar
-   * Test functionality across different websites
+4.  **Testing:**
+    *   Load the extension in Chrome using "Load unpacked" pointing to the **`dist`** directory.
+    *   Test functionality.
 
-5. **Packaging:**
-   * Local packaging is no longer required as this is handled by GitHub Actions
-   * For manual testing of packaged versions, use the GitHub Actions artifacts
+5.  **Packaging:** Handled by GitHub Actions.
 
 ### Continuous Integration
 
 The GitHub Actions workflow automatically:
 1. Installs dependencies
-2. Runs the build process
-3. Packages the extension
+2. Runs the build process (`npm run build`)
+3. Packages the **contents of the `dist` directory**
 4. Creates versioned artifacts
-
-This ensures that all distributed versions of the extension contain properly bundled and optimized code.
 
 ## Code Quality Rules
 
 ### Comment Guidelines
 
-1. **Remove Unnecessarily Redundant Comments:**
-   * Eliminate comments that merely restate what the code obviously does
-   * Remove duplicate explanations of the same concept
-   * Delete commented-out code that is no longer needed
-   * Avoid excessive inline comments that interrupt code readability
-   * Keep only comments that provide genuine insight, context, or explanation beyond what is evident from the code itself
+1.  **Remove Unnecessarily Redundant Comments:**
+    *   Eliminate comments that merely restate what the code obviously does.
+    *   Remove duplicate explanations.
+    *   Delete commented-out code.
+    *   Avoid excessive inline comments.
+    *   Keep only comments providing genuine insight or context.
 
-## Global Variables
+## State Management (Replaces Global Variables Section)
 
-The extension uses several global variables defined in `content.js` that are critical to understand:
-
-1. **currentInputElement:**
-   * Tracks the currently focused input element on the page
-   * Used to determine where text should be inserted
-   * Updated when the user clicks on an input field or when auto-detection finds a suitable field
-
-2. **lastClickedInput:**
-   * Stores the most recently clicked input element
-   * Provides fallback when currentInputElement becomes invalid
-   * Helps maintain context across SPA navigation
-
-3. **appendMode:**
-   * Boolean flag that controls whether new text is appended to existing content
-   * When true, prevents auto-submission after voice input
-   * Toggled by the append mode button in the UI
-
-4. **isListening:**
-   * Indicates whether speech recognition is currently active
-   * Controls microphone button appearance and behavior
-   * Prevents multiple recognition sessions from starting simultaneously
-
-5. **isEditing:**
-   * Tracks whether the extension is in edit instruction mode
-   * When true, voice input is interpreted as editing commands rather than text to insert
-   * Activated by the edit button in the UI
-
-6. **alwaysOnMode:**
-   * Enables continuous voice recognition without requiring button clicks
-   * Persisted in Chrome storage for consistency across page reloads
-   * Activated by double-clicking the microphone button
-
-These variables are exposed on the window object to facilitate cross-module access and are critical to the extension's state management.
-
-## Recent Enhancements (May 2025)
-
-### Input Field Auto-Detection
-
-* Changed the default setting for input field auto-detection from OFF to ON
-* Modified `constants.js` to set `AUTO_DETECT_INPUT_FIELDS` to `true` in the `DEFAULT_SETTINGS` object
-* This allows users to use the extension immediately after installation without manual configuration
-
-### UI Improvements
-
-* Simplified the settings button tooltip from "OpenAI APIキーを設定 (GPT-4.1-mini / GPT-4.1用)" to just "設定"
-* Changed the settings modal window title from "OpenAI APIキー設定" to "設定"
-* Updated the settings modal label from "API Key" to "OpenAI API Key" for clarity
-* Added "otak-voice" prefix to all CSS selectors to prevent conflicts with website styles
-
-### Bug Fixes
-
-* Fixed an error that occurred when pressing the "内容を校閲" (Proofread) button
-* Replaced all references to the undefined variable `targetElement` with `window.currentInputElement` in the `proofreadCurrentInput` function
-* Fixed a syntax error in `speech.js` (changed `result[0.transcript` to `result[0].transcript`)
-* Fixed an issue where the microphone button label text "マイク" was being picked up by voice recognition
-  - Modified `createMenuItem` in `ui.js` to set an empty string for the microphone button label
-  - Updated `updateMicButtonState` in `speech.js` to ensure the label remains empty
-
-### Feature Removals
-
-* Completely removed the always-on mode functionality
-* The microphone button now only toggles voice recognition on/off
-* Voice recognition no longer automatically restarts in always-on mode
-
-### x.com (Twitter) Support
-
-* Initially added support for x.com (formerly Twitter)
-* Encountered JavaScript errors due to x.com's complex React/Draft.js-based editor
-* Direct DOM manipulation caused internal state corruption in x.com's editor
-* Temporarily disabled x.com support with clear user messaging
-
-### Modal Dialog for Voice Recognition Results
-
-* Added a new modal dialog feature to display voice recognition results
-* Created `showRecognitionTextModal` function in `ui.js` to show recognized text in a modal with copy button
-* Added localization support for modal dialog text in all supported languages
-* Implemented this approach for:
-  1. Sites with complex frameworks (like x.com) where direct input doesn't work
-  2. Cases where no suitable input field is found on the page
-* Enhanced `handleMicButtonClick` to continue with voice recognition even when no input field is found
-* Modified the speech recognition handler to display results in the modal dialog when appropriate
-* This makes the extension more versatile as users can now use voice recognition on any webpage
-
-These enhancements significantly improve the usability and reliability of the extension across different websites and scenarios.
-
-### Cloud Synchronization and Theme Improvements (May 2025)
-
-* Changed settings storage from `chrome.storage.local` to `chrome.storage.sync` for cross-device synchronization:
-  - Modified all storage operations in `settings.js` to use `chrome.storage.sync`
-  - This enables settings (API key, language, theme, etc.) to sync across all devices using the same Google account
-
-* Fixed modal window auto-submit issue:
-  - Added checks for `window.useRecognitionModal` flag before calling `autoSubmitAfterVoiceInput`
-  - Modified `speech.js`, `utils.js`, and `input-handler.js` to prevent auto-submission when using the modal window
-  - This prevents the "送信しました" (sent) message from appearing inappropriately when using the modal dialog
-
-* Enhanced theme functionality:
-  - Added theme toggle button to the UI with SVG icon
-  - Positioned theme toggle button above modal toggle button for better UX
-  - Modified `loadSettings` to apply theme immediately when settings are loaded
-  - Ensured theme settings are properly synchronized across devices
-  - Added theme toggle button to processing state management
-
-* Fixed Enter key handling:
-  - Updated `enhanceInputElementHandlers` function to properly add event listeners
-  - Added proper checks to prevent auto-submission in modal windows
-  - Improved event listener management to prevent duplicate handlers
+Global variables directly exposed on the `window` object are minimized. State management for the content script is primarily handled by the `src/modules/state.js` module, providing a centralized way to access and modify state like `isListening`, `appendMode`, `currentInputElement`, etc. Modules typically import the state module or listen for state change events via the event bus (`src/modules/event-bus.js`) rather than relying on global variables. Background script state (if any) is managed within `background.js`.
