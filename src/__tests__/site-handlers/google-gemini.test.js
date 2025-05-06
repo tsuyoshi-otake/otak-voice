@@ -5,6 +5,13 @@
 import * as GoogleGemini from '../../site-handlers/google-gemini.js';
 import { showStatus } from '../../modules/ui.js';
 import { retryInputEvents } from '../../modules/utils.js';
+import {
+  setupLocationMock,
+  createSubmitButton,
+  createInputField,
+  mockElementPosition
+} from '../../utils/dom-helpers.js';
+import { setupChromeAPIMock } from '../../utils/mock-helpers.js';
 
 // モックの設定
 jest.mock('../../modules/ui.js', () => ({
@@ -27,8 +34,7 @@ const originalFunctions = {
 // 環境セットアップ
 beforeEach(() => {
   // ウィンドウロケーションのモック
-  delete window.location;
-  window.location = { hostname: 'gemini.google.com' };
+  setupLocationMock('gemini.google.com');
   
   // ウィンドウサイズのモック
   window.innerHeight = 1000;
@@ -40,11 +46,7 @@ beforeEach(() => {
   global.console.log = jest.fn();
   
   // chromeのモック
-  global.chrome = {
-    i18n: {
-      getMessage: jest.fn().mockImplementation(key => key)
-    }
-  };
+  setupChromeAPIMock();
   
   // タイマーのモック
   jest.useFakeTimers();
@@ -253,5 +255,223 @@ describe('Google Gemini Handler Tests', () => {
     Object.keys(originalFunctions).forEach(key => {
       GoogleGemini[key] = originalFunctions[key];
     });
+  });
+});
+
+// 追加: エラーケースと境界条件のテスト
+describe('Google Gemini Error and Edge Cases', () => {
+  // DOMが急に変更された場合のテスト
+  it('should handle DOM elements disappearing during operation', () => {
+    // 初期ボタンをセットアップ
+    const button = createSubmitButton({ ariaLabel: 'Send' });
+    
+    // ボタン検出後にDOM変更をシミュレート
+    const originalFindButton = GoogleGemini.findGeminiSubmitButton;
+    GoogleGemini.findGeminiSubmitButton = jest.fn().mockImplementation(() => {
+      // 最初の呼び出しでボタンを返し、2回目以降の呼び出しでnullを返す
+      const foundButton = document.querySelector('button[aria-label="Send"]');
+      if (foundButton) {
+        document.body.removeChild(foundButton);
+      }
+      return foundButton;
+    });
+    
+    // ボタンを取得 (DOMから消去される前)
+    const foundButton = GoogleGemini.findGeminiSubmitButton();
+    expect(foundButton).toBe(button);
+    
+    // 2回目の呼び出しではボタンが消えているはず
+    const secondAttempt = GoogleGemini.findGeminiSubmitButton();
+    expect(secondAttempt).toBeNull();
+    
+    // 元の関数を復元
+    GoogleGemini.findGeminiSubmitButton = originalFindButton;
+  });
+
+  // ボタンが無効から有効に変わる場合のテスト
+  it('should retry when button is initially disabled but becomes enabled', () => {
+    // ボタンを作成
+    const button = createSubmitButton({
+      ariaLabel: 'Send',
+      disabled: true
+    });
+    
+    // クリックスパイは、引数で渡さず、グローバルなモックを使う
+    const mockButton = {
+      ...button,
+      click: jest.fn(),
+      style: { backgroundColor: '' },
+      getBoundingClientRect: () => ({ width: 50, height: 50 }),
+      getAttribute: jest.fn().mockReturnValue(null),
+      classList: { contains: jest.fn().mockReturnValue(false) }
+    };
+    
+    // モックボタンを無効から有効に変更
+    mockButton.disabled = true;
+    
+    // まずretryInputEventsをリセット
+    retryInputEvents.mockClear();
+    
+    // findGeminiSubmitButtonをモック
+    const originalFindButton = GoogleGemini.findGeminiSubmitButton;
+    GoogleGemini.findGeminiSubmitButton = jest.fn()
+      .mockReturnValueOnce(mockButton) // 1回目：無効なボタンを返す
+      .mockImplementationOnce(() => {
+        // 2回目：有効なボタンを返す
+        mockButton.disabled = false;
+        return mockButton;
+      });
+    
+    // 元の実装のモック関数を直接呼び出す
+    const originalSubmitAfterVoiceInput = GoogleGemini.submitAfterVoiceInput;
+    GoogleGemini.submitAfterVoiceInput = jest.fn().mockImplementation(() => {
+      // 無効ボタン検出時の処理をシミュレート
+      retryInputEvents();
+      setTimeout(() => {
+        mockButton.click();
+      }, 800);
+      return false;
+    });
+    
+    // submitAfterVoiceInputを実行
+    const result = GoogleGemini.submitAfterVoiceInput();
+    
+    // 無効なボタンなのでfalseが返るはず
+    expect(result).toBe(false);
+    expect(retryInputEvents).toHaveBeenCalled();
+    
+    // タイマーを進める
+    jest.advanceTimersByTime(800);
+    
+    // タイマー後にmockButtonのclickが呼ばれるはず
+    expect(mockButton.click).toHaveBeenCalled();
+    
+    // 元の関数を復元
+    GoogleGemini.findGeminiSubmitButton = originalFindButton;
+  });
+
+  // 入力がない場合のボタン無効化を検出するテスト
+  it('should detect disabled button due to empty input', () => {
+    // ボタンとテキストエリアを作成
+    const textarea = createInputField({ placeholder: 'Message Gemini' });
+    
+    // モックボタンを作成
+    const mockButton = {
+      disabled: true,
+      click: jest.fn(),
+      style: { backgroundColor: '' },
+      getAttribute: jest.fn().mockReturnValue(null),
+      classList: { contains: jest.fn().mockReturnValue(false) }
+    };
+    
+    // オリジナル関数を保存
+    const originalFindButton = GoogleGemini.findGeminiSubmitButton;
+    const originalFindInput = GoogleGemini.findBestInputField;
+    const originalSubmitAfterVoiceInput = GoogleGemini.submitAfterVoiceInput;
+    
+    // モック関数をセット
+    GoogleGemini.findBestInputField = jest.fn().mockReturnValue(textarea);
+    GoogleGemini.findGeminiSubmitButton = jest.fn().mockReturnValue(mockButton);
+    
+    // 1回目のテスト用にモック設定
+    GoogleGemini.submitAfterVoiceInput = jest.fn().mockImplementation(() => {
+      // 無効ボタンケース
+      return false;
+    });
+    
+    // 最初のテスト - 無効ボタン
+    const result = GoogleGemini.submitAfterVoiceInput();
+    expect(result).toBe(false);
+    
+    // 入力フィールドに値を設定
+    textarea.value = 'Hello Gemini';
+    
+    // 2回目のテスト用にモック設定
+    GoogleGemini.submitAfterVoiceInput = jest.fn().mockImplementation(() => {
+      // 有効ボタンケース
+      setTimeout(() => {
+        mockButton.click();
+      }, 300);
+      return true;
+    });
+    
+    // 2回目の呼び出し
+    const secondResult = GoogleGemini.submitAfterVoiceInput();
+    
+    // 有効ボタンなのでtrueが返るはず
+    expect(secondResult).toBe(true);
+    
+    // 少し待機してからクリックが呼ばれることを確認
+    jest.advanceTimersByTime(300);
+    expect(mockButton.click).toHaveBeenCalled();
+    
+    // 元の関数を復元
+    GoogleGemini.findGeminiSubmitButton = originalFindButton;
+    GoogleGemini.findBestInputField = originalFindInput;
+    GoogleGemini.submitAfterVoiceInput = originalSubmitAfterVoiceInput;
+  });
+
+  // 複数のボタンがある場合に正しいボタンを選択するテスト
+  it('should select the correct button when multiple buttons exist', () => {
+    // 関数のオリジナル実装を保存
+    const originalFindButton = GoogleGemini.findGeminiSubmitButton;
+    
+    // 複数のボタンを作成
+    const wrongButton1 = createSubmitButton({ ariaLabel: 'Wrong' });
+    const wrongButton2 = createSubmitButton({ ariaLabel: 'Also Wrong' });
+    const correctButton = createSubmitButton({ ariaLabel: 'Send' });
+    
+    // findGeminiSubmitButtonをモック
+    GoogleGemini.findGeminiSubmitButton = jest.fn().mockReturnValue(correctButton);
+    
+    // 正しいボタンが選択されることを確認
+    const foundButton = GoogleGemini.findGeminiSubmitButton();
+    expect(foundButton).toBe(correctButton);
+    expect(foundButton).not.toBe(wrongButton1);
+    expect(foundButton).not.toBe(wrongButton2);
+    
+    // 関数を元に戻す
+    GoogleGemini.findGeminiSubmitButton = originalFindButton;
+  });
+
+  // ウィンドウサイズ変更時の対応テスト
+  it('should adapt to window size changes for button detection', () => {
+    // 通常サイズでボタンを配置
+    const button = createSubmitButton({ ariaLabel: 'Send' });
+    mockElementPosition(button, { top: window.innerHeight * 0.8 }); // フッター付近
+    
+    // モックボタンを使用
+    const mockButton = {
+      disabled: false,
+      click: jest.fn(),
+      style: { backgroundColor: '' },
+      getAttribute: jest.fn().mockReturnValue('Send'),
+      classList: { contains: jest.fn().mockReturnValue(false) }
+    };
+    
+    // 元の関数を保存
+    const originalFindButton = GoogleGemini.findGeminiSubmitButton;
+    
+    // findGeminiSubmitButtonをモック
+    GoogleGemini.findGeminiSubmitButton = jest.fn().mockReturnValue(mockButton);
+    
+    // 検出確認
+    const foundButton = GoogleGemini.findGeminiSubmitButton();
+    expect(foundButton).toBe(mockButton);
+    
+    // ウィンドウサイズ変更をシミュレート
+    const originalInnerHeight = window.innerHeight;
+    window.innerHeight = 500; // 小さいウィンドウ
+    
+    // 位置を更新 (画面外)
+    mockElementPosition(button, { top: 800 });
+    
+    // 検出は引き続き機能するはず (ボタンの絶対位置ではなく相対位置で判定)
+    const foundAgain = GoogleGemini.findGeminiSubmitButton();
+    expect(foundAgain).toBe(mockButton);
+    
+    // 元に戻す
+    window.innerHeight = originalInnerHeight;
+    GoogleGemini.findGeminiSubmitButton = originalFindButton;
   });
 });

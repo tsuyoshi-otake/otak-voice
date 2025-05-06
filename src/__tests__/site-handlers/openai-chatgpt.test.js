@@ -1,12 +1,8 @@
 /**
- * openai-chatgpt.js (OpenAI ChatGPTハンドラー) のテスト
+ * OpenAI ChatGPT Site Handler Tests
  */
 
-import * as OpenAIChatGPT from '../../site-handlers/openai-chatgpt.js';
-import { showStatus } from '../../modules/ui.js';
-import { retryInputEvents } from '../../modules/utils.js';
-
-// モックの設定
+// モジュールのモック
 jest.mock('../../modules/ui.js', () => ({
   showStatus: jest.fn()
 }));
@@ -15,176 +11,225 @@ jest.mock('../../modules/utils.js', () => ({
   retryInputEvents: jest.fn()
 }));
 
-// テスト用の簡易モジュールモック
-const originalFunctions = {
-  findChatGPTSubmitButton: OpenAIChatGPT.findChatGPTSubmitButton,
-  submitAfterVoiceInput: OpenAIChatGPT.submitAfterVoiceInput,
-  findSubmitButtonForInput: OpenAIChatGPT.findSubmitButtonForInput
-};
+// インポート
+import { 
+  findChatGPTSubmitButton,
+  submitAfterVoiceInput,
+  findSubmitButtonForInput,
+  isChatGPTSite
+} from '../../site-handlers/openai-chatgpt';
+import { showStatus } from '../../modules/ui.js';
+import { retryInputEvents } from '../../modules/utils.js';
 
-// 環境セットアップ
-beforeEach(() => {
-  // ウィンドウロケーションのモック
-  delete window.location;
-  window.location = { hostname: 'chat.openai.com' };
-  
-  // ドキュメントボディのリセット
-  document.body.innerHTML = '';
-  
-  // コンソールログのモック
-  global.console.log = jest.fn();
-  
-  // chromeのモック
-  global.chrome = {
-    i18n: {
-      getMessage: jest.fn().mockImplementation(key => key)
-    }
-  };
-  
-  // タイマーのモック
-  jest.useFakeTimers();
-});
-
-// テスト後のクリーンアップ
-afterEach(() => {
-  // すべてのモックをリセット
-  jest.clearAllMocks();
-  document.body.innerHTML = '';
-  jest.useRealTimers();
-  
-  // オリジナル関数を復元
-  jest.restoreAllMocks();
-});
-
-describe('OpenAI ChatGPT Handler Tests', () => {
-  // サイト検出のテスト
-  it('should correctly detect ChatGPT site', () => {
-    // チェック
-    expect(OpenAIChatGPT.isChatGPTSite()).toBe(true);
+describe('OpenAI ChatGPT Site Handler', () => {
+  // テスト前の準備
+  beforeEach(() => {
+    // モックをリセット
+    jest.clearAllMocks();
+    jest.useFakeTimers();
     
-    // 別のドメインの場合
-    window.location.hostname = 'claude.ai';
-    expect(OpenAIChatGPT.isChatGPTSite()).toBe(false);
+    // chrome API のモック
+    global.chrome = {
+      i18n: {
+        getMessage: jest.fn(key => key)
+      }
+    };
     
-    window.location.hostname = 'chat.openai.com';
+    // consoleのモック
+    console.log = jest.fn();
+    
+    // locationのモック
+    delete window.location;
+    window.location = {
+      hostname: '',
+      includes: jest.fn(str => window.location.hostname.includes(str))
+    };
+    
+    // documentのquerySelectorAllのモック
+    document.querySelectorAll = jest.fn(() => []);
+    
+    // windowのgetComputedStyleのモック
+    window.getComputedStyle = jest.fn(() => ({
+      display: 'block',
+      visibility: 'visible',
+      opacity: '1'
+    }));
   });
   
-  // 送信ボタン検出のモックテスト
-  it('should mock ChatGPT submit button detection', () => {
-    // ボタンを作成
-    const button = document.createElement('button');
-    button.setAttribute('data-testid', 'send-button');
-    document.body.appendChild(button);
-    
-    // オリジナル関数をモック
-    const mockFindButton = jest.fn().mockReturnValue(button);
-    OpenAIChatGPT.findChatGPTSubmitButton = mockFindButton;
-    
-    // 関数を呼び出し
-    const result = OpenAIChatGPT.findChatGPTSubmitButton();
-    
-    // 検証
-    expect(mockFindButton).toHaveBeenCalled();
-    expect(result).toBe(button);
+  afterEach(() => {
+    jest.useRealTimers();
   });
   
-  // ボタン無効状態検出のテスト
-  it('should detect disabled button state', () => {
-    // 無効なボタンを作成
-    const disabledButton = document.createElement('button');
-    disabledButton.disabled = true;
-    
-    // submitAfterVoiceInputの動作をモック
-    const mockSubmit = jest.fn().mockImplementation(() => {
-      // 無効ボタン検出時の処理をシミュレート
-      retryInputEvents();
-      return false;
+  describe('findChatGPTSubmitButton', () => {
+    it('should return null when no buttons are found', () => {
+      // querySelectorAllは空配列を返す
+      document.querySelectorAll.mockReturnValue([]);
+      
+      // 関数呼び出し
+      const result = findChatGPTSubmitButton();
+      
+      // 検証
+      expect(result).toBeNull();
+      // 少なくとも一つのセレクタで検索が行われた
+      expect(document.querySelectorAll).toHaveBeenCalled();
     });
-    OpenAIChatGPT.submitAfterVoiceInput = mockSubmit;
     
-    // テスト実行
-    const result = OpenAIChatGPT.submitAfterVoiceInput();
-    
-    // 検証
-    expect(result).toBe(false);
-    expect(retryInputEvents).toHaveBeenCalled();
-  });
-  
-  // 送信処理のテスト
-  it('should handle successful submission', () => {
-    // 有効なボタンを作成
-    const button = document.createElement('button');
-    button.setAttribute('data-testid', 'send-button');
-    const clickSpy = jest.spyOn(button, 'click');
-    
-    // submitAfterVoiceInputの動作をモック
-    const mockSubmit = jest.fn().mockImplementation(() => {
-      // 成功時の処理をシミュレート
-      setTimeout(() => {
-        button.click();
-        showStatus('statusSubmitClicked');
-      }, 300);
-      return true;
+    it('should find the first visible button matching selectors', () => {
+      // モックのボタン要素を作成
+      const mockButton1 = document.createElement('button');
+      const mockButton2 = document.createElement('button');
+      
+      // ボタンのスタイルをモック
+      window.getComputedStyle.mockImplementation((element) => {
+        if (element === mockButton1) {
+          return {
+            display: 'block',
+            visibility: 'visible',
+            opacity: '1'
+          };
+        }
+        return {
+          display: 'block',
+          visibility: 'visible', 
+          opacity: '1'
+        };
+      });
+      
+      // ボタンのBoundingClientRectをモック
+      mockButton1.getBoundingClientRect = jest.fn(() => ({
+        width: 100,
+        height: 40
+      }));
+      
+      mockButton2.getBoundingClientRect = jest.fn(() => ({
+        width: 100,
+        height: 40
+      }));
+      
+      // querySelectorAllの返り値をモック
+      document.querySelectorAll.mockReturnValueOnce([mockButton1, mockButton2]);
+      
+      // 関数呼び出し
+      const result = findChatGPTSubmitButton();
+      
+      // 検証
+      expect(result).toBe(mockButton1);
     });
-    OpenAIChatGPT.submitAfterVoiceInput = mockSubmit;
     
-    // テスト実行
-    const result = OpenAIChatGPT.submitAfterVoiceInput();
-    
-    // タイマーを進める
-    jest.runAllTimers();
-    
-    // 検証
-    expect(result).toBe(true);
-    expect(mockSubmit).toHaveBeenCalled();
-    expect(clickSpy).toHaveBeenCalled();
-    expect(showStatus).toHaveBeenCalledWith('statusSubmitClicked');
-  });
-  
-  // 入力フィールドに関連するボタン検出のテスト
-  it('should find submit button for input field using mock', () => {
-    // ボタン要素
-    const button = document.createElement('button');
-    
-    // findSubmitButtonForInputの動作をモック
-    const mockFindSubmitButton = jest.fn().mockReturnValue(button);
-    OpenAIChatGPT.findSubmitButtonForInput = mockFindSubmitButton;
-    
-    // 入力フィールド要素
-    const inputElement = document.createElement('textarea');
-    
-    // テスト実行
-    const result = OpenAIChatGPT.findSubmitButtonForInput(inputElement);
-    
-    // 検証
-    expect(mockFindSubmitButton).toHaveBeenCalledWith(inputElement);
-    expect(result).toBe(button);
-  });
-  
-  // ボタンが見つからない場合のテスト
-  it('should return false when no button found', () => {
-    // オリジナル関数をモック - ボタンが見つからないケース
-    OpenAIChatGPT.findChatGPTSubmitButton = jest.fn().mockReturnValue(null);
-    
-    // submitAfterVoiceInputの動作をモック
-    const mockSubmit = jest.fn().mockImplementation(() => {
-      // ボタンが見つからない場合は直接false
-      const button = OpenAIChatGPT.findChatGPTSubmitButton();
-      return button !== null;
+    it('should filter out invisible buttons', () => {
+      // モックのボタン要素を作成
+      const mockInvisibleButton = document.createElement('button');
+      const mockVisibleButton = document.createElement('button');
+      
+      // ボタンのスタイルをモック
+      window.getComputedStyle.mockImplementation((element) => {
+        if (element === mockInvisibleButton) {
+          return {
+            display: 'none',  // 非表示
+            visibility: 'visible',
+            opacity: '1'
+          };
+        }
+        return {
+          display: 'block',
+          visibility: 'visible',
+          opacity: '1'
+        };
+      });
+      
+      // ボタンのBoundingClientRectをモック
+      mockInvisibleButton.getBoundingClientRect = jest.fn(() => ({
+        width: 100,
+        height: 40
+      }));
+      
+      mockVisibleButton.getBoundingClientRect = jest.fn(() => ({
+        width: 100,
+        height: 40
+      }));
+      
+      // querySelectorAllの返り値をモック
+      document.querySelectorAll.mockReturnValueOnce([mockInvisibleButton, mockVisibleButton]);
+      
+      // 関数呼び出し
+      const result = findChatGPTSubmitButton();
+      
+      // 検証
+      expect(result).toBe(mockVisibleButton);
     });
-    OpenAIChatGPT.submitAfterVoiceInput = mockSubmit;
     
-    // テスト実行
-    const result = OpenAIChatGPT.submitAfterVoiceInput();
-    
-    // 検証
-    expect(result).toBe(false);
+    it('should try multiple selectors until a match is found', () => {
+      // 最初のセレクタは要素が見つからない
+      document.querySelectorAll.mockReturnValueOnce([]);
+      
+      // 2番目のセレクタで要素が見つかる
+      const mockButton = document.createElement('button');
+      mockButton.getBoundingClientRect = jest.fn(() => ({
+        width: 100,
+        height: 40
+      }));
+      document.querySelectorAll.mockReturnValueOnce([mockButton]);
+      
+      // 関数呼び出し
+      const result = findChatGPTSubmitButton();
+      
+      // 検証
+      expect(result).toBe(mockButton);
+      expect(document.querySelectorAll).toHaveBeenCalledTimes(2);
+    });
   });
   
-  // オリジナル関数を復元
-  afterAll(() => {
-    OpenAIChatGPT.findChatGPTSubmitButton = originalFunctions.findChatGPTSubmitButton;
-    OpenAIChatGPT.submitAfterVoiceInput = originalFunctions.submitAfterVoiceInput;
-    OpenAIChatGPT.findSubmitButtonForInput = originalFunctions.findSubmitButtonForInput;
+  // この関数は実装がシンプルなのでシンプルなテストにします
+  describe('findSubmitButtonForInput', () => {
+    it('should exist and be a function', () => {
+      expect(typeof findSubmitButtonForInput).toBe('function');
+    });
+    
+    // 関数の仕様を確認するだけのシンプルなテスト
+    it('should forward the result from findChatGPTSubmitButton', () => {
+      // 関数の中身を確認
+      const functionString = findSubmitButtonForInput.toString();
+      // 関数内で`findChatGPTSubmitButton`を呼び出していることを確認
+      expect(functionString).toContain('findChatGPTSubmitButton');
+      expect(functionString).toContain('return findChatGPTSubmitButton');
+    });
+  });
+  
+  describe('isChatGPTSite', () => {
+    it('should return true for chat.openai.com domain', () => {
+      // OpenAIドメインをシミュレート
+      window.location.hostname = 'chat.openai.com';
+      
+      // 関数呼び出し
+      const result = isChatGPTSite();
+      
+      // 検証
+      expect(result).toBe(true);
+    });
+    
+    it('should return false for other domains', () => {
+      // 他のドメインをシミュレート
+      window.location.hostname = 'example.com';
+      
+      // 関数呼び出し
+      const result = isChatGPTSite();
+      
+      // 検証
+      expect(result).toBe(false);
+    });
+  });
+  
+  describe('submitAfterVoiceInput', () => {
+    it('should return false when no submit button is found', () => {
+      // findChatGPTSubmitButtonの結果をモック
+      jest.spyOn(require('../../site-handlers/openai-chatgpt'), 'findChatGPTSubmitButton')
+        .mockImplementation(() => null);
+      
+      // 関数呼び出し
+      const result = submitAfterVoiceInput();
+      
+      // 検証
+      expect(result).toBe(false);
+    });
   });
 });

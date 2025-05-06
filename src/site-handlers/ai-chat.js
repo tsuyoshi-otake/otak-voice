@@ -91,16 +91,22 @@ function findGenericPaperPlaneButton() {
  * @returns {boolean} 送信処理が開始された場合はtrue
  */
 export function submitAfterVoiceInput() {
-    // 適切なドメインハンドラーを取得
-    const handler = detectAIChatPlatform();
-    
-    // そのハンドラーの送信メソッドを呼び出し
-    if (handler && typeof handler.submitAfterVoiceInput === 'function') {
-        return handler.submitAfterVoiceInput();
+    try {
+        // 適切なドメインハンドラーを取得
+        const handler = detectAIChatPlatform();
+        
+        // そのハンドラーの送信メソッドを呼び出し
+        if (handler && typeof handler.submitAfterVoiceInput === 'function') {
+            return handler.submitAfterVoiceInput();
+        }
+        
+        // フォールバック: OpenAIハンドラー
+        return OpenAIChatGPT.submitAfterVoiceInput();
+    } catch (error) {
+        // エラーをログに記録して、処理を継続
+        console.error('Error in submitAfterVoiceInput:', error);
+        return false;
     }
-    
-    // フォールバック: OpenAIハンドラー
-    return OpenAIChatGPT.submitAfterVoiceInput();
 }
 
 /**
@@ -109,16 +115,21 @@ export function submitAfterVoiceInput() {
  * @returns {Element|null} 送信ボタン要素またはnull
  */
 export function findSubmitButtonForInput(inputElement) {
-    // 適切なドメインハンドラーを取得
-    const handler = detectAIChatPlatform();
-    
-    // そのハンドラーの送信ボタン検出メソッドを呼び出し
-    if (handler && typeof handler.findSubmitButtonForInput === 'function') {
-        return handler.findSubmitButtonForInput(inputElement);
+    try {
+        // 適切なドメインハンドラーを取得
+        const handler = detectAIChatPlatform();
+        
+        // そのハンドラーの送信ボタン検出メソッドを呼び出し
+        if (handler && typeof handler.findSubmitButtonForInput === 'function') {
+            return handler.findSubmitButtonForInput(inputElement);
+        }
+        
+        // フォールバック: OpenAIハンドラー
+        return OpenAIChatGPT.findSubmitButtonForInput(inputElement);
+    } catch (error) {
+        console.error('Error in findSubmitButtonForInput:', error);
+        return null;
     }
-    
-    // フォールバック: OpenAIハンドラー
-    return OpenAIChatGPT.findSubmitButtonForInput(inputElement);
 }
 
 /**
@@ -126,19 +137,24 @@ export function findSubmitButtonForInput(inputElement) {
  * @returns {Element|null} 入力要素またはnull
  */
 export function findBestInputField() {
-    // 適切なドメインハンドラーを取得
-    const handler = detectAIChatPlatform();
-    
-    // そのハンドラーの入力フィールド検出メソッドを呼び出し
-    if (handler && typeof handler.findBestInputField === 'function') {
-        return handler.findBestInputField();
+    try {
+        // 適切なドメインハンドラーを取得
+        const handler = detectAIChatPlatform();
+        
+        // そのハンドラーの入力フィールド検出メソッドを呼び出し
+        if (handler && typeof handler.findBestInputField === 'function') {
+            return handler.findBestInputField();
+        }
+        
+        // 一般的なAIチャット入力フィールド検出
+        const chatTextareas = document.querySelectorAll('textarea[placeholder*="message"], textarea[placeholder*="メッセージ"]');
+        if (chatTextareas.length > 0) {
+            return chatTextareas[0];
+        }
+        
+        return null;
+    } catch (error) {
+        console.error('Error in findBestInputField:', error);
+        return null;
     }
-    
-    // 一般的なAIチャット入力フィールド検出
-    const chatTextareas = document.querySelectorAll('textarea[placeholder*="message"], textarea[placeholder*="メッセージ"]');
-    if (chatTextareas.length > 0) {
-        return chatTextareas[0];
-    }
-    
-    return null;
 }

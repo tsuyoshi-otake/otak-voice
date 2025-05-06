@@ -4,10 +4,18 @@ module.exports = {
   testEnvironment: 'jsdom',
   
   // Specify file extensions to be treated as test files
-  testMatch: ['**/__tests__/**/*.js', '**/?(*.)+(spec|test).js'],
+  testMatch: [
+    '**/__tests__/**/*.test.js',
+    '**/__tests__/**/*.spec.js'
+  ],
+  testRegex: null,
   
   // Specify directories to ignore
-  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/dist/',
+    '/__tests__/setup.js'
+  ],
   
   // Transform files with babel-jest
   transform: {
@@ -20,10 +28,28 @@ module.exports = {
   // Mock file extensions
   moduleFileExtensions: ['js', 'json'],
   
+  // カバレッジ測定を有効化
+  collectCoverage: true,
+  
+  // カバレッジレポート形式
+  coverageReporters: ['text', 'lcov', 'html'],
+  
+  // 最低カバレッジ基準（段階的に引き上げる）
+  coverageThreshold: {
+    global: {
+      branches: 5,
+      functions: 10,
+      lines: 5,
+      statements: 5
+    }
+  },
+  
   // Configure coverage collection
   collectCoverageFrom: [
     'src/**/*.js',
     '!src/**/*.test.js',
+    '!src/__tests__/helpers/**',
+    '!src/__tests__/setup.js',
     '!**/node_modules/**',
     '!**/dist/**'
   ],

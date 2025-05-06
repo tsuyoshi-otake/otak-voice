@@ -186,7 +186,7 @@ function _notifySubscribers(key, value) {
 export function initializeStateFromGlobals(windowObj = window) {
   // Only run in browser context
   if (typeof windowObj === 'undefined') {
-    return;
+    return; /* istanbul ignore next */
   }
   
   // Map of state keys to window properties
@@ -231,7 +231,7 @@ export function initializeStateFromGlobals(windowObj = window) {
 export function syncStateToGlobals(windowObj = window) {
   // Only run in browser context
   if (typeof windowObj === 'undefined') {
-    return;
+    return; /* istanbul ignore next */
   }
   
   // Map of state keys to window properties

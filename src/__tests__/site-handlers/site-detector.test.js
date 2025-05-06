@@ -1,158 +1,187 @@
 /**
- * site-detector.js (サイト検出エンジン) のテスト
+ * Site Detector Module Tests
  */
 
-import { detectSiteType, getSiteHandler } from '../../site-handlers/site-detector.js';
-import { SITE_TYPES } from '../../constants.js';
+// モジュールのモック
+jest.mock('../../site-handlers/systemexe.js');
+jest.mock('../../site-handlers/ai-chat.js');
+jest.mock('../../site-handlers/twitter.js');
+jest.mock('../../site-handlers/default.js');
+
+// インポート
+import { detectSiteType, getSiteHandler } from '../../site-handlers/site-detector';
+import { SITE_TYPES } from '../../constants';
 import * as SystemExeHandler from '../../site-handlers/systemexe.js';
 import * as AIChatHandler from '../../site-handlers/ai-chat.js';
 import * as TwitterHandler from '../../site-handlers/twitter.js';
 import * as DefaultHandler from '../../site-handlers/default.js';
 
-// 環境セットアップ
-beforeEach(() => {
-  // ウィンドウロケーションのモック
-  delete window.location;
-  window.location = { hostname: '' };
-  
-  // ドキュメントボディのリセット
-  document.body.innerHTML = '';
-  
-  // コンソールログのモック
-  global.console.log = jest.fn();
-});
-
-// テスト後のクリーンアップ
-afterEach(() => {
-  jest.clearAllMocks();
-  document.body.innerHTML = '';
-});
-
-describe('Site Detector Tests', () => {
-  // System.exeサイト検出テスト
-  it('should detect System.exe site by hostname', () => {
-    // System.exeドメインを設定
-    window.location.hostname = 'systemexe-research-and-development.com';
+describe('Site Detector', () => {
+  // テスト前の準備
+  beforeEach(() => {
+    // モックをリセット
+    jest.clearAllMocks();
     
-    // 検出テスト
-    const siteType = detectSiteType();
+    // consoleのモック
+    console.log = jest.fn();
     
-    // 検証
-    expect(siteType).toBe(SITE_TYPES.SYSTEMEXE);
+    // locationのモック
+    delete window.location;
+    window.location = {
+      hostname: '',
+      includes: jest.fn(str => window.location.hostname.includes(str))
+    };
+    
+    // documentのquerySelectorのモック
+    document.querySelector = jest.fn(() => null);
+    
+    // documentのquerySelectorAllのモック
+    document.querySelectorAll = jest.fn(() => []);
   });
   
-  // Twitterサイト検出テスト
-  it('should detect Twitter site by hostname', () => {
-    // Twitterドメインを設定
-    window.location.hostname = 'twitter.com';
+  describe('detectSiteType', () => {
+    it('should detect SystemExe site', () => {
+      // SystemExeドメインをシミュレート
+      window.location.hostname = 'systemexe-research-and-development.com';
+      
+      // 関数呼び出し
+      const result = detectSiteType();
+      
+      // 検証
+      expect(result).toBe(SITE_TYPES.SYSTEMEXE);
+    });
     
-    // 検出テスト
-    const siteType = detectSiteType();
+    it('should detect Twitter site', () => {
+      // Twitterドメインをシミュレート
+      window.location.hostname = 'twitter.com';
+      
+      // 関数呼び出し
+      const result = detectSiteType();
+      
+      // 検証
+      expect(result).toBe(SITE_TYPES.TWITTER);
+    });
     
-    // 検証
-    expect(siteType).toBe(SITE_TYPES.TWITTER);
+    it('should detect x.com site', () => {
+      // x.comドメインをシミュレート
+      window.location.hostname = 'x.com';
+      
+      // 関数呼び出し
+      const result = detectSiteType();
+      
+      // 検証
+      expect(result).toBe(SITE_TYPES.TWITTER);
+    });
     
-    // X.comドメインでも同様
-    window.location.hostname = 'x.com';
-    expect(detectSiteType()).toBe(SITE_TYPES.TWITTER);
+    it('should detect AI chat site by selectors', () => {
+      // AIチャットセレクタによる検出をシミュレート
+      document.querySelector.mockImplementation((selector) => {
+        if (selector === 'button[aria-label="Send message"]') {
+          return document.createElement('button');
+        }
+        return null;
+      });
+      
+      // 関数呼び出し
+      const result = detectSiteType();
+      
+      // 検証
+      expect(result).toBe(SITE_TYPES.AI_CHAT);
+      expect(document.querySelector).toHaveBeenCalledWith('button[aria-label="Send message"]');
+    });
+    
+    it('should detect AI chat site by SVG pattern', () => {
+      // SVGパターン検出をシミュレート
+      const mockButton = {
+        querySelector: jest.fn().mockReturnValue({
+          // SVGのモック
+          querySelector: jest.fn().mockImplementation((selector) => {
+            if (selector === 'line[x1="22"][y1="2"][x2="11"][y2="13"]') {
+              return { /* line element */ };
+            } else if (selector === 'polygon[points="22 2 15 22 11 13 2 9 22 2"]') {
+              return { /* polygon element */ };
+            }
+            return null;
+          })
+        })
+      };
+      
+      // ボタンのリストをシミュレート
+      document.querySelectorAll.mockReturnValue([mockButton]);
+      
+      // 関数呼び出し
+      const result = detectSiteType();
+      
+      // 検証
+      expect(result).toBe(SITE_TYPES.AI_CHAT);
+      expect(document.querySelectorAll).toHaveBeenCalledWith('button');
+    });
+    
+    it('should return DEFAULT when no specific site is detected', () => {
+      // 特定のサイトパターンが検出されない状態
+      window.location.hostname = 'example.com';
+      
+      // 関数呼び出し
+      const result = detectSiteType();
+      
+      // 検証
+      expect(result).toBe(SITE_TYPES.DEFAULT);
+    });
   });
   
-  // AIチャットサイト検出テスト（DOMベース）
-  it('should detect AI chat site by DOM elements', () => {
-    // AIチャットサイト特有の要素を作成
-    const submitButton = document.createElement('button');
-    submitButton.setAttribute('data-testid', 'send-button');
-    document.body.appendChild(submitButton);
+  describe('getSiteHandler', () => {
+    it('should return SystemExe handler for SystemExe site', () => {
+      // SystemExeサイト検出をシミュレート
+      jest.spyOn(window.location, 'includes').mockReturnValue(true);
+      window.location.hostname = 'systemexe-research-and-development.com';
+      
+      // 関数呼び出し
+      const handler = getSiteHandler();
+      
+      // 検証
+      expect(handler).toBe(SystemExeHandler);
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('SystemExe'));
+    });
     
-    // 検出テスト
-    const siteType = detectSiteType();
+    it('should return Twitter handler for Twitter site', () => {
+      // Twitterサイト検出をシミュレート
+      window.location.hostname = 'twitter.com';
+      
+      // 関数呼び出し
+      const handler = getSiteHandler();
+      
+      // 検証
+      expect(handler).toBe(TwitterHandler);
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Twitter'));
+    });
     
-    // 検証
-    expect(siteType).toBe(SITE_TYPES.AI_CHAT);
-  });
-  
-  // AIチャットサイト検出テスト（SVGパターンベース）
-  it('should detect AI chat site by SVG pattern', () => {
-    // ペーパープレーンSVGパターンを持つボタンを作成
-    const button = document.createElement('button');
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', '22');
-    line.setAttribute('y1', '2');
-    line.setAttribute('x2', '11');
-    line.setAttribute('y2', '13');
+    it('should return AI Chat handler for AI chat site', () => {
+      // AIチャットサイト検出をシミュレート
+      document.querySelector.mockImplementation((selector) => {
+        if (selector === 'button[aria-label="Send"]') {
+          return document.createElement('button');
+        }
+        return null;
+      });
+      
+      // 関数呼び出し
+      const handler = getSiteHandler();
+      
+      // 検証
+      expect(handler).toBe(AIChatHandler);
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('AI Chat'));
+    });
     
-    const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-    polygon.setAttribute('points', '22 2 15 22 11 13 2 9 22 2');
-    
-    svg.appendChild(line);
-    svg.appendChild(polygon);
-    button.appendChild(svg);
-    document.body.appendChild(button);
-    
-    // 検出テスト
-    const siteType = detectSiteType();
-    
-    // 検証
-    expect(siteType).toBe(SITE_TYPES.AI_CHAT);
-  });
-  
-  // デフォルトサイト検出テスト
-  it('should return DEFAULT for unknown sites', () => {
-    // 未知のドメインを設定
-    window.location.hostname = 'unknown-site.com';
-    
-    // 検証
-    expect(detectSiteType()).toBe(SITE_TYPES.DEFAULT);
-  });
-  
-  // ハンドラー取得テスト（System.exe）
-  it('should get SystemExe handler for System.exe sites', () => {
-    // System.exeドメインを設定
-    window.location.hostname = 'systemexe-research-and-development.com';
-    
-    // ハンドラー取得
-    const handler = getSiteHandler();
-    
-    // 検証
-    expect(handler).toBe(SystemExeHandler);
-  });
-  
-  // ハンドラー取得テスト（Twitter）
-  it('should get Twitter handler for Twitter sites', () => {
-    // Twitterドメインを設定
-    window.location.hostname = 'twitter.com';
-    
-    // ハンドラー取得
-    const handler = getSiteHandler();
-    
-    // 検証
-    expect(handler).toBe(TwitterHandler);
-  });
-  
-  // ハンドラー取得テスト（AIチャット）
-  it('should get AI chat handler for AI chat sites', () => {
-    // AIチャットサイト特有の要素を作成
-    const submitButton = document.createElement('button');
-    submitButton.setAttribute('aria-label', 'Send message');
-    document.body.appendChild(submitButton);
-    
-    // ハンドラー取得
-    const handler = getSiteHandler();
-    
-    // 検証
-    expect(handler).toBe(AIChatHandler);
-  });
-  
-  // ハンドラー取得テスト（デフォルト）
-  it('should get Default handler for unknown sites', () => {
-    // 未知のドメインを設定
-    window.location.hostname = 'unknown-site.com';
-    
-    // ハンドラー取得
-    const handler = getSiteHandler();
-    
-    // 検証
-    expect(handler).toBe(DefaultHandler);
+    it('should return Default handler for unknown site', () => {
+      // 不明なサイトをシミュレート
+      window.location.hostname = 'example.com';
+      
+      // 関数呼び出し
+      const handler = getSiteHandler();
+      
+      // 検証
+      expect(handler).toBe(DefaultHandler);
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Default'));
+    });
   });
 });

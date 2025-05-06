@@ -16,6 +16,12 @@ const GEMINI_SELECTORS = [
     'button.send-button',
     'button.mdc-button',
     'button.paper-plane-button',
+    // UI変更に備えて追加のセレクター
+    'button[aria-label^="Send"]', // "Send"で始まるaria-label
+    'button[data-testid="send-button"]',
+    'button.gemini-send-button',
+    'button[title="Send"]',
+    'button[title="送信"]',
 ];
 
 /**
@@ -23,7 +29,30 @@ const GEMINI_SELECTORS = [
  * @returns {Element|null} 検出されたボタンまたはnull
  */
 export function findGeminiSubmitButton() {
-    // セレクターによる検索
+    // セレクターによる検索（複数の検出戦略を試行）
+    const buttonStrategies = [
+        findButtonBySelector,
+        findButtonByPosition,
+        findButtonByAttribute,
+        findButtonByIcon
+    ];
+    
+    // 各戦略を順番に試行
+    for (const strategy of buttonStrategies) {
+        const button = strategy();
+        if (button) {
+            return button;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * 戦略1: セレクターによるボタン検索
+ * @returns {Element|null} 検出されたボタンまたはnull
+ */
+function findButtonBySelector() {
     for (const selector of GEMINI_SELECTORS) {
         const buttons = document.querySelectorAll(selector);
         if (buttons.length > 0) {
@@ -44,22 +73,77 @@ export function findGeminiSubmitButton() {
             }
         }
     }
+    return null;
+}
 
-    // ペーパープレーンアイコンを持つボタンも検索
+/**
+ * 戦略2: 位置によるボタン検索（フッター付近）
+ * @returns {Element|null} 検出されたボタンまたはnull
+ */
+function findButtonByPosition() {
     const allButtons = document.querySelectorAll('button');
     for (const button of allButtons) {
-        // Check if it has SVG with specific attributes or styles
-        const svg = button.querySelector('svg');
-        if (svg) {
-            // Check for Material Design paper plane icon styles
-            const rect = button.getBoundingClientRect();
-            // 下部にあるボタン（フッターあたり）を優先的に検出
-            if (rect.top > window.innerHeight * 0.7 && rect.width > 20 && rect.height > 20) {
+        const rect = button.getBoundingClientRect();
+        // 下部にあるボタン（フッターあたり）を優先的に検出
+        if (rect.top > window.innerHeight * 0.7 && rect.width > 20 && rect.height > 20) {
+            // ボタンのスタイルをチェック（無効でない場合）
+            if (!isButtonDisabled(button)) {
                 return button;
             }
         }
     }
+    return null;
+}
 
+/**
+ * 戦略3: 属性によるボタン検索
+ * @returns {Element|null} 検出されたボタンまたはnull
+ */
+function findButtonByAttribute() {
+    const allButtons = document.querySelectorAll('button');
+    
+    // 送信関連の属性を持つボタンを探す
+    for (const button of allButtons) {
+        // テキスト内容で判断
+        const buttonText = button.innerText ? button.innerText.toLowerCase() : '';
+        if (buttonText.includes('send') || buttonText.includes('送信')) {
+            return button;
+        }
+        
+        // class名で判断
+        const classList = button.className ? button.className.toLowerCase() : '';
+        if (classList.includes('send') || classList.includes('submit')) {
+            return button;
+        }
+    }
+    return null;
+}
+
+/**
+ * 戦略4: アイコンによるボタン検索
+ * @returns {Element|null} 検出されたボタンまたはnull
+ */
+function findButtonByIcon() {
+    // ペーパープレーンアイコンを持つボタンも検索
+    const allButtons = document.querySelectorAll('button');
+    for (const button of allButtons) {
+        // SVGを持つボタンをチェック
+        const svg = button.querySelector('svg');
+        if (svg) {
+            // 送信ボタンらしきSVGを検出
+            const hasPath = svg.querySelector('path');
+            const hasPolygon = svg.querySelector('polygon');
+            const hasLine = svg.querySelector('line');
+            
+            // 紙飛行機アイコンに特徴的な要素
+            if ((hasPolygon || hasPath) && hasLine) {
+                const rect = button.getBoundingClientRect();
+                if (rect.width > 20 && rect.height > 20) {
+                    return button;
+                }
+            }
+        }
+    }
     return null;
 }
 
