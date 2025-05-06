@@ -68,7 +68,7 @@ export async function initVoiceInput() {
  * Set up periodic self-healing to ensure UI elements exist
  * This helps recover from SPA navigation or DOM changes that might remove our UI
  */
-function setupPeriodicSelfHealing() {
+export function setupPeriodicSelfHealing() {
     setInterval(() => {
         const menuButton = document.getElementById('otak-voice-menu-btn');
         if (!menuButton) {
@@ -85,7 +85,7 @@ function setupPeriodicSelfHealing() {
  * Main initialization function
  * Sets up all modules in the correct order
  */
-async function runInitialization() {
+export async function runInitialization() {
     try {
         // Initialize state management first
         initializeState();
@@ -125,7 +125,7 @@ async function runInitialization() {
 /**
  * Set up event subscriptions for content.js
  */
-function setupEventSubscriptions() {
+export function setupEventSubscriptions() {
     // Subscribe to proofreading events
     subscribe(EVENTS.GPT_PROOFREADING_STARTED, () => {
         console.log('Proofreading started via event bus');
@@ -144,6 +144,12 @@ function setupEventSubscriptions() {
     // Subscribe to settings loaded events
     subscribe(EVENTS.SETTINGS_LOADED, (settings) => {
         console.log('Settings loaded via event bus');
+    });
+    
+    // Subscribe to UI recovery events
+    subscribe(EVENTS.UI_RECOVERY_NEEDED, () => {
+        console.log('UI recovery needed via event bus');
+        initVoiceInput();
     });
 }
 

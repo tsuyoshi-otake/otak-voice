@@ -7,7 +7,6 @@
 
 import { enhanceInputElementHandlers } from './input-handler.js';
 import { publish, subscribe, EVENTS } from './event-bus.js';
-import { initVoiceInput } from '../content.js';
 
 /**
  * Set up DOM observer to monitor page changes
@@ -32,8 +31,7 @@ export function setupDOMObserver() {
                                 console.log(chrome.i18n.getMessage('logSpaUiReinit'));
                                 // Publish event for UI reinit
                                 publish(EVENTS.UI_RECOVERY_NEEDED);
-                                // Call directly for backward compatibility
-                                initVoiceInput();
+                                publish(EVENTS.MENU_STATE_UPDATE_NEEDED);
                             } else {
                                 console.log('Page transition detected: Reapplying menu state');
                                 // Publish event for menu state update
@@ -77,9 +75,9 @@ export function setupDOMObserver() {
             console.log(chrome.i18n.getMessage('logPollingUiNotFound'));
             // Publish event for UI recovery
             publish(EVENTS.UI_RECOVERY_NEEDED);
-            // Call directly for backward compatibility
-            initVoiceInput();
+            publish(EVENTS.MENU_STATE_UPDATE_NEEDED);
         } else {
+            console.log('Periodic check: Reapplying menu state');
             // Publish event for menu state update
             publish(EVENTS.MENU_STATE_UPDATE_NEEDED);
         }
