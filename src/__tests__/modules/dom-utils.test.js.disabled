@@ -1,0 +1,1501 @@
+import {
+  isElementVisible,
+  isElementInViewport,
+  isInputElement,
+  findAllInputElements,
+  isButtonDisabled,
+  findAllButtons,
+  findButtonsForInput,
+  scoreSubmitButton,
+  findBestSubmitButton,
+  scoreInputField,
+  findBestInputField,
+  dispatchEvent,
+  setInputValue,
+  handleTwitterInput,
+  writeToInputField,
+  appendToInputField,
+  clickButtonWithFeedback,
+  clearInputField,
+  findElement,
+  findAllElements,
+} from '../../modules/dom-utils';
+import { createError, handleError, ERROR_CODE, ERROR_CATEGORY, ERROR_SEVERITY } from '../../modules/error-handler';
+import { publish, EVENTS } from '../../modules/event-bus';
+import { createInputField, createSubmitButton, resetDOM, mockElementPosition, createPaperPlaneButton } from '../../utils/dom-helpers'; // dom-helpers.js からヘルパーをインポート
+
+// error-handler と event-bus をモック
+jest.mock('../../modules/error-handler', () => {
+  const ERROR_CATEGORY = {
+    DOM: 'DOM_ERROR',
+  };
+  
+  const ERROR_CODE = {};
+  ERROR_CODE[ERROR_CATEGORY.DOM] = {
+    EVENT_DISPATCH_FAILED: 'DOM_EVENT_DISPATCH_FAILED',
+    INPUT_OPERATION_FAILED: 'DOM_INPUT_OPERATION_FAILED',
+    TWITTER_INPUT_FAILED: 'DOM_TWITTER_INPUT_FAILED',
+    BUTTON_CLICK_FAILED: 'DOM_BUTTON_CLICK_FAILED',
+  };
+  
+  return {
+    createError: jest.fn(),
+    handleError: jest.fn(),
+    ERROR_CODE,
+    ERROR_CATEGORY,
+    ERROR_SEVERITY: {
+      WARNING: 'WARNING',
+    },
+  };
+});
+
+jest.mock('../../modules/event-bus', () => ({
+  publish: jest.fn(),
+  EVENTS: {
+    ERROR_OCCURRED: 'errorOccurred',
+    STATUS_UPDATED: 'statusUpdated',
+  },
+}));
+
+// TODO: Fix module import paths and mocking approach
+// This test suite currently has issues with the import paths and the way mocking is implemented.
+// Working on fixing it to properly test the DOM utilities.
+describe('DOM Utilities', () => {
+  beforeEach(() => {
+    resetDOM(); // 各テストの前にDOMをリセット
+    // window.getComputedStyle と element.getBoundingClientRect の基本的なモック
+    window.getComputedStyle = jest.fn().mockReturnValue({
+      display: 'block',
+      visibility: 'visible',
+      opacity: '1',
+    });
+    // getBoundingClientRect は各テストケースで具体的にモックする
+    // console.error のモックを追加 (テスト中のエラー出力を抑制するため)
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    
+    // Reset all mocks at the start of each test
+    jest.clearAllMocks();
+    createError.mockClear();
+    handleError.mockClear();
+    publish.mockClear();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    console.error.mockRestore(); // console.error のモックを復元
+  });
+
+  describe('isElementVisible', () => {
+    it('should return true for a visible element', () => {
+      const element = document.createElement('div');
+      document.body.appendChild(element);
+      mockElementPosition(element, { width: 10, height: 10 });
+      // offsetParent のモック
+      Object.defineProperty(element, 'offsetParent', {
+        get: jest.fn(() => document.body),
+      });
+      expect(isElementVisible(element)).toBe(true);
+    });
+
+    it('should return false if element is null', () => {
+      expect(isElementVisible(null)).toBe(false);
+    });
+
+    it('should return false if display is none', () => {
+      const element = document.createElement('div');
+      document.body.appendChild(element);
+      window.getComputedStyle.mockReturnValueOnce({ display: 'none', visibility: 'visible', opacity: '1' });
+      mockElementPosition(element, { width: 10, height: 10 });
+      Object.defineProperty(element, 'offsetParent', {
+        get: jest.fn(() => document.body),
+      });
+      expect(isElementVisible(element)).toBe(false);
+    });
+
+    it('should return false if visibility is hidden', () => {
+      const element = document.createElement('div');
+      document.body.appendChild(element);
+      window.getComputedStyle.mockReturnValueOnce({ display: 'block', visibility: 'hidden', opacity: '1' });
+      mockElementPosition(element, { width: 10, height: 10 });
+      Object.defineProperty(element, 'offsetParent', {
+        get: jest.fn(() => document.body),
+      });
+      expect(isElementVisible(element)).toBe(false);
+    });
+
+    it('should return false if opacity is 0', () => {
+      const element = document.createElement('div');
+      document.body.appendChild(element);
+      window.getComputedStyle.mockReturnValueOnce({ display: 'block', visibility: 'visible', opacity: '0' });
+      mockElementPosition(element, { width: 10, height: 10 });
+      Object.defineProperty(element, 'offsetParent', {
+        get: jest.fn(() => document.body),
+      });
+      expect(isElementVisible(element)).toBe(false);
+    });
+
+    it('should return false if width is 0', () => {
+      const element = document.createElement('div');
+      document.body.appendChild(element);
+      // Explicitly mock width as 0 for getBoundingClientRect
+      element.getBoundingClientRect = jest.fn().mockReturnValue({
+        width: 0,
+        height: 10,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 10
+      });
+      Object.defineProperty(element, 'offsetParent', {
+        get: jest.fn(() => document.body),
+      });
+      expect(isElementVisible(element)).toBe(false);
+    });
+
+    it('should return false if height is 0', () => {
+      const element = document.createElement('div');
+      document.body.appendChild(element);
+      // Explicitly mock height as 0 for getBoundingClientRect
+      element.getBoundingClientRect = jest.fn().mockReturnValue({
+        width: 10,
+        height: 0,
+        top: 0,
+        left: 0,
+        right: 10,
+        bottom: 0
+      });
+      Object.defineProperty(element, 'offsetParent', {
+        get: jest.fn(() => document.body),
+      });
+      expect(isElementVisible(element)).toBe(false);
+    });
+
+    it('should return false if offsetParent is null', () => {
+      const element = document.createElement('div');
+      document.body.appendChild(element);
+      mockElementPosition(element, { width: 10, height: 10 });
+      Object.defineProperty(element, 'offsetParent', {
+        get: jest.fn(() => null),
+      });
+      expect(isElementVisible(element)).toBe(false);
+    });
+
+    it('should handle errors and return false', () => {
+      const element = document.createElement('div');
+      document.body.appendChild(element);
+      window.getComputedStyle = jest.fn(() => { throw new Error('Test error'); });
+      expect(isElementVisible(element)).toBe(false);
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('isElementInViewport', () => {
+    beforeEach(() => {
+      // window の innerHeight/innerWidth をモック
+      Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 800 });
+      Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 600 });
+    });
+
+    it('should return true for an element in viewport', () => {
+      const element = document.createElement('div');
+      document.body.appendChild(element);
+      mockElementPosition(element, { top: 10, left: 10, width: 100, height: 50 });
+      expect(isElementInViewport(element)).toBe(true);
+    });
+
+    it('should return false if element is null', () => {
+      expect(isElementInViewport(null)).toBe(false);
+    });
+
+    it('should return false if element is partially outside (top)', () => {
+      const element = document.createElement('div');
+      document.body.appendChild(element);
+      mockElementPosition(element, { top: -10, left: 10, width: 100, height: 50 });
+      expect(isElementInViewport(element)).toBe(false);
+    });
+
+    it('should return false if element is partially outside (left)', () => {
+      const element = document.createElement('div');
+      document.body.appendChild(element);
+      mockElementPosition(element, { top: 10, left: -10, width: 100, height: 50 });
+      expect(isElementInViewport(element)).toBe(false);
+    });
+
+    it('should return false if element is partially outside (bottom)', () => {
+      const element = document.createElement('div');
+      document.body.appendChild(element);
+      mockElementPosition(element, { top: 580, left: 10, width: 100, height: 50 }); // bottom would be 630
+      expect(isElementInViewport(element)).toBe(false);
+    });
+
+    it('should return false if element is partially outside (right)', () => {
+      const element = document.createElement('div');
+      document.body.appendChild(element);
+      mockElementPosition(element, { top: 10, left: 750, width: 100, height: 50 }); // right would be 850
+      expect(isElementInViewport(element)).toBe(false);
+    });
+
+    it('should handle errors and return false', () => {
+      const element = document.createElement('div');
+      document.body.appendChild(element);
+      element.getBoundingClientRect = jest.fn(() => { throw new Error('Test error'); });
+      expect(isElementInViewport(element)).toBe(false);
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('isInputElement', () => {
+    it('should return true for a visible contentEditable element', () => {
+      const element = document.createElement('div');
+      element.isContentEditable = true;
+      document.body.appendChild(element);
+      mockElementPosition(element, { width: 10, height: 10 });
+      Object.defineProperty(element, 'offsetParent', { get: jest.fn(() => document.body) });
+      expect(isInputElement(element)).toBe(true);
+    });
+
+    it('should return true for a visible input type text', () => {
+      const element = document.createElement('input');
+      element.type = 'text';
+      document.body.appendChild(element);
+      mockElementPosition(element, { width: 10, height: 10 });
+      Object.defineProperty(element, 'offsetParent', { get: jest.fn(() => document.body) });
+      expect(isInputElement(element)).toBe(true);
+    });
+
+    it('should return true for a visible textarea', () => {
+      const element = document.createElement('textarea');
+      document.body.appendChild(element);
+      mockElementPosition(element, { width: 10, height: 10 });
+      Object.defineProperty(element, 'offsetParent', { get: jest.fn(() => document.body) });
+      expect(isInputElement(element)).toBe(true);
+    });
+
+    it('should return false if element is null', () => {
+      expect(isInputElement(null)).toBe(false);
+    });
+
+    it('should return false for a non-input element', () => {
+      const element = document.createElement('div');
+      document.body.appendChild(element);
+      expect(isInputElement(element)).toBe(false);
+    });
+
+    it('should return false for an invisible input element', () => {
+      const element = document.createElement('input');
+      element.type = 'text';
+      document.body.appendChild(element);
+      window.getComputedStyle.mockReturnValueOnce({ display: 'none', visibility: 'visible', opacity: '1' });
+      mockElementPosition(element, { width: 10, height: 10 });
+      Object.defineProperty(element, 'offsetParent', { get: jest.fn(() => document.body) });
+      expect(isInputElement(element)).toBe(false);
+    });
+
+    it('should return false for a disabled input element', () => {
+      const element = document.createElement('input');
+      element.type = 'text';
+      element.disabled = true;
+      document.body.appendChild(element);
+      mockElementPosition(element, { width: 10, height: 10 });
+      Object.defineProperty(element, 'offsetParent', { get: jest.fn(() => document.body) });
+      expect(isInputElement(element)).toBe(false);
+    });
+
+    it('should return false for a readonly input element', () => {
+      const element = document.createElement('input');
+      element.type = 'text';
+      element.readOnly = true;
+      document.body.appendChild(element);
+      mockElementPosition(element, { width: 10, height: 10 });
+      Object.defineProperty(element, 'offsetParent', { get: jest.fn(() => document.body) });
+      expect(isInputElement(element)).toBe(false);
+    });
+
+    it('should return false for input type button', () => {
+      const element = document.createElement('input');
+      element.type = 'button';
+      document.body.appendChild(element);
+      mockElementPosition(element, { width: 10, height: 10 });
+      Object.defineProperty(element, 'offsetParent', { get: jest.fn(() => document.body) });
+      expect(isInputElement(element)).toBe(false);
+    });
+
+    it('should handle errors and return false', () => {
+      const element = document.createElement('div');
+      element.isContentEditable = true; // Trigger a path that uses isElementVisible
+      document.body.appendChild(element);
+      window.getComputedStyle = jest.fn(() => { throw new Error('Test error'); });
+      expect(isInputElement(element)).toBe(false);
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('findAllInputElements', () => {
+    it('should find all valid input elements', () => {
+      createInputField({ isVisible: true }); // textarea
+      const input = document.createElement('input');
+      input.type = 'text';
+      document.body.appendChild(input);
+      mockElementPosition(input, { width: 10, height: 10 });
+      Object.defineProperty(input, 'offsetParent', { get: jest.fn(() => document.body) });
+
+      const contentEditable = document.createElement('div');
+      contentEditable.isContentEditable = true;
+      document.body.appendChild(contentEditable);
+      mockElementPosition(contentEditable, { width: 10, height: 10 });
+      Object.defineProperty(contentEditable, 'offsetParent', { get: jest.fn(() => document.body) });
+
+
+      const elements = findAllInputElements();
+      expect(elements.length).toBe(3); // textarea, input, contentEditable
+    });
+
+    it('should return an empty array if no input elements are found', () => {
+      expect(findAllInputElements().length).toBe(0);
+    });
+
+    it('should filter out invisible or invalid input elements', () => {
+      createInputField({ isVisible: false }); // invisible textarea
+      const elements = findAllInputElements();
+      expect(elements.length).toBe(0);
+    });
+
+    it('should handle errors and return an empty array', () => {
+      document.querySelectorAll = jest.fn(() => { throw new Error('Test error'); });
+      expect(findAllInputElements()).toEqual([]);
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('isButtonDisabled', () => {
+    it('should return true if button is null', () => {
+      expect(isButtonDisabled(null)).toBe(true);
+    });
+
+    it('should return true if button.disabled is true', () => {
+      const button = createSubmitButton({ disabled: true });
+      expect(isButtonDisabled(button)).toBe(true);
+    });
+
+    it('should return true if aria-disabled is true', () => {
+      const button = createSubmitButton();
+      button.setAttribute('aria-disabled', 'true');
+      expect(isButtonDisabled(button)).toBe(true);
+    });
+
+    it('should return true if classList contains "disabled"', () => {
+      const button = createSubmitButton();
+      button.classList.add('disabled');
+      expect(isButtonDisabled(button)).toBe(true);
+    });
+
+    it('should return true if classList contains "cursor-not-allowed"', () => {
+      const button = createSubmitButton();
+      button.classList.add('cursor-not-allowed');
+      expect(isButtonDisabled(button)).toBe(true);
+    });
+
+    it('should return true if classList contains "opacity-50"', () => {
+      const button = createSubmitButton();
+      button.classList.add('opacity-50');
+      expect(isButtonDisabled(button)).toBe(true);
+    });
+
+    it('should return true if computed opacity is less than 0.9', () => {
+      const button = createSubmitButton();
+      window.getComputedStyle.mockReturnValueOnce({ opacity: '0.5' });
+      expect(isButtonDisabled(button)).toBe(true);
+    });
+
+    it('should return false for an enabled button', () => {
+      const button = createSubmitButton();
+      window.getComputedStyle.mockReturnValueOnce({ opacity: '1' });
+      expect(isButtonDisabled(button)).toBe(false);
+    });
+
+    it('should handle errors and return true', () => {
+      const button = createSubmitButton();
+      window.getComputedStyle = jest.fn(() => { throw new Error('Test error'); });
+      expect(isButtonDisabled(button)).toBe(true);
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('findAllButtons', () => {
+    it('should find all visible button elements', () => {
+      createSubmitButton(); // button
+      const inputButton = document.createElement('input');
+      inputButton.type = 'button';
+      document.body.appendChild(inputButton);
+      mockElementPosition(inputButton, { width: 10, height: 10 });
+      Object.defineProperty(inputButton, 'offsetParent', { get: jest.fn(() => document.body) });
+
+
+      const elements = findAllButtons();
+      expect(elements.length).toBe(2);
+    });
+
+    it('should return an empty array if no buttons are found', () => {
+      expect(findAllButtons().length).toBe(0);
+    });
+
+    it('should filter out invisible buttons', () => {
+      const button = createSubmitButton();
+      window.getComputedStyle.mockReturnValueOnce({ display: 'none' }); // Make it invisible
+      const elements = findAllButtons();
+      expect(elements.length).toBe(0);
+    });
+
+    it('should handle errors and return an empty array', () => {
+      document.querySelectorAll = jest.fn(() => { throw new Error('Test error'); });
+      expect(findAllButtons()).toEqual([]);
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('findButtonsForInput', () => {
+    it('should return empty array if inputElement is null', () => {
+      expect(findButtonsForInput(null)).toEqual([]);
+    });
+
+    it('should find buttons in the same form', () => {
+      const form = document.createElement('form');
+      const input = createInputField();
+      const button1 = createSubmitButton();
+      const button2 = document.createElement('input');
+      button2.type = 'button';
+      form.appendChild(input);
+      form.appendChild(button1);
+      form.appendChild(button2);
+      document.body.appendChild(form);
+      mockElementPosition(button1, { width: 10, height: 10 });
+      Object.defineProperty(button1, 'offsetParent', { get: jest.fn(() => document.body) });
+      mockElementPosition(button2, { width: 10, height: 10 });
+      Object.defineProperty(button2, 'offsetParent', { get: jest.fn(() => document.body) });
+
+
+      const buttons = findButtonsForInput(input);
+      expect(buttons.length).toBe(2);
+      expect(buttons).toContain(button1);
+      expect(buttons).toContain(button2);
+    });
+
+    it('should find nearby buttons if no form', () => {
+      const parent = document.createElement('div');
+      const input = createInputField();
+      const button = createSubmitButton();
+      parent.appendChild(input);
+      parent.appendChild(button);
+      document.body.appendChild(parent);
+      mockElementPosition(button, { width: 10, height: 10 });
+      Object.defineProperty(button, 'offsetParent', { get: jest.fn(() => document.body) });
+
+      const buttons = findButtonsForInput(input);
+      expect(buttons.length).toBe(1);
+      expect(buttons[0]).toBe(button);
+    });
+
+    it('should filter out invisible buttons', () => {
+      const form = document.createElement('form');
+      const input = createInputField();
+      const button1 = createSubmitButton();
+      const button2 = createSubmitButton();
+      form.appendChild(input);
+      form.appendChild(button1);
+      form.appendChild(button2);
+      document.body.appendChild(form);
+
+      mockElementPosition(button1, { width: 10, height: 10 });
+      Object.defineProperty(button1, 'offsetParent', { get: jest.fn(() => document.body) });
+      // Make button2 invisible
+      window.getComputedStyle = jest.fn((el) => {
+        if (el === button2) {
+          return { display: 'none', visibility: 'visible', opacity: '1' };
+        }
+        return { display: 'block', visibility: 'visible', opacity: '1' };
+      });
+      mockElementPosition(button2, { width: 10, height: 10 });
+       Object.defineProperty(button2, 'offsetParent', { get: jest.fn(() => document.body) });
+
+
+      const buttons = findButtonsForInput(input);
+      expect(buttons.length).toBe(1);
+      expect(buttons[0]).toBe(button1);
+    });
+
+    it('should handle errors and return an empty array', () => {
+      const input = createInputField();
+      // Ensure input.form exists before trying to mock its querySelectorAll
+      const form = document.createElement('form');
+      form.appendChild(input);
+      document.body.appendChild(form);
+      input.form.querySelectorAll = jest.fn(() => { throw new Error('Test error'); }); // Simulate error
+      expect(findButtonsForInput(input)).toEqual([]);
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('scoreSubmitButton', () => {
+    let input;
+    beforeEach(() => {
+      input = createInputField();
+      mockElementPosition(input, { top: 100, left: 100, width: 200, height: 30 });
+    });
+
+    it('should return 0 if button or inputElement is null', () => {
+      expect(scoreSubmitButton(null, input)).toBe(0);
+      const button = createSubmitButton();
+      expect(scoreSubmitButton(button, null)).toBe(0);
+    });
+
+    it('should score higher for type="submit"', () => {
+      const button = createSubmitButton();
+      button.type = 'submit';
+      mockElementPosition(button, { top: 100, left: 310, width: 80, height: 30 });
+      const score = scoreSubmitButton(button, input);
+      expect(score).toBeGreaterThan(5); // Base score for type submit is 10
+    });
+
+    it('should score for keywords in textContent', () => {
+      const button = createSubmitButton();
+      button.textContent = '送信する';
+      mockElementPosition(button, { top: 100, left: 310, width: 80, height: 30 });
+      const score = scoreSubmitButton(button, input);
+      expect(score).toBeGreaterThanOrEqual(5);
+    });
+
+    it('should score for keywords in value', () => {
+      const button = createSubmitButton();
+      button.value = 'submit now';
+      mockElementPosition(button, { top: 100, left: 310, width: 80, height: 30 });
+      const score = scoreSubmitButton(button, input);
+      expect(score).toBeGreaterThanOrEqual(4);
+    });
+
+    it('should score for keywords in id', () => {
+      const button = createSubmitButton({ selector: '#submit-button' });
+      mockElementPosition(button, { top: 100, left: 310, width: 80, height: 30 });
+      const score = scoreSubmitButton(button, input);
+      expect(score).toBeGreaterThanOrEqual(3);
+    });
+
+    it('should score for keywords in className', () => {
+      const button = createSubmitButton({ selector: '.btn-submit' });
+      mockElementPosition(button, { top: 100, left: 310, width: 80, height: 30 });
+      const score = scoreSubmitButton(button, input);
+      expect(score).toBeGreaterThanOrEqual(2);
+    });
+
+
+    it('should score for paper plane icon', () => {
+      const button = createPaperPlaneButton();
+      mockElementPosition(button, { top: 100, left: 310, width: 80, height: 30 });
+      const score = scoreSubmitButton(button, input);
+      expect(score).toBeGreaterThanOrEqual(5 + 2); // 5 for icon, 2 for SVG
+    });
+
+    it('should score higher if only button in form', () => {
+      const form = document.createElement('form');
+      const button = createSubmitButton();
+      button.type = 'submit';
+      form.appendChild(input);
+      form.appendChild(button);
+      document.body.appendChild(form);
+      mockElementPosition(button, { top: 100, left: 310, width: 80, height: 30 });
+      const score = scoreSubmitButton(button, input);
+      expect(score).toBeGreaterThanOrEqual(10 + 8); // 10 for type, 8 for only button
+    });
+
+    it('should score for proximity (right of input)', () => {
+      const button = createSubmitButton();
+      mockElementPosition(button, { top: 100, left: 310, width: 80, height: 30 }); // Right of input
+      const score = scoreSubmitButton(button, input);
+      expect(score).toBeGreaterThanOrEqual(3);
+    });
+
+    it('should score for proximity (below input)', () => {
+      const button = createSubmitButton();
+      mockElementPosition(button, { top: 140, left: 100, width: 80, height: 30 }); // Below input
+      const score = scoreSubmitButton(button, input);
+      expect(score).toBeGreaterThanOrEqual(3);
+    });
+
+     it('should score for chat UI pattern', () => {
+      const button = createSubmitButton();
+      // Position button like in a chat UI (below and to the right of input, but aligned)
+      mockElementPosition(button, { top: 110, left: 250, width: 80, height: 30 });
+      const score = scoreSubmitButton(button, input);
+      expect(score).toBeGreaterThanOrEqual(4);
+    });
+
+    it('should reduce score if button is disabled', () => {
+      const button = createSubmitButton({ disabled: true });
+      button.textContent = '送信';
+      mockElementPosition(button, { top: 100, left: 310, width: 80, height: 30 });
+      const score = scoreSubmitButton(button, input);
+      expect(score).toBeLessThan(0); // Should be negative due to penalty
+    });
+
+    it('should handle errors and return 0', () => {
+      const button = createSubmitButton();
+      button.getAttribute = jest.fn(() => { throw new Error('Test error'); });
+      expect(scoreSubmitButton(button, input)).toBe(0);
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('findBestSubmitButton', () => {
+    let input;
+    beforeEach(() => {
+      input = createInputField();
+      mockElementPosition(input, { top: 100, left: 100, width: 200, height: 30 });
+       // Ensure isElementVisible returns true for buttons by default in these tests
+      window.getComputedStyle = jest.fn().mockReturnValue({
+        display: 'block',
+        visibility: 'visible',
+        opacity: '1',
+      });
+      // Ensure offsetParent is mocked for visibility checks
+      const mockOffsetParent = (el) => Object.defineProperty(el, 'offsetParent', {
+        get: jest.fn(() => document.body),
+        configurable: true
+      });
+      mockOffsetParent(input);
+    });
+
+    it('should return null if inputElement is null', () => {
+      expect(findBestSubmitButton(null)).toBeNull();
+    });
+
+    it('should find the button with the highest score', () => {
+      const button1 = createSubmitButton(); // Lower score
+      button1.textContent = 'キャンセル';
+      mockElementPosition(button1, { top: 100, left: 310, width: 80, height: 30 });
+      Object.defineProperty(button1, 'offsetParent', { get: jest.fn(() => document.body), configurable: true });
+
+
+      const button2 = createSubmitButton(); // Higher score
+      button2.type = 'submit';
+      button2.textContent = '送信';
+      mockElementPosition(button2, { top: 140, left: 100, width: 80, height: 30 });
+      Object.defineProperty(button2, 'offsetParent', { get: jest.fn(() => document.body), configurable: true });
+
+
+      const bestButton = findBestSubmitButton(input);
+      expect(bestButton).toBe(button2);
+    });
+
+    it('should return null if no buttons are found', () => {
+      expect(findBestSubmitButton(input)).toBeNull();
+    });
+
+    it('should skip a disabled button and choose the next best', () => {
+      const disabledButton = createSubmitButton({ disabled: true });
+      disabledButton.type = 'submit'; // High score but disabled
+      disabledButton.textContent = '送信';
+      mockElementPosition(disabledButton, { top: 100, left: 310, width: 80, height: 30 });
+      Object.defineProperty(disabledButton, 'offsetParent', { get: jest.fn(() => document.body), configurable: true });
+
+
+      const enabledButton = createSubmitButton();
+      enabledButton.textContent = '投稿'; // Lower score but enabled
+      mockElementPosition(enabledButton, { top: 140, left: 100, width: 80, height: 30 });
+      Object.defineProperty(enabledButton, 'offsetParent', { get: jest.fn(() => document.body), configurable: true });
+
+
+      const bestButton = findBestSubmitButton(input);
+      expect(bestButton).toBe(enabledButton);
+    });
+
+     it('should return null if all buttons are disabled or have very low scores', () => {
+      const disabledButton1 = createSubmitButton({ disabled: true });
+      disabledButton1.textContent = '送信';
+      mockElementPosition(disabledButton1, { top: 100, left: 310, width: 80, height: 30 });
+      Object.defineProperty(disabledButton1, 'offsetParent', { get: jest.fn(() => document.body), configurable: true });
+
+      const disabledButton2 = createSubmitButton({ disabled: true });
+      disabledButton2.textContent = '投稿';
+      mockElementPosition(disabledButton2, { top: 140, left: 100, width: 80, height: 30 });
+      Object.defineProperty(disabledButton2, 'offsetParent', { get: jest.fn(() => document.body), configurable: true });
+
+      expect(findBestSubmitButton(input)).toBeNull();
+    });
+
+
+    it('should handle errors and return null', () => {
+      const button = createSubmitButton();
+      button.textContent = '送信';
+      mockElementPosition(button, { top: 100, left: 310, width: 80, height: 30 });
+      Object.defineProperty(button, 'offsetParent', { get: jest.fn(() => document.body), configurable: true });
+
+      // Temporarily mock scoreSubmitButton to throw an error
+      const domUtils = require('../../modules/dom-utils');
+      const originalInternalScoreFn = domUtils.scoreSubmitButton;
+      domUtils.scoreSubmitButton = jest.fn(() => { throw new Error('Scoring error'); });
+
+      expect(findBestSubmitButton(input)).toBeNull();
+      expect(console.error).toHaveBeenCalled();
+
+      domUtils.scoreSubmitButton = originalInternalScoreFn; // Restore
+    });
+  });
+
+  describe('scoreInputField', () => {
+    beforeEach(() => {
+      Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 800 });
+      Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 600 });
+      window.getComputedStyle = jest.fn().mockReturnValue({
+        display: 'block',
+        visibility: 'visible',
+        opacity: '1',
+      });
+    });
+
+    it('should return 0 if element is null', () => {
+      expect(scoreInputField(null)).toBe(0);
+    });
+
+    it('should return 0 if element is not visible', () => {
+      const inputEl = createInputField(); // Renamed to avoid conflict
+      window.getComputedStyle.mockReturnValueOnce({ display: 'none' });
+      mockElementPosition(inputEl, { top: 10, left: 10, width: 200, height: 30 });
+      Object.defineProperty(inputEl, 'offsetParent', { get: jest.fn(() => document.body) });
+      expect(scoreInputField(inputEl)).toBe(0);
+    });
+
+    it('should score higher if in viewport', () => {
+      const inputEl = createInputField();
+      mockElementPosition(inputEl, { top: 10, left: 10, width: 200, height: 30 }); // In viewport
+      Object.defineProperty(inputEl, 'offsetParent', { get: jest.fn(() => document.body) });
+      const score = scoreInputField(inputEl);
+      expect(score).toBeGreaterThanOrEqual(5);
+    });
+
+    it('should score for chat keywords in attributes', () => {
+      const inputEl = createInputField({ placeholder: 'チャットメッセージを入力' });
+      mockElementPosition(inputEl, { top: 10, left: 10, width: 200, height: 30 });
+      Object.defineProperty(inputEl, 'offsetParent', { get: jest.fn(() => document.body) });
+      const score = scoreInputField(inputEl);
+      expect(score).toBeGreaterThanOrEqual(3 + 5); // 3 for keyword, 5 for viewport
+    });
+
+    it('should score for search keywords in attributes', () => {
+      const inputEl = createInputField();
+      inputEl.name = 'search_query';
+      mockElementPosition(inputEl, { top: 10, left: 10, width: 200, height: 30 });
+      Object.defineProperty(inputEl, 'offsetParent', { get: jest.fn(() => document.body) });
+      const score = scoreInputField(inputEl);
+      expect(score).toBeGreaterThanOrEqual(2 + 5); // 2 for keyword, 5 for viewport
+    });
+
+    it('should score higher for textarea', () => {
+      const textarea = document.createElement('textarea');
+      document.body.appendChild(textarea);
+      mockElementPosition(textarea, { top: 10, left: 10, width: 200, height: 100 }); // Larger area
+      Object.defineProperty(textarea, 'offsetParent', { get: jest.fn(() => document.body) });
+      const score = scoreInputField(textarea);
+      // 5 (viewport) + 2 (textarea) + areaScore (e.g., 200*100/5000 = 4)
+      expect(score).toBeGreaterThanOrEqual(5 + 2 + 4);
+    });
+
+    it('should score based on element area', () => {
+      const smallInput = createInputField();
+      mockElementPosition(smallInput, { top: 10, left: 10, width: 100, height: 20 }); // Area = 2000
+      Object.defineProperty(smallInput, 'offsetParent', { get: jest.fn(() => document.body) });
+      const scoreSmall = scoreInputField(smallInput); // Area score = 0
+
+      const largeInput = createInputField();
+      mockElementPosition(largeInput, { top: 10, left: 10, width: 300, height: 100 }); // Area = 30000
+      Object.defineProperty(largeInput, 'offsetParent', { get: jest.fn(() => document.body) });
+      const scoreLarge = scoreInputField(largeInput); // Area score = min(5, floor(30000/5000)) = 5
+
+      expect(scoreLarge).toBeGreaterThan(scoreSmall);
+      expect(scoreLarge - scoreSmall).toBeGreaterThanOrEqual(5); // Difference due to area score
+    });
+
+    it('should slightly lower score for contentEditable', () => {
+      const inputEl = createInputField();
+      mockElementPosition(inputEl, { top: 10, left: 10, width: 200, height: 30 });
+      Object.defineProperty(inputEl, 'offsetParent', { get: jest.fn(() => document.body) });
+      const scoreInput = scoreInputField(inputEl);
+
+      const contentEditable = document.createElement('div');
+      contentEditable.isContentEditable = true;
+      document.body.appendChild(contentEditable);
+      mockElementPosition(contentEditable, { top: 10, left: 10, width: 200, height: 30 });
+      Object.defineProperty(contentEditable, 'offsetParent', { get: jest.fn(() => document.body) });
+      const scoreContentEditable = scoreInputField(contentEditable);
+
+      expect(scoreInput).toBeGreaterThan(scoreContentEditable);
+    });
+
+    it('should handle errors and return 0', () => {
+      const inputEl = createInputField();
+      mockElementPosition(inputEl, { top: 10, left: 10, width: 200, height: 30 });
+      Object.defineProperty(inputEl, 'offsetParent', { get: jest.fn(() => document.body) });
+      // Force an error in getAttribute
+      inputEl.getAttribute = jest.fn(() => { throw new Error('Test error'); });
+      expect(scoreInputField(inputEl)).toBe(0);
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('findBestInputField', () => {
+     beforeEach(() => {
+      Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 800 });
+      Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 600 });
+      window.getComputedStyle = jest.fn().mockReturnValue({
+        display: 'block',
+        visibility: 'visible',
+        opacity: '1',
+      });
+      // Mock offsetParent for all created elements to ensure visibility
+      const originalCreateElement = document.createElement;
+      document.createElement = (tagName) => {
+        const element = originalCreateElement.call(document, tagName);
+        Object.defineProperty(element, 'offsetParent', {
+          get: jest.fn(() => document.body), // Assume it's always attached for simplicity
+          configurable: true
+        });
+        // Mock getBoundingClientRect for all elements
+        mockElementPosition(element, { top: 10, left: 10, width: 100, height: 30 });
+        return element;
+      };
+    });
+
+    afterEach(() => {
+      document.createElement = Object.getPrototypeOf(document).createElement; // Restore original
+    });
+
+
+    it('should return null if no input elements are found', () => {
+      expect(findBestInputField()).toBeNull();
+    });
+
+    it('should find the input field with the highest score', () => {
+      const lowScoreInput = createInputField({ placeholder: ' unimportant ' });
+      mockElementPosition(lowScoreInput, { top: 10, left: 10, width: 100, height: 20 });
+
+
+      const highScoreInput = createInputField({ placeholder: 'チャットメッセージを入力してください' });
+      mockElementPosition(highScoreInput, { top: 50, left: 10, width: 300, height: 50 }); // Larger, better keywords
+
+      const bestInput = findBestInputField();
+      expect(bestInput).toBe(highScoreInput);
+    });
+
+    it('should handle errors and return null', () => {
+      const domUtils = require('../../modules/dom-utils');
+      const originalFindAll = domUtils.findAllInputElements;
+      domUtils.findAllInputElements = jest.fn(() => { throw new Error('Test error'); });
+
+      expect(findBestInputField()).toBeNull();
+      expect(console.error).toHaveBeenCalled();
+
+      domUtils.findAllInputElements = originalFindAll; // Restore
+    });
+  });
+
+  describe('dispatchEvent', () => {
+    it('should return false if element is null', () => {
+      expect(dispatchEvent(null, 'click')).toBe(false);
+    });
+
+    it('should dispatch a generic event', () => {
+      const element = document.createElement('div');
+      const spy = jest.spyOn(element, 'dispatchEvent');
+      dispatchEvent(element, 'customEvent');
+      expect(spy).toHaveBeenCalled();
+      expect(spy.mock.calls[0][0].type).toBe('customEvent');
+      expect(spy.mock.calls[0][0].bubbles).toBe(true);
+    });
+
+    it('should dispatch an input event', () => {
+      const element = document.createElement('input');
+      const spy = jest.spyOn(element, 'dispatchEvent');
+      dispatchEvent(element, 'input', { inputType: 'insertText', data: 'hello' });
+      expect(spy).toHaveBeenCalled();
+      const dispatchedEvent = spy.mock.calls[0][0];
+      expect(dispatchedEvent.type).toBe('input');
+      expect(dispatchedEvent.inputType).toBe('insertText');
+      expect(dispatchedEvent.data).toBe('hello');
+    });
+
+     it('should dispatch a simple input event if no inputType', () => {
+      const element = document.createElement('input');
+      const spy = jest.spyOn(element, 'dispatchEvent');
+      dispatchEvent(element, 'input');
+      expect(spy).toHaveBeenCalled();
+      const dispatchedEvent = spy.mock.calls[0][0];
+      expect(dispatchedEvent.type).toBe('input');
+      expect(dispatchedEvent.inputType).toBeUndefined();
+    });
+
+    it('should dispatch a change event', () => {
+      const element = document.createElement('input');
+      const spy = jest.spyOn(element, 'dispatchEvent');
+      dispatchEvent(element, 'change');
+      expect(spy).toHaveBeenCalled();
+      expect(spy.mock.calls[0][0].type).toBe('change');
+    });
+
+    it('should dispatch a keyboard event', () => {
+      const element = document.createElement('input');
+      const spy = jest.spyOn(element, 'dispatchEvent');
+      dispatchEvent(element, 'keydown', { key: 'Enter', code: 'Enter' });
+      expect(spy).toHaveBeenCalled();
+      const dispatchedEvent = spy.mock.calls[0][0];
+      expect(dispatchedEvent.type).toBe('keydown');
+      expect(dispatchedEvent.key).toBe('Enter');
+    });
+
+    it('should dispatch a focus event', () => {
+      const element = document.createElement('input');
+      const spy = jest.spyOn(element, 'dispatchEvent');
+      dispatchEvent(element, 'focus');
+      expect(spy).toHaveBeenCalled();
+      expect(spy.mock.calls[0][0].type).toBe('focus');
+    });
+
+    it('should handle errors, call createError/handleError, and return false', () => {
+      const element = document.createElement('div');
+      element.dispatchEvent = jest.fn(() => { throw new Error('Dispatch error'); });
+      const result = dispatchEvent(element, 'click');
+      expect(result).toBe(false);
+      expect(createError).toHaveBeenCalled();
+      expect(handleError).toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('setInputValue', () => {
+    let inputEl; // Renamed to avoid conflict
+    beforeEach(() => {
+      inputEl = createInputField({isVisible: true});
+      mockElementPosition(inputEl, { width: 10, height: 10 });
+      Object.defineProperty(inputEl, 'offsetParent', { get: jest.fn(() => document.body) });
+      jest.spyOn(inputEl, 'focus');
+      jest.spyOn(inputEl, 'dispatchEvent');
+    });
+
+    it('should return false if element is null or not an input element', () => {
+      expect(setInputValue(null, 'test')).toBe(false);
+      const div = document.createElement('div');
+      expect(setInputValue(div, 'test')).toBe(false);
+    });
+
+    it('should set value for input element and dispatch events', () => {
+      const result = setInputValue(inputEl, 'hello');
+      expect(result).toBe(true);
+      expect(inputEl.focus).toHaveBeenCalled();
+      expect(inputEl.value).toBe('hello');
+      expect(inputEl.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'input', inputType: 'insertText', data: 'hello' }));
+      expect(inputEl.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'change' }));
+      expect(inputEl.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'keydown', key: 'o' }));
+      expect(inputEl.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'keyup', key: 'o' }));
+    });
+
+    it('should set textContent for contentEditable element and dispatch events', () => {
+      const div = document.createElement('div');
+      div.isContentEditable = true;
+      document.body.appendChild(div);
+      mockElementPosition(div, { width: 10, height: 10 });
+      Object.defineProperty(div, 'offsetParent', { get: jest.fn(() => document.body) });
+      jest.spyOn(div, 'focus');
+      jest.spyOn(div, 'dispatchEvent');
+
+      const result = setInputValue(div, 'world');
+      expect(result).toBe(true);
+      expect(div.focus).toHaveBeenCalled();
+      expect(div.textContent).toBe('world');
+      expect(div.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'input', inputType: 'insertText', data: 'world' }));
+    });
+
+    it('should not dispatch key events if text is empty', () => {
+      setInputValue(inputEl, '');
+      expect(inputEl.dispatchEvent).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'keydown' }));
+      expect(inputEl.dispatchEvent).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'keyup' }));
+    });
+
+    it('should handle errors, call createError/handleError, and return false', () => {
+      inputEl.focus = jest.fn(() => { throw new Error('Focus error'); });
+      const result = setInputValue(inputEl, 'test');
+      expect(result).toBe(false);
+      expect(createError).toHaveBeenCalled();
+      expect(handleError).toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('handleTwitterInput', () => {
+    let contentEditableDiv;
+
+    beforeEach(() => {
+      contentEditableDiv = document.createElement('div');
+      contentEditableDiv.isContentEditable = true;
+      contentEditableDiv.setAttribute('aria-label', 'ツイートテキスト'); // Simulate Twitter input
+      document.body.appendChild(contentEditableDiv);
+      jest.spyOn(contentEditableDiv, 'focus');
+      jest.spyOn(contentEditableDiv, 'dispatchEvent');
+      contentEditableDiv.closest = jest.fn().mockImplementation((selector) => {
+        if (selector.includes('[data-testid^="tweetTextarea"]') || selector.includes('[aria-label*="ツイート"]')) {
+          return contentEditableDiv;
+        }
+        return null;
+      });
+    });
+
+    it('should return false if element is null or not contentEditable', () => {
+      expect(handleTwitterInput(null, 'test')).toBe(false);
+      const nonEditable = document.createElement('div');
+      expect(handleTwitterInput(nonEditable, 'test')).toBe(false);
+    });
+
+    it('should return false if not a Twitter input (closest returns null)', () => {
+      contentEditableDiv.closest = jest.fn().mockReturnValue(null);
+      expect(handleTwitterInput(contentEditableDiv, 'test')).toBe(false);
+    });
+
+    it('should correctly structure DOM and set text for Twitter input', () => {
+      const result = handleTwitterInput(contentEditableDiv, 'hello twitter');
+      expect(result).toBe(true);
+      expect(contentEditableDiv.focus).toHaveBeenCalled();
+
+      const dataContentsDiv = contentEditableDiv.querySelector('div[data-contents="true"]');
+      expect(dataContentsDiv).not.toBeNull();
+      const dataBlockDiv = dataContentsDiv.querySelector('div[data-block="true"]');
+      expect(dataBlockDiv).not.toBeNull();
+      const innerDiv = dataBlockDiv.querySelector('div[data-offset-key]');
+      expect(innerDiv).not.toBeNull();
+      const offsetSpan = innerDiv.querySelector('span[data-offset-key]');
+      expect(offsetSpan).not.toBeNull();
+      const textSpan = offsetSpan.querySelector('span[data-text="true"]');
+      expect(textSpan).not.toBeNull();
+      expect(textSpan.textContent).toBe('hello twitter');
+
+      expect(contentEditableDiv.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'input' }));
+      expect(contentEditableDiv.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'change' }));
+      expect(contentEditableDiv.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'keydown' }));
+      expect(contentEditableDiv.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'keyup' }));
+      expect(contentEditableDiv.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'blur' }));
+      expect(contentEditableDiv.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'focus' }));
+    });
+
+    it('should reuse existing Twitter DOM structure if present', () => {
+      contentEditableDiv.innerHTML = `
+        <div data-contents="true">
+          <div data-block="true" style="position: relative;">
+            <div data-offset-key="some-key-0-0" style="position: relative;">
+              <span data-offset-key="some-key-0-0">
+                <span data-text="true">old text</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      `;
+      const result = handleTwitterInput(contentEditableDiv, 'new text');
+      expect(result).toBe(true);
+      const textSpan = contentEditableDiv.querySelector('span[data-text="true"]');
+      expect(textSpan.textContent).toBe('new text');
+    });
+
+
+    it('should handle errors, call createError/handleError, and return false', () => {
+      contentEditableDiv.focus = jest.fn(() => { throw new Error('Focus error'); });
+      const result = handleTwitterInput(contentEditableDiv, 'test');
+      expect(result).toBe(false);
+      expect(createError).toHaveBeenCalled();
+      expect(handleError).toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('writeToInputField', () => {
+    let inputEl, contentEditableEl; // Renamed to avoid conflict
+    beforeEach(() => {
+      inputEl = createInputField({isVisible: true});
+      mockElementPosition(inputEl, { width: 10, height: 10 });
+      Object.defineProperty(inputEl, 'offsetParent', { get: jest.fn(() => document.body) });
+      jest.spyOn(inputEl, 'focus');
+      jest.spyOn(inputEl, 'dispatchEvent');
+
+
+      contentEditableEl = document.createElement('div');
+      contentEditableEl.isContentEditable = true;
+      document.body.appendChild(contentEditableEl);
+      mockElementPosition(contentEditableEl, { width: 10, height: 10 });
+      Object.defineProperty(contentEditableEl, 'offsetParent', { get: jest.fn(() => document.body) });
+      jest.spyOn(contentEditableEl, 'focus');
+      jest.spyOn(contentEditableEl, 'dispatchEvent');
+      document.execCommand = jest.fn();
+    });
+
+    it('should return false and publish error if element is invalid', () => {
+      expect(writeToInputField(null, 'test')).toBe(false);
+      expect(publish).toHaveBeenCalledWith(EVENTS.ERROR_OCCURRED, expect.any(Object));
+      const div = document.createElement('div'); // Not an input element
+      expect(writeToInputField(div, 'test')).toBe(false);
+      expect(publish).toHaveBeenCalledTimes(2);
+    });
+
+    it('should try handleTwitterInput for contentEditable', () => {
+      const domUtils = require('../../modules/dom-utils');
+      const originalTwitterHandler = domUtils.handleTwitterInput;
+      domUtils.handleTwitterInput = jest.fn().mockReturnValue(true);
+
+      const result = writeToInputField(contentEditableEl, 'twitter test');
+      expect(result).toBe(true);
+      expect(domUtils.handleTwitterInput).toHaveBeenCalledWith(contentEditableEl, 'twitter test');
+
+      domUtils.handleTwitterInput = originalTwitterHandler;
+    });
+
+    it('should use execCommand for contentEditable if Twitter handler fails', () => {
+      const domUtils = require('../../modules/dom-utils');
+      const originalTwitterHandler = domUtils.handleTwitterInput;
+      domUtils.handleTwitterInput = jest.fn().mockReturnValue(false);
+      document.execCommand.mockReturnValue(true);
+
+      const result = writeToInputField(contentEditableEl, 'exec test');
+      expect(result).toBe(true);
+      expect(domUtils.handleTwitterInput).toHaveBeenCalled();
+      expect(document.execCommand).toHaveBeenCalledWith('selectAll', false, null);
+      expect(document.execCommand).toHaveBeenCalledWith('delete', false, null);
+      expect(document.execCommand).toHaveBeenCalledWith('insertText', false, 'exec test');
+      expect(contentEditableEl.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'input' }));
+
+      domUtils.handleTwitterInput = originalTwitterHandler;
+    });
+
+    it('should fallback to setInputValue if execCommand fails for contentEditable', () => {
+      const domUtils = require('../../modules/dom-utils');
+      const originalTwitterHandler = domUtils.handleTwitterInput;
+      domUtils.handleTwitterInput = jest.fn().mockReturnValue(false);
+      document.execCommand.mockReturnValue(false);
+
+      const originalSetInputValue = domUtils.setInputValue;
+      domUtils.setInputValue = jest.fn().mockReturnValue(true);
+
+
+      const result = writeToInputField(contentEditableEl, 'fallback test');
+      expect(result).toBe(true);
+      expect(domUtils.setInputValue).toHaveBeenCalledWith(contentEditableEl, 'fallback test');
+
+      domUtils.handleTwitterInput = originalTwitterHandler;
+      domUtils.setInputValue = originalSetInputValue;
+    });
+
+    it('should use setInputValue for standard input elements', () => {
+      const domUtils = require('../../modules/dom-utils');
+      const originalSetInputValue = domUtils.setInputValue;
+      domUtils.setInputValue = jest.fn().mockReturnValue(true);
+
+      const result = writeToInputField(inputEl, 'standard test');
+      expect(result).toBe(true);
+      expect(domUtils.setInputValue).toHaveBeenCalledWith(inputEl, 'standard test');
+
+      domUtils.setInputValue = originalSetInputValue;
+    });
+
+    it('should handle errors, call createError/handleError, and attempt last resort fallback', () => {
+      const domUtils = require('../../modules/dom-utils');
+      const originalSetInputValue = domUtils.setInputValue;
+      domUtils.setInputValue = jest.fn(() => { throw new Error('setInputValue error'); });
+
+      const result = writeToInputField(inputEl, 'error test');
+      expect(result).toBe(true); // Fallback should succeed
+      expect(createError).toHaveBeenCalled();
+      expect(handleError).toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalledWith('Error writing to input field:', expect.any(Error));
+      expect(inputEl.value).toBe('error test');
+      expect(inputEl.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'input' }));
+
+      domUtils.setInputValue = originalSetInputValue;
+    });
+
+     it('should return false if last resort fallback also fails', () => {
+      const domUtils = require('../../modules/dom-utils');
+      const originalSetInputValue = domUtils.setInputValue;
+      domUtils.setInputValue = jest.fn(() => { throw new Error('setInputValue error'); });
+
+      Object.defineProperty(inputEl, 'value', {
+        set: jest.fn(() => { throw new Error('Fallback value set error'); }),
+        configurable: true
+      });
+
+
+      const result = writeToInputField(inputEl, 'double error test');
+      expect(result).toBe(false);
+      expect(console.error).toHaveBeenCalledWith('Fallback error writing to input field:', expect.any(Error));
+
+      domUtils.setInputValue = originalSetInputValue;
+    });
+  });
+
+  describe('appendToInputField', () => {
+    let inputEl, contentEditableEl; // Renamed
+    beforeEach(() => {
+      inputEl = createInputField({ value: 'initial ', isVisible: true });
+      mockElementPosition(inputEl, { width: 10, height: 10 });
+      Object.defineProperty(inputEl, 'offsetParent', { get: jest.fn(() => document.body) });
+      jest.spyOn(inputEl, 'focus');
+      jest.spyOn(inputEl, 'dispatchEvent');
+
+      contentEditableEl = document.createElement('div');
+      contentEditableEl.isContentEditable = true;
+      contentEditableEl.textContent = 'initial ';
+      document.body.appendChild(contentEditableEl);
+      mockElementPosition(contentEditableEl, { width: 10, height: 10 });
+      Object.defineProperty(contentEditableEl, 'offsetParent', { get: jest.fn(() => document.body) });
+      jest.spyOn(contentEditableEl, 'focus');
+      jest.spyOn(contentEditableEl, 'dispatchEvent');
+      document.execCommand = jest.fn();
+    });
+
+    it('should return false and publish error if element is invalid', () => {
+      expect(appendToInputField(null, 'text')).toBe(false);
+      expect(publish).toHaveBeenCalledWith(EVENTS.ERROR_OCCURRED, expect.any(Object));
+    });
+
+    it('should append text to standard input', () => {
+      const result = appendToInputField(inputEl, 'appended');
+      expect(result).toBe(true);
+      expect(inputEl.value).toBe('initial appended');
+      expect(inputEl.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'input', data: 'appended' }));
+      expect(inputEl.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'change' }));
+    });
+
+    it('should use completeText if provided for standard input', () => {
+      appendToInputField(inputEl, 'ignored', 'completely new text');
+      expect(inputEl.value).toBe('completely new text');
+    });
+
+    it('should not dispatch change event if isFinal is false for standard input', () => {
+      appendToInputField(inputEl, 'appended', '', false);
+      expect(inputEl.dispatchEvent).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'change' }));
+    });
+
+    it('should try handleTwitterInput for contentEditable append', () => {
+      const domUtils = require('../../modules/dom-utils');
+      const originalTwitterHandler = domUtils.handleTwitterInput;
+      domUtils.handleTwitterInput = jest.fn().mockReturnValue(true);
+
+      const result = appendToInputField(contentEditableEl, 'appended');
+      expect(result).toBe(true);
+      expect(domUtils.handleTwitterInput).toHaveBeenCalledWith(contentEditableEl, 'initial appended');
+
+      domUtils.handleTwitterInput = originalTwitterHandler;
+    });
+
+    it('should use execCommand for contentEditable append if Twitter fails', () => {
+      const domUtils = require('../../modules/dom-utils');
+      const originalTwitterHandler = domUtils.handleTwitterInput;
+      domUtils.handleTwitterInput = jest.fn().mockReturnValue(false);
+      document.execCommand.mockReturnValue(true);
+
+      appendToInputField(contentEditableEl, 'appended');
+      expect(document.execCommand).toHaveBeenCalledWith('insertText', false, 'initial appended');
+      expect(contentEditableEl.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'input', data: 'appended' }));
+
+      domUtils.handleTwitterInput = originalTwitterHandler;
+    });
+
+    it('should fallback to direct textContent set for contentEditable append', () => {
+      const domUtils = require('../../modules/dom-utils');
+      const originalTwitterHandler = domUtils.handleTwitterInput;
+      domUtils.handleTwitterInput = jest.fn().mockReturnValue(false);
+      document.execCommand.mockReturnValue(false);
+
+      appendToInputField(contentEditableEl, 'appended');
+      expect(contentEditableEl.textContent).toBe('initial appended');
+      expect(contentEditableEl.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'input', data: 'appended' }));
+    });
+
+    it('should handle errors, call createError/handleError, and return false', () => {
+      inputEl.focus = jest.fn(() => { throw new Error('Focus error during append'); });
+      const result = appendToInputField(inputEl, 'appended');
+      expect(result).toBe(false);
+      expect(createError).toHaveBeenCalled();
+      expect(handleError).toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('clickButtonWithFeedback', () => {
+    let button;
+    beforeEach(() => {
+      jest.useFakeTimers();
+      button = createSubmitButton();
+      mockElementPosition(button, { width: 10, height: 10 });
+      Object.defineProperty(button, 'offsetParent', { get: jest.fn(() => document.body) });
+      jest.spyOn(button, 'click');
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should return false if button is null or disabled', () => {
+      expect(clickButtonWithFeedback(null)).toBe(false);
+      const disabledButton = createSubmitButton({ disabled: true });
+      expect(clickButtonWithFeedback(disabledButton)).toBe(false);
+    });
+
+    it('should apply styles, click, restore styles, and publish event', () => {
+      const originalBg = button.style.backgroundColor;
+      const originalBorder = button.style.border;
+
+      const result = clickButtonWithFeedback(button);
+      expect(result).toBe(true);
+      expect(button.style.backgroundColor).toBe('rgb(76, 175, 80)');
+      expect(button.style.border).toBe('2px solid rgb(46, 125, 50)');
+
+      jest.runAllTimers();
+
+      expect(button.style.backgroundColor).toBe(originalBg);
+      expect(button.style.border).toBe(originalBorder);
+      expect(button.click).toHaveBeenCalled();
+      expect(publish).toHaveBeenCalledWith(EVENTS.STATUS_UPDATED, {
+        messageKey: 'statusSubmitClicked',
+        persistent: false,
+      });
+    });
+
+    it('should handle errors, call createError/handleError, and return false', () => {
+      Object.defineProperty(button, 'style', {
+          get: () => { throw new Error('Style error'); },
+          configurable: true
+      });
+      expect(clickButtonWithFeedback(button)).toBe(false);
+
+      expect(createError).toHaveBeenCalled();
+      expect(handleError).toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('clearInputField', () => {
+    let inputEl, contentEditableEl; // Renamed
+    beforeEach(() => {
+      inputEl = createInputField({ value: 'some text', isVisible: true });
+      mockElementPosition(inputEl, { width: 10, height: 10 });
+      Object.defineProperty(inputEl, 'offsetParent', { get: jest.fn(() => document.body) });
+      jest.spyOn(inputEl, 'focus');
+      jest.spyOn(inputEl, 'dispatchEvent');
+
+      contentEditableEl = document.createElement('div');
+      contentEditableEl.isContentEditable = true;
+      contentEditableEl.textContent = 'some content';
+      document.body.appendChild(contentEditableEl);
+      mockElementPosition(contentEditableEl, { width: 10, height: 10 });
+      Object.defineProperty(contentEditableEl, 'offsetParent', { get: jest.fn(() => document.body) });
+      jest.spyOn(contentEditableEl, 'focus');
+      jest.spyOn(contentEditableEl, 'dispatchEvent');
+    });
+
+    it('should return false if element is null or not an input element', () => {
+      expect(clearInputField(null)).toBe(false);
+      const div = document.createElement('div');
+      expect(clearInputField(div)).toBe(false);
+    });
+
+    it('should clear value of input element and dispatch events', () => {
+      const result = clearInputField(inputEl);
+      expect(result).toBe(true);
+      expect(inputEl.focus).toHaveBeenCalled();
+      expect(inputEl.value).toBe('');
+      expect(inputEl.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'input' }));
+      expect(inputEl.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'change' }));
+    });
+
+    it('should clear textContent of contentEditable element and dispatch events', () => {
+      const result = clearInputField(contentEditableEl);
+      expect(result).toBe(true);
+      expect(contentEditableEl.focus).toHaveBeenCalled();
+      expect(contentEditableEl.textContent).toBe('');
+      expect(contentEditableEl.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'input' }));
+      expect(contentEditableEl.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'change' }));
+    });
+
+    it('should handle errors, call createError/handleError, and return false', () => {
+      inputEl.focus = jest.fn(() => { throw new Error('Focus error'); });
+      const result = clearInputField(inputEl);
+      expect(result).toBe(false);
+      expect(createError).toHaveBeenCalled();
+      expect(handleError).toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('findElement', () => {
+    it('should find an element by selector', () => {
+      const div = document.createElement('div');
+      div.id = 'test-id';
+      document.body.appendChild(div);
+      expect(findElement('#test-id')).toBe(div);
+    });
+
+    it('should return null if element is not found', () => {
+      expect(findElement('#non-existent-id')).toBeNull();
+    });
+
+    it('should search within a parent element', () => {
+      const parent = document.createElement('div');
+      const child = document.createElement('span');
+      child.className = 'test-class';
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+      expect(findElement('.test-class', parent)).toBe(child);
+    });
+
+    it('should handle errors and return null', () => {
+      document.querySelector = jest.fn(() => { throw new Error('Query error'); });
+      expect(findElement('.any')).toBeNull();
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('findAllElements', () => {
+    it('should find all elements matching a selector', () => {
+      const div1 = document.createElement('div');
+      div1.className = 'multi-test';
+      const div2 = document.createElement('div');
+      div2.className = 'multi-test';
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+      const results = findAllElements('.multi-test');
+      expect(results.length).toBe(2);
+      expect(results).toContain(div1);
+      expect(results).toContain(div2);
+    });
+
+    it('should return an empty array if no elements are found', () => {
+      expect(findAllElements('.non-existent-class')).toEqual([]);
+    });
+
+    it('should search within a parent element', () => {
+      const parent = document.createElement('div');
+      const child1 = document.createElement('span');
+      child1.className = 'multi-child';
+      const child2 = document.createElement('span');
+      child2.className = 'multi-child';
+      parent.appendChild(child1);
+      parent.appendChild(child2);
+      document.body.appendChild(parent);
+      const anotherChild = document.createElement('span'); // Outside parent
+      anotherChild.className = 'multi-child';
+      document.body.appendChild(anotherChild);
+
+      const results = findAllElements('.multi-child', parent);
+      expect(results.length).toBe(2);
+      expect(results).toContain(child1);
+      expect(results).toContain(child2);
+    });
+
+    it('should handle errors and return an empty array', () => {
+      document.querySelectorAll = jest.fn(() => { throw new Error('QueryAll error'); });
+      expect(findAllElements('.any')).toEqual([]);
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+});
