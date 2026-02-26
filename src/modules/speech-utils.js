@@ -5,6 +5,7 @@
 
 import { setState, getState } from './state.js';
 import { publish, EVENTS } from './event-bus.js';
+export { publishStatus as showStatus } from './event-bus.js';
 
 /**
  * Update mic button state
@@ -78,16 +79,6 @@ export function forceSetTextAreaValue(element, value) {
         console.error(chrome.i18n.getMessage('logForceSetError'), e);
         return false;
     }
-}
-
-/**
- * Status display function - proxy to avoid circular dependencies
- * @param {string} messageKey - i18n key for the message to display
- * @param {string|undefined} substitutions - Replacement string in the message
- * @param {boolean} persistent - Whether to display persistently
- */
-export function showStatus(messageKey, substitutions, persistent = false) {
-    publish(EVENTS.STATUS_UPDATED, { messageKey, substitutions, persistent });
 }
 
 /**

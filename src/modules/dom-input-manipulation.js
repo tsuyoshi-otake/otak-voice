@@ -3,6 +3,7 @@ import { isInputElement } from './dom-input-detection.js';
 import { isButtonDisabled } from './dom-button-detection.js';
 import { createError, handleError, ERROR_CODE, ERROR_CATEGORY, ERROR_SEVERITY } from './error-handler.js';
 import { publish, EVENTS } from './event-bus.js';
+import { UI_FEEDBACK } from '../constants.js';
 
 /**
  * Safely dispatches events to an element
@@ -41,8 +42,7 @@ export function dispatchEvent(element, eventType, options = {}) {
     return false;
   }
 }
-/**
- * Sets the value of an input element and dispatches appropriate events
+/** Sets the value of an input element and dispatches appropriate events
  * @param {Element} element - Input element
  * @param {string} text - Text to set
  * @returns {boolean} True if successful
@@ -222,24 +222,24 @@ export function appendToInputField(element, text, completeText = '', isFinal = t
     return false;
   }
 }
-/**
- * Clicks a button with visual feedback
+/** Clicks a button with visual feedback
  * @param {Element} button - Button to click
+ * @param {number} [delayMs] - Delay before clicking (defaults to UI_FEEDBACK.CLICK_FEEDBACK_DELAY_MS)
  * @returns {boolean} True if successful
  */
-export function clickButtonWithFeedback(button) {
+export function clickButtonWithFeedback(button, delayMs = UI_FEEDBACK.CLICK_FEEDBACK_DELAY_MS) {
   if (!button || isButtonDisabled(button)) return false;
   try {
     const originalBackgroundColor = button.style.backgroundColor;
     const originalBorder = button.style.border;
-    button.style.backgroundColor = '#4CAF50';
-    button.style.border = '2px solid #2E7D32';
+    button.style.backgroundColor = UI_FEEDBACK.BUTTON_HIGHLIGHT_COLOR;
+    button.style.border = UI_FEEDBACK.BUTTON_HIGHLIGHT_BORDER;
     setTimeout(() => {
       button.style.backgroundColor = originalBackgroundColor;
       button.style.border = originalBorder;
       button.click();
       publish(EVENTS.STATUS_UPDATED, { messageKey: 'statusSubmitClicked', persistent: false });
-    }, 500);
+    }, delayMs);
     return true;
   } catch (error) {
     console.error('Error clicking button with feedback:', error);

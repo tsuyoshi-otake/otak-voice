@@ -3,9 +3,9 @@
  * Provides processing for OpenAI's ChatGPT interface
  */
 
-import { showStatus } from '../modules/ui.js';
 import { retryInputEvents } from '../modules/utils.js';
-import { isButtonDisabled, filterVisibleElements } from '../modules/dom-utils.js';
+import { isButtonDisabled, filterVisibleElements, clickButtonWithFeedback } from '../modules/dom-utils.js';
+import { UI_FEEDBACK } from '../constants.js';
 
 /**
  * OpenAI特有のセレクター
@@ -47,38 +47,15 @@ export function findChatGPTSubmitButton() {
  */
 export function submitAfterVoiceInput() {
     try {
-        // ChatGPT送信ボタンを検索
         const submitButton = findChatGPTSubmitButton();
-
         if (submitButton) {
-            // ボタンが無効状態かチェック
             if (isButtonDisabled(submitButton)) {
                 console.log(chrome.i18n.getMessage('logSubmitButtonDisabled'));
-
-                // イベント再試行によるReact状態更新促進
-                if (typeof retryInputEvents === 'function') {
-                    retryInputEvents();
-                }
+                retryInputEvents();
                 return false;
             }
-
-            // ボタンをハイライト
-            const originalBackgroundColor = submitButton.style.backgroundColor;
-            submitButton.style.backgroundColor = '#4CAF50';
-
-            // 少し待機してから送信
-            setTimeout(() => {
-                submitButton.style.backgroundColor = originalBackgroundColor;
-                submitButton.click();
-
-                // ステータス表示
-                if (typeof showStatus === 'function') {
-                    showStatus('statusSubmitClicked');
-                }
-            }, 300);
-            return true;
+            return clickButtonWithFeedback(submitButton, UI_FEEDBACK.SUBMIT_DELAY_MS);
         }
-
         return false;
     } catch (error) {
         console.error('Error submitting after voice input:', error);

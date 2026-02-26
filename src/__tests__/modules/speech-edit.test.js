@@ -7,6 +7,7 @@ import {
 import * as gptService from '../../modules/gpt-service';
 import * as history from '../../modules/history';
 import * as utils from '../../modules/utils';
+import * as domUtils from '../../modules/dom-utils';
 import * as state from '../../modules/state';
 import * as eventBus from '../../modules/event-bus';
 import * as constants from '../../constants';
@@ -18,6 +19,7 @@ import * as speech from '../../modules/speech';
 jest.mock('../../modules/gpt-service');
 jest.mock('../../modules/history');
 jest.mock('../../modules/utils');
+jest.mock('../../modules/dom-utils');
 jest.mock('../../modules/state');
 jest.mock('../../site-handlers/site-detector');
 
@@ -192,7 +194,7 @@ describe('speech.js - Edit & UI', () => {
 
         state.setState.mockImplementation(() => {});
         state.subscribe.mockImplementation(() => {});
-        utils.isInputElement.mockImplementation(el =>
+        domUtils.isInputElement.mockImplementation(el =>
             el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)
         );
         siteDetector.detectSiteType.mockReturnValue('default');

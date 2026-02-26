@@ -6,7 +6,7 @@ import { getSiteHandler } from '../site-handlers/site-detector.js';
 import { proofreadWithGPT } from './gpt-service.js';
 import { PROCESSING_STATE } from '../constants.js';
 import { getState, setState } from './state.js';
-import { publish, EVENTS } from './event-bus.js';
+import { publishStatus as showStatus } from './event-bus.js';
 import { toggleSettingsModal } from './ui-settings-modal.js';
 import { createError, handleError, ERROR_CODE, ERROR_CATEGORY, ERROR_SEVERITY } from './error-handler.js';
 import {
@@ -15,16 +15,6 @@ import {
     clearInputField as domClearInputField,
     findBestInputField as domFindBestInputField
 } from './dom-utils.js';
-
-/**
- * ステータス表示関数 - UIモジュールへの依存を避けるためのプロキシ
- * @param {string} messageKey - i18n key for the message to display
- * @param {string|undefined} substitutions - Replacement string in the message
- * @param {boolean} persistent - Whether to display persistently
- */
-function showStatus(messageKey, substitutions, persistent = false) {
-    publish(EVENTS.STATUS_UPDATED, { messageKey, substitutions, persistent });
-}
 
 /**
  * 最適な入力フィールドを探します
@@ -99,7 +89,7 @@ export function clearCurrentInput() {
             // 追記モード時の元テキストもクリア
             const currentInputElement = getState('currentInputElement');
             if (targetElement === currentInputElement) setState('originalText', '');
-            publish(EVENTS.STATUS_UPDATED, { messageKey: 'statusClearSuccess' });
+            showStatus('statusClearSuccess');
             return;
         }
     }
@@ -116,12 +106,12 @@ export function clearCurrentInput() {
         }
         if (targetElement) {
             targetElement.focus();
-            publish(EVENTS.STATUS_UPDATED, { messageKey: 'statusInputFound' });
+            showStatus('statusInputFound');
         } else {
             if (!getState('autoDetectInputFields')) {
-                publish(EVENTS.STATUS_UPDATED, { messageKey: 'statusAutoDetectOff' });
+                showStatus('statusAutoDetectOff');
             } else {
-                publish(EVENTS.STATUS_UPDATED, { messageKey: 'statusClearNotFound' });
+                showStatus('statusClearNotFound');
             }
             return;
         }
@@ -130,7 +120,7 @@ export function clearCurrentInput() {
     if (domClearInputField(targetElement)) {
         const currentInputElement = getState('currentInputElement');
         if (targetElement === currentInputElement) setState('originalText', '');
-        publish(EVENTS.STATUS_UPDATED, { messageKey: 'statusClearSuccess' });
+        showStatus('statusClearSuccess');
     } else {
         const appError = createError(
             ERROR_CODE[ERROR_CATEGORY.DOM].INPUT_OPERATION_FAILED,

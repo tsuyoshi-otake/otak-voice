@@ -25,6 +25,7 @@ jest.mock('../../modules/state.js', () => ({
 
 jest.mock('../../modules/event-bus.js', () => ({
   publish: jest.fn(),
+  publishStatus: jest.fn(),
   subscribe: jest.fn(() => jest.fn()),
   EVENTS: {
     STATUS_UPDATED: 'status:updated',
@@ -206,10 +207,7 @@ describe('Input Handler Operations Module', () => {
       inputHandler.clearCurrentInput();
 
       expect(domUtils.clearInputField).toHaveBeenCalled();
-      expect(eventBus.publish).toHaveBeenCalledWith(
-        eventBus.EVENTS.STATUS_UPDATED,
-        { messageKey: 'statusClearSuccess' }
-      );
+      expect(eventBus.publishStatus).toHaveBeenCalledWith('statusClearSuccess');
     });
 
     test('最後にクリックした入力要素を使用', () => {
@@ -233,7 +231,6 @@ describe('Input Handler Operations Module', () => {
   describe('Initialization', () => {
     test('initInputHandler - 初期化', async () => {
       await inputHandler.initInputHandler();
-      expect(stateModule.initializeState).toHaveBeenCalled();
       expect(stateModule.setState).toHaveBeenCalledWith('menuExpanded', expect.any(Boolean));
     });
 
@@ -260,7 +257,7 @@ describe('Input Handler Operations Module', () => {
       await inputHandler.proofreadCurrentInput();
 
       expect(stateModule.setState).not.toHaveBeenCalledWith('processingState', PROCESSING_STATE.PROOFREADING);
-      expect(eventBus.publish).toHaveBeenCalled();
+      expect(eventBus.publishStatus).toHaveBeenCalled();
     });
 
     test('proofreadCurrentInput - 空のコンテンツ', async () => {
@@ -277,7 +274,7 @@ describe('Input Handler Operations Module', () => {
 
       await inputHandler.proofreadCurrentInput();
 
-      expect(eventBus.publish).toHaveBeenCalled();
+      expect(eventBus.publishStatus).toHaveBeenCalled();
       expect(stateModule.setState).toHaveBeenCalledWith('processingState', PROCESSING_STATE.IDLE);
     });
   });

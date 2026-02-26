@@ -4,7 +4,7 @@
  */
 
 import { editWithGPT } from './gpt-service.js';
-import { isInputElement } from './utils.js';
+import { isInputElement } from './dom-utils.js';
 import { getState, setState } from './state.js';
 import { publish, EVENTS } from './event-bus.js';
 import { PROCESSING_STATE } from '../constants.js';

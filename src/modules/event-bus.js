@@ -85,6 +85,16 @@ export function getHandlerCount(eventName) {
 }
 
 /**
+ * Publish a STATUS_UPDATED event (convenience wrapper to avoid circular deps)
+ * @param {string} messageKey - i18n key for the status message
+ * @param {string|undefined} substitutions - Optional substitution string
+ * @param {boolean} persistent - Whether to display persistently
+ */
+export function publishStatus(messageKey, substitutions, persistent = false) {
+  publish(EVENTS.STATUS_UPDATED, { messageKey, substitutions, persistent });
+}
+
+/**
  * Standard event names used throughout the application.
  * Grouped by category with namespace pattern: 'category:subcategory:action'
  *

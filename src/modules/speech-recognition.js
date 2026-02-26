@@ -3,7 +3,7 @@
  */
 import { correctWithGPT } from './gpt-service.js';
 import { addToHistory } from './history.js';
-import { isInputElement } from './utils.js';
+import { isInputElement } from './dom-utils.js';
 import { getState, setState } from './state.js';
 import { publish, subscribe as eventSubscribe, EVENTS } from './event-bus.js';
 import { DEFAULT_SETTINGS } from '../constants.js';

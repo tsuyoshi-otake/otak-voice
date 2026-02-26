@@ -3,7 +3,7 @@
  * Responsible for setting up event listeners and event bus subscriptions
  */
 import { PROCESSING_STATE } from '../constants.js';
-import { isInputElement } from './utils.js';
+import { isInputElement } from './dom-utils.js';
 import { getState } from './state.js';
 import { publish, subscribe, EVENTS } from './event-bus.js';
 import { saveSetting } from './settings.js';

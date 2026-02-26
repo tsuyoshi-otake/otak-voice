@@ -4,17 +4,11 @@
  * Provides text proofreading using GPT API
  */
 
-import { GPT_MODELS } from '../constants.js';
+import { GPT_MODELS, GPT_PARAMS, DEFAULT_SETTINGS } from '../constants.js';
 import { getState } from './state.js';
 import { publish, EVENTS } from './event-bus.js';
-import {
-    makeGPTRequest,
-    handleAPIError,
-    createError,
-    ERROR_CODE,
-    ERROR_CATEGORY,
-    ERROR_SEVERITY
-} from './gpt-api-client.js';
+import { makeGPTRequest, handleAPIError, validateApiKey } from './gpt-api-client.js';
+import { createError, ERROR_CODE, ERROR_CATEGORY, ERROR_SEVERITY } from './error-handler.js';
 
 /**
  * @param {string} text - Text to proofread
@@ -22,7 +16,7 @@ import {
  */
 export async function proofreadWithGPT(text) {
     const apiKey = getState('apiKey');
-    if (!apiKey) throw new Error(chrome.i18n.getMessage('statusApiKeyMissing'));
+    if (!validateApiKey(apiKey)) throw new Error(chrome.i18n.getMessage('statusApiKeyMissing'));
 
     try {
         // Use event bus to show status
@@ -34,7 +28,7 @@ export async function proofreadWithGPT(text) {
 
         // Get custom prompt from settings or use default
         const customPrompt = getState('proofreadingPrompt');
-        const systemPrompt = customPrompt || "You are an assistant that proofreads Japanese text. For the entire text provided by the user, correct typos, grammatical errors, and unnatural expressions to make it a more natural and readable text. Please preserve the original meaning and nuance of the text as much as possible. Output only the corrected text.";
+        const systemPrompt = customPrompt || DEFAULT_SETTINGS.PROOFREADING_PROMPT;
 
         const messages = [
             {
@@ -50,8 +44,8 @@ export async function proofreadWithGPT(text) {
         const response = await makeGPTRequest(
             messages,
             GPT_MODELS.PROOFREADING,
-            32768, // Support for long output
-            0.5,   // Moderate creativity for proofreading
+            GPT_PARAMS.PROOFREADING.maxTokens,
+            GPT_PARAMS.PROOFREADING.temperature,
             apiKey
         );
 

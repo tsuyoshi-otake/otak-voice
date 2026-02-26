@@ -3,7 +3,7 @@
  * Detects the current site and returns the appropriate handler
  */
 
-import { SITE_TYPES } from '../constants.js';
+import { SITE_TYPES, PAPER_PLANE_SVG } from '../constants.js';
 import * as SystemExeHandler from './systemexe.js';
 import * as AIChatHandler from './ai-chat.js';
 import * as TwitterHandler from './twitter.js';
@@ -61,19 +61,24 @@ export function detectSiteType() {
     // Look for buttons with specific SVG patterns (like paper airplane icons)
     const allButtons = document.querySelectorAll('button');
     for (const button of allButtons) {
-        // Check if it has paper airplane SVG pattern
-        const svg = button.querySelector('svg');
-        if (svg) {
-            const hasLine = svg.querySelector('line[x1="22"][y1="2"][x2="11"][y2="13"]');
-            const hasPolygon = svg.querySelector('polygon[points="22 2 15 22 11 13 2 9 22 2"]');
-
-            if (hasLine && hasPolygon) {
-                return SITE_TYPES.AI_CHAT;
-            }
+        if (hasPaperPlaneSVG(button.querySelector('svg'))) {
+            return SITE_TYPES.AI_CHAT;
         }
     }
     
     return SITE_TYPES.DEFAULT;
+}
+
+/**
+ * Checks if an SVG element matches the paper airplane icon pattern
+ * @param {Element} svgElement - SVG element to check
+ * @returns {boolean} true if paper airplane pattern found
+ */
+export function hasPaperPlaneSVG(svgElement) {
+    if (!svgElement) return false;
+    const hasLine = svgElement.querySelector(PAPER_PLANE_SVG.LINE_SELECTOR);
+    const hasPolygon = svgElement.querySelector(PAPER_PLANE_SVG.POLYGON_SELECTOR);
+    return !!(hasLine && hasPolygon);
 }
 
 /**

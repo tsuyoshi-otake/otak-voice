@@ -3,7 +3,6 @@
  * Provides System.exe-specific processing
  */
 
-import { showStatus } from '../modules/ui.js';
 import { retryInputEvents } from '../modules/utils.js';
 import {
   findElement,
@@ -12,7 +11,7 @@ import {
   clickButtonWithFeedback,
   isElementVisible
 } from '../modules/dom-utils.js';
-import { publish, EVENTS } from '../modules/event-bus.js';
+import { PAPER_PLANE_SVG } from '../constants.js';
 
 /**
  * Searches for System.exe-specific submit button
@@ -37,8 +36,8 @@ export function findSubmitButton() {
         // Check if it has paper airplane SVG pattern
         const svg = button.querySelector('svg');
         if (svg) {
-            const hasLine = svg.querySelector('line[x1="22"][y1="2"][x2="11"][y2="13"]');
-            const hasPolygon = svg.querySelector('polygon[points="22 2 15 22 11 13 2 9 22 2"]');
+            const hasLine = svg.querySelector(PAPER_PLANE_SVG.LINE_SELECTOR);
+            const hasPolygon = svg.querySelector(PAPER_PLANE_SVG.POLYGON_SELECTOR);
 
             if (hasLine && hasPolygon) {
                 console.log('Found paper airplane SVG button in System.exe site');
@@ -52,8 +51,8 @@ export function findSubmitButton() {
     for (const div of cursorNotAllowedDivs) {
         const svg = div.querySelector('svg');
         if (svg) {
-            const hasLine = svg.querySelector('line[x1="22"][y1="2"][x2="11"][y2="13"]');
-            const hasPolygon = svg.querySelector('polygon[points="22 2 15 22 11 13 2 9 22 2"]');
+            const hasLine = svg.querySelector(PAPER_PLANE_SVG.LINE_SELECTOR);
+            const hasPolygon = svg.querySelector(PAPER_PLANE_SVG.POLYGON_SELECTOR);
 
             if (hasLine && hasPolygon) {
                 console.log('Found paper airplane SVG in cursor-not-allowed div');

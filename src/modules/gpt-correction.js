@@ -4,21 +4,13 @@
  * Provides voice input correction using GPT API
  */
 
-import { GPT_MODELS, PROCESSING_STATE } from '../constants.js';
+import { GPT_MODELS, PROCESSING_STATE, GPT_PARAMS, DEFAULT_SETTINGS } from '../constants.js';
 import { getState } from './state.js';
 import { voiceHistory } from './history.js';
 import { updateProcessingState } from './ui.js';
 import { publish, EVENTS } from './event-bus.js';
-import {
-    makeGPTRequest,
-    validateApiKey,
-    handleAPIError,
-    createError,
-    handleError,
-    ERROR_CODE,
-    ERROR_CATEGORY,
-    ERROR_SEVERITY
-} from './gpt-api-client.js';
+import { makeGPTRequest, validateApiKey, handleAPIError } from './gpt-api-client.js';
+import { createError, handleError, ERROR_CODE, ERROR_CATEGORY, ERROR_SEVERITY } from './error-handler.js';
 
 /**
  * @param {string} text - Text to proofread
@@ -50,7 +42,7 @@ export async function correctWithGPT(text) {
 
         // Get custom prompt from settings or use default
         const customPrompt = getState('autoCorrectionPrompt');
-        const systemPrompt = customPrompt || "You are an assistant that corrects Japanese voice input in real-time. Please correct the content spoken by the user (the last message), fixing typos, grammatical errors, and unnatural expressions to make it a more natural and readable text. Consider the previous conversation history (if any) as context. Output only the corrected text.";
+        const systemPrompt = customPrompt || DEFAULT_SETTINGS.AUTO_CORRECTION_PROMPT;
 
         const messages = [
             {
@@ -67,8 +59,8 @@ export async function correctWithGPT(text) {
         const response = await makeGPTRequest(
             messages,
             GPT_MODELS.CORRECTION,
-            150, // Expect short response
-            0.3, // Encourage more deterministic output
+            GPT_PARAMS.CORRECTION.maxTokens,
+            GPT_PARAMS.CORRECTION.temperature,
             apiKey
         );
 

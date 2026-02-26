@@ -12,7 +12,7 @@ jest.mock('../../modules/settings-storage', () => ({
 
 import { toggleTheme, applyTheme } from '../../modules/settings-theme';
 import { getState } from '../../modules/state';
-import { publish, EVENTS } from '../../modules/event-bus';
+import { publish, publishStatus, EVENTS } from '../../modules/event-bus';
 import * as errorHandler from '../../modules/error-handler';
 import { saveSetting } from '../../modules/settings-storage';
 import { THEME_MODES, DEFAULT_SETTINGS } from '../../constants';
@@ -188,10 +188,7 @@ describe('Settings Theme Module', () => {
 
       await toggleTheme();
 
-      expect(publish).toHaveBeenCalledWith(
-        EVENTS.STATUS_UPDATED,
-        expect.objectContaining({ messageKey: 'statusThemeLight' })
-      );
+      expect(publishStatus).toHaveBeenCalledWith('statusThemeLight');
     });
 
     it('should publish STATUS_UPDATED with "statusThemeDark" when toggling to DARK', async () => {
@@ -202,10 +199,7 @@ describe('Settings Theme Module', () => {
 
       await toggleTheme();
 
-      expect(publish).toHaveBeenCalledWith(
-        EVENTS.STATUS_UPDATED,
-        expect.objectContaining({ messageKey: 'statusThemeDark' })
-      );
+      expect(publishStatus).toHaveBeenCalledWith('statusThemeDark');
     });
 
     it('should return true on success', async () => {

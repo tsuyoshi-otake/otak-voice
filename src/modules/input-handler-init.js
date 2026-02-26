@@ -15,7 +15,7 @@ import {
     proofreadCurrentInput,
     enhanceInputElementHandlers
 } from './input-operations.js';
-import { getState, setState, initializeState } from './state.js';
+import { getState, setState } from './state.js';
 import { publish, subscribe as eventSubscribe, EVENTS } from './event-bus.js';
 import {
     createError,
@@ -27,18 +27,12 @@ import {
 import { isInputElement } from './dom-utils.js';
 
 // Variables for append mode
-// Local variable removed because we use window.originalText
-let interimText = ""; // Interim recognition result
 let menuExpanded = false; // Menu expanded state
-const keydownHandlers = new Map(); // Map of elements and keydown handlers
 
 /**
  * input-handler モジュールの初期化
  */
 export async function initInputHandler() {
-    // 状態管理モジュールの初期化
-    initializeState();
-
     // メニュー状態と自動送信状態の読み込み
     console.log('Initializing input handler - loading states...');
     menuExpanded = await loadMenuState();

@@ -9,8 +9,7 @@
 import * as OpenAIChatGPT from './openai-chatgpt.js';
 import * as AnthropicClaude from './anthropic-claude.js';
 import * as GoogleGemini from './google-gemini.js';
-import { showStatus } from '../modules/ui.js';
-import { publish, EVENTS } from '../modules/event-bus.js';
+import { PAPER_PLANE_SVG } from '../constants.js';
 
 /**
  * どのAIチャットプラットフォームかを検出
@@ -69,20 +68,12 @@ function detectAIChatPlatform() {
  */
 function findGenericPaperPlaneButton() {
     const allButtons = document.querySelectorAll('button');
-
     for (const button of allButtons) {
-        // ペーパープレーンアイコンのSVGパターンをチェック
         const svg = button.querySelector('svg');
-        if (svg) {
-            const hasLine = svg.querySelector('line[x1="22"][y1="2"][x2="11"][y2="13"]');
-            const hasPolygon = svg.querySelector('polygon[points="22 2 15 22 11 13 2 9 22 2"]');
-
-            if (hasLine && hasPolygon) {
-                return true;
-            }
+        if (svg && svg.querySelector(PAPER_PLANE_SVG.LINE_SELECTOR) && svg.querySelector(PAPER_PLANE_SVG.POLYGON_SELECTOR)) {
+            return true;
         }
     }
-
     return false;
 }
 

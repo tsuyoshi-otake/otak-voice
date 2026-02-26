@@ -8,7 +8,6 @@ export const AUTO_CORRECTION_PROMPT_STORAGE_KEY = 'auto_correction_prompt';
 export const PROOFREADING_PROMPT_STORAGE_KEY = 'proofreading_prompt';
 export const SHOW_MODAL_WINDOW_STORAGE_KEY = 'showModalWindow';
 export const AUTO_SUBMIT_STORAGE_KEY = 'otak_voice_auto_submit_state';
-export const CLEAR_EXISTING_TEXT_STORAGE_KEY = 'clear_existing_text';
 export const SILENCE_TIMEOUT_STORAGE_KEY = 'silence_timeout';
 
 export const MAX_HISTORY = 10;
@@ -50,4 +49,22 @@ export const PROCESSING_STATE = {
   PROOFREADING: 'proofreading',
   EDITING: 'editing',
   CORRECTING: 'correcting'
+};
+
+export const UI_FEEDBACK = {
+  BUTTON_HIGHLIGHT_COLOR: '#4CAF50',
+  BUTTON_HIGHLIGHT_BORDER: '2px solid #2E7D32',
+  SUBMIT_DELAY_MS: 300,
+  CLICK_FEEDBACK_DELAY_MS: 500,
+};
+
+export const GPT_PARAMS = {
+  CORRECTION: { maxTokens: 150, temperature: 0.3 },
+  PROOFREADING: { maxTokens: 32768, temperature: 0.5 },
+  EDITING: { maxTokens: 32768, temperature: 0.5 },
+};
+
+export const PAPER_PLANE_SVG = {
+  LINE_SELECTOR: 'line[x1="22"][y1="2"][x2="11"][y2="13"]',
+  POLYGON_SELECTOR: 'polygon[points="22 2 15 22 11 13 2 9 22 2"]',
 };

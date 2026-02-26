@@ -5,23 +5,13 @@
 
 import { DEFAULT_SETTINGS, THEME_MODES } from '../constants.js';
 import { getState } from './state.js';
-import { publish, EVENTS } from './event-bus.js';
+import { publishStatus as showStatus } from './event-bus.js';
 import {
   tryCatch,
   ERROR_CATEGORY,
   ERROR_CODE
 } from './error-handler.js';
 import { saveSetting } from './settings-storage.js';
-
-/**
- * Status display function - proxy to avoid circular dependencies
- * @param {string} messageKey - i18n key for the message to display
- * @param {string|undefined} substitutions - Replacement string in the message
- * @param {boolean} persistent - Whether to display persistently
- */
-function showStatus(messageKey, substitutions, persistent = false) {
-  publish(EVENTS.STATUS_UPDATED, { messageKey, substitutions, persistent });
-}
 
 /**
  * Toggle theme between light and dark

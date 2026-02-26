@@ -21,13 +21,15 @@ jest.mock('../../modules/state.js', () => ({
 import {
   makeGPTRequest,
   validateApiKey,
-  handleAPIError,
+  handleAPIError
+} from '../../modules/gpt-api-client.js';
+import {
   createError,
   handleError,
   ERROR_CODE,
   ERROR_CATEGORY,
   ERROR_SEVERITY
-} from '../../modules/gpt-api-client.js';
+} from '../../modules/error-handler.js';
 
 import { publish } from '../../modules/event-bus.js';
 

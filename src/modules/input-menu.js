@@ -97,15 +97,7 @@ export function updateAutoSubmitButtonState(autoSubmit) {
         autoSubmitButton.style.borderColor = '';
         autoSubmitButton.style.boxShadow = '';
 
-        // 直接イベントバスを使用して通知を表示（persistent: falseで一定時間後に自動的に消える）
         publish(EVENTS.STATUS_UPDATED, { messageKey: 'statusAutoSubmitOn', persistent: false });
-
-        // 通知を強制的に表示
-        const statusElem = document.querySelector('.otak-voice-status');
-        if (statusElem) {
-            statusElem.textContent = chrome.i18n.getMessage('statusAutoSubmitOn');
-            statusElem.style.display = 'block';
-        }
     } else {
         // 自動送信がOFFの場合、アクティブ状態のクラスを追加
         autoSubmitButton.classList.add('otak-voice-menu__append-btn--active');
@@ -116,15 +108,7 @@ export function updateAutoSubmitButtonState(autoSubmit) {
         autoSubmitButton.style.borderColor = '';
         autoSubmitButton.style.boxShadow = '';
 
-        // 直接イベントバスを使用して通知を表示（persistent: falseで一定時間後に自動的に消える）
         publish(EVENTS.STATUS_UPDATED, { messageKey: 'statusAutoSubmitOff', persistent: false });
-
-        // 通知を強制的に表示
-        const statusElem = document.querySelector('.otak-voice-status');
-        if (statusElem) {
-            statusElem.textContent = chrome.i18n.getMessage('statusAutoSubmitOff');
-            statusElem.style.display = 'block';
-        }
     }
 }
 

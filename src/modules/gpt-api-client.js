@@ -84,10 +84,3 @@ export async function makeGPTRequest(messages, model, maxTokens, temperature, ap
     return response;
 }
 
-export {
-    createError,
-    handleError,
-    ERROR_CODE,
-    ERROR_CATEGORY,
-    ERROR_SEVERITY
-};

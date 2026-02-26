@@ -4,21 +4,13 @@
  * Provides text editing using GPT API with instruction-based editing
  */
 
-import { GPT_MODELS, PROCESSING_STATE } from '../constants.js';
+import { GPT_MODELS, PROCESSING_STATE, GPT_PARAMS } from '../constants.js';
 import { getState } from './state.js';
 import { updateProcessingState } from './ui.js';
 import { simulateTypingIntoElement } from './input-handler.js';
 import { publish, EVENTS } from './event-bus.js';
-import {
-    makeGPTRequest,
-    validateApiKey,
-    handleAPIError,
-    createError,
-    handleError,
-    ERROR_CODE,
-    ERROR_CATEGORY,
-    ERROR_SEVERITY
-} from './gpt-api-client.js';
+import { makeGPTRequest, validateApiKey, handleAPIError } from './gpt-api-client.js';
+import { createError, handleError, ERROR_CODE, ERROR_CATEGORY, ERROR_SEVERITY } from './error-handler.js';
 
 /**
  * @param {string} currentText - Current text
@@ -54,8 +46,8 @@ export async function editWithGPT(currentText, instruction, activeElement) {
         const response = await makeGPTRequest(
             messages,
             GPT_MODELS.EDITING,
-            32768,
-            0.5, // Lower temperature for more predictable editing
+            GPT_PARAMS.EDITING.maxTokens,
+            GPT_PARAMS.EDITING.temperature,
             apiKey
         );
 

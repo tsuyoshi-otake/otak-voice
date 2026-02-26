@@ -10,17 +10,12 @@ import {
 } from '../constants.js';
 import { SETTINGS_SCHEMA, getAllStorageKeys, validateSetting } from './settings-schema.js';
 import { getState, setState } from './state.js';
-import { publish, subscribe, EVENTS } from './event-bus.js';
+import { publish, publishStatus as showStatus, subscribe, EVENTS } from './event-bus.js';
 import {
   createError, handleError, tryCatch,
   ERROR_CATEGORY, ERROR_CODE, ERROR_SEVERITY
 } from './error-handler.js';
 import { applyTheme } from './settings-theme.js';
-
-/** Status display function - proxy to avoid circular dependencies */
-function showStatus(messageKey, substitutions, persistent = false) {
-  publish(EVENTS.STATUS_UPDATED, { messageKey, substitutions, persistent });
-}
 
 /** Set up event subscriptions for settings module */
 function setupEventSubscriptions() {

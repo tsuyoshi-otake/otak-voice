@@ -7,6 +7,7 @@ import {
 import * as gptService from '../../modules/gpt-service';
 import * as history from '../../modules/history';
 import * as utils from '../../modules/utils';
+import * as domUtils from '../../modules/dom-utils';
 import * as state from '../../modules/state';
 import * as eventBus from '../../modules/event-bus';
 import * as constants from '../../constants';
@@ -17,6 +18,7 @@ import * as errorHandler from '../../modules/error-handler';
 jest.mock('../../modules/gpt-service');
 jest.mock('../../modules/history');
 jest.mock('../../modules/utils');
+jest.mock('../../modules/dom-utils');
 jest.mock('../../modules/state');
 jest.mock('../../site-handlers/site-detector');
 
@@ -24,6 +26,7 @@ jest.mock('../../site-handlers/site-detector');
 jest.mock('../../modules/event-bus', () => {
     return {
         publish: jest.fn(),
+        publishStatus: jest.fn(),
         subscribe: jest.fn(),
         EVENTS: {
             MIC_BUTTON_CLICKED: 'mic:button:clicked',
@@ -193,7 +196,7 @@ describe('speech.js - Recognition Core', () => {
 
         state.setState.mockImplementation(() => {});
         state.subscribe.mockImplementation(() => {});
-        utils.isInputElement.mockImplementation(el =>
+        domUtils.isInputElement.mockImplementation(el =>
             el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)
         );
         siteDetector.detectSiteType.mockReturnValue('default');

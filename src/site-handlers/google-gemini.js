@@ -3,9 +3,9 @@
  * Provides processing for Google's Gemini/Bard interface
  */
 
-import { showStatus } from '../modules/ui.js';
 import { retryInputEvents } from '../modules/utils.js';
-import { isButtonDisabled, filterVisibleElements } from '../modules/dom-utils.js';
+import { isButtonDisabled, filterVisibleElements, clickButtonWithFeedback } from '../modules/dom-utils.js';
+import { UI_FEEDBACK } from '../constants.js';
 
 /**
  * Gemini特有のセレクター
@@ -149,48 +149,22 @@ function findButtonByIcon() {
  */
 export function submitAfterVoiceInput() {
     try {
-        // Gemini送信ボタンを検索
         const submitButton = findGeminiSubmitButton();
-
         if (submitButton) {
-            // ボタンが無効状態かチェック
             if (isButtonDisabled(submitButton)) {
                 console.log(chrome.i18n.getMessage('logSubmitButtonDisabled'));
-
-                // イベント再試行によるフレームワーク状態更新促進
-                if (typeof retryInputEvents === 'function') {
-                    retryInputEvents();
-                }
-
+                retryInputEvents();
                 // Gemini/Bardは長めの待機時間が必要な場合がある
                 setTimeout(() => {
-                    // 再度ボタンを取得して再試行
                     const refreshedButton = findGeminiSubmitButton();
                     if (refreshedButton && !isButtonDisabled(refreshedButton)) {
                         refreshedButton.click();
                     }
                 }, 800);
-
                 return false;
             }
-
-            // ボタンをハイライト
-            const originalBackgroundColor = submitButton.style.backgroundColor;
-            submitButton.style.backgroundColor = '#4CAF50';
-
-            // 少し待機してから送信
-            setTimeout(() => {
-                submitButton.style.backgroundColor = originalBackgroundColor;
-                submitButton.click();
-
-                // ステータス表示
-                if (typeof showStatus === 'function') {
-                    showStatus('statusSubmitClicked');
-                }
-            }, 300);
-            return true;
+            return clickButtonWithFeedback(submitButton, UI_FEEDBACK.SUBMIT_DELAY_MS);
         }
-
         return false;
     } catch (error) {
         console.error('Error submitting after voice input:', error);
