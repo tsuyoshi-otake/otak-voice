@@ -148,7 +148,7 @@ const SETTINGS_SCHEMA = {
     key: API_KEY_STORAGE_KEY,
     type: 'string',
     default: '',
-    validate: (value) => value === '' || value.startsWith('sk-'),
+    validate: (value) => value === '' || (typeof value === 'string' && value.startsWith('sk-') && value.length >= 6),
     errorMessage: 'alertApiKeyInvalid'
   },
   recognitionLang: {

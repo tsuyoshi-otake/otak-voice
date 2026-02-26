@@ -13,6 +13,9 @@ import { initializeState, setState, getState } from './modules/state.js';
 import { initSpeechEvents } from './modules/speech.js';
 import { publish, subscribe, EVENTS } from './modules/event-bus.js';
 
+/** Interval for self-healing UI recovery check (ms) */
+const SELF_HEALING_INTERVAL_MS = 10000;
+
 // Initialize state with default values
 // This will be properly set by the state module during initialization
 setState({
@@ -66,12 +69,10 @@ export function setupPeriodicSelfHealing() {
         const menuButton = document.getElementById('otak-voice-menu-btn');
         if (!menuButton) {
             console.warn(chrome.i18n.getMessage('logUiNotFoundHealing'));
-            // Publish event to notify about UI recovery
             publish(EVENTS.UI_RECOVERY_NEEDED);
-            // Directly call initVoiceInput for backward compatibility
             initVoiceInput();
         }
-    }, 10000);
+    }, SELF_HEALING_INTERVAL_MS);
 }
 
 /**

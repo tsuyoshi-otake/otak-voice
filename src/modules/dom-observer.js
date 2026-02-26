@@ -8,6 +8,9 @@
 import { enhanceInputElementHandlers } from './input-handler.js';
 import { publish, subscribe, EVENTS } from './event-bus.js';
 
+/** Interval for periodic UI presence check (ms) */
+const PERIODIC_CHECK_INTERVAL_MS = 5000;
+
 /**
  * Set up DOM observer to monitor page changes
  */
@@ -99,7 +102,7 @@ export function setupDOMObserver() {
                 });
             }
         }
-    }, 5000);
+    }, PERIODIC_CHECK_INTERVAL_MS);
 }
 
 /**
