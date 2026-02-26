@@ -29,6 +29,8 @@ const _state = {
   // Speech recognition state
   isListening: false,
   silenceTimeout: DEFAULT_SETTINGS.SILENCE_TIMEOUT,
+  useRecognitionModal: false,
+  recognitionReady: false,
   
   // Settings
   apiKey: '',
@@ -206,9 +208,11 @@ export function initializeStateFromGlobals(windowObj = window) {
     showModalWindow: 'showModalWindow',
     modalOriginalText: 'modalOriginalText',
     lastAppendedText: 'lastAppendedText',
-    newRecognitionSession: 'newRecognitionSession'
+    newRecognitionSession: 'newRecognitionSession',
+    useRecognitionModal: 'useRecognitionModal',
+    recognitionReady: 'recognitionReady'
   };
-  
+
   // Initialize state from window properties
   const updates = {};
   Object.entries(stateWindowMap).forEach(([stateKey, windowKey]) => {
@@ -251,9 +255,11 @@ export function syncStateToGlobals(windowObj = window) {
     showModalWindow: 'showModalWindow',
     modalOriginalText: 'modalOriginalText',
     lastAppendedText: 'lastAppendedText',
-    newRecognitionSession: 'newRecognitionSession'
+    newRecognitionSession: 'newRecognitionSession',
+    useRecognitionModal: 'useRecognitionModal',
+    recognitionReady: 'recognitionReady'
   };
-  
+
   // Set up subscribers to sync state to window
   Object.entries(stateWindowMap).forEach(([stateKey, windowKey]) => {
     subscribe(stateKey, (value) => {

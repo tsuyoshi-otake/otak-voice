@@ -719,6 +719,22 @@
     "message": "DOM操作に失敗しました",
     "description": "Error message for DOM manipulation failure"
   },
+  "errorDomInputOperationFailed": {
+    "message": "入力フィールドの操作に失敗しました",
+    "description": "Error message for DOM input operation failure"
+  },
+  "errorDomTwitterInputFailed": {
+    "message": "Twitter/X.comへの入力に失敗しました",
+    "description": "Error message for Twitter input failure"
+  },
+  "errorDomButtonClickFailed": {
+    "message": "ボタンのクリックに失敗しました",
+    "description": "Error message for button click failure"
+  },
+  "errorInputValidationFailed": {
+    "message": "入力値の検証に失敗しました",
+    "description": "Error message for input validation failure"
+  },
   "errorUnknown": {
     "message": "不明なエラーが発生しました",
     "description": "Error message for unknown errors"

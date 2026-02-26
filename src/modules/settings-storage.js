@@ -125,7 +125,9 @@ async function loadSettings() {
       });
       if (typeof window !== 'undefined') {
         applyTheme(settings.themeMode);
-        publish(EVENTS.SPEECH_RECOGNITION_STOPPED);
+        if (getState('isListening')) {
+          publish(EVENTS.SPEECH_RECOGNITION_STOPPED);
+        }
       }
       publish(EVENTS.SETTINGS_LOADED, settings);
       return settings;
@@ -144,14 +146,14 @@ async function saveSetting(settingName, value) {
     async () => {
       if (!SETTINGS_SCHEMA[settingName]) {
         throw createError(
-          ERROR_CODE[ERROR_CATEGORY.INPUT].INVALID_API_KEY_FORMAT,
+          ERROR_CODE[ERROR_CATEGORY.INPUT].VALIDATION_FAILED,
           `Invalid setting name: ${settingName}`,
           null, { settingName }, ERROR_SEVERITY.ERROR
         );
       }
       if (!validateSetting(settingName, value)) {
         throw createError(
-          ERROR_CODE[ERROR_CATEGORY.INPUT].INVALID_API_KEY_FORMAT,
+          ERROR_CODE[ERROR_CATEGORY.INPUT].VALIDATION_FAILED,
           chrome.i18n.getMessage(SETTINGS_SCHEMA[settingName].errorMessage),
           null, { settingName, value }, ERROR_SEVERITY.ERROR
         );
@@ -188,7 +190,7 @@ async function saveSettings(settings = null) {
       if (invalidSettings.length > 0) {
         const [name, value] = invalidSettings[0];
         throw createError(
-          ERROR_CODE[ERROR_CATEGORY.INPUT].INVALID_API_KEY_FORMAT,
+          ERROR_CODE[ERROR_CATEGORY.INPUT].VALIDATION_FAILED,
           chrome.i18n.getMessage(SETTINGS_SCHEMA[name].errorMessage),
           null, { settingName: name, value }, ERROR_SEVERITY.ERROR
         );

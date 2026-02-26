@@ -719,6 +719,22 @@
     "message": "Thao tác DOM thất bại",
     "description": "Error message for DOM manipulation failure"
   },
+  "errorDomInputOperationFailed": {
+    "message": "Thao tác trường nhập liệu thất bại",
+    "description": "Error message for DOM input operation failure"
+  },
+  "errorDomTwitterInputFailed": {
+    "message": "Nhập liệu vào Twitter/X.com thất bại",
+    "description": "Error message for Twitter input failure"
+  },
+  "errorDomButtonClickFailed": {
+    "message": "Nhấp vào nút thất bại",
+    "description": "Error message for button click failure"
+  },
+  "errorInputValidationFailed": {
+    "message": "Xác thực đầu vào thất bại",
+    "description": "Error message for input validation failure"
+  },
   "errorUnknown": {
     "message": "Đã xảy ra lỗi không xác định",
     "description": "Error message for unknown errors"

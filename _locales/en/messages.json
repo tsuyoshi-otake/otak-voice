@@ -719,6 +719,22 @@
     "message": "DOM manipulation failed",
     "description": "Error message for DOM manipulation failure"
   },
+  "errorDomInputOperationFailed": {
+    "message": "Failed to operate on the input field",
+    "description": "Error message for DOM input operation failure"
+  },
+  "errorDomTwitterInputFailed": {
+    "message": "Failed to input into Twitter/X.com",
+    "description": "Error message for Twitter input failure"
+  },
+  "errorDomButtonClickFailed": {
+    "message": "Failed to click the button",
+    "description": "Error message for button click failure"
+  },
+  "errorInputValidationFailed": {
+    "message": "Input validation failed",
+    "description": "Error message for input validation failure"
+  },
   "errorUnknown": {
     "message": "An unknown error occurred",
     "description": "Error message for unknown errors"

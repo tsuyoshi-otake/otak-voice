@@ -43,7 +43,8 @@ export const ERROR_CODE = {
     MISSING_API_KEY: 'input_missing_api_key',
     INVALID_API_KEY_FORMAT: 'input_invalid_api_key_format',
     EMPTY_CONTENT: 'input_empty_content',
-    FIELD_NOT_FOUND: 'input_field_not_found'
+    FIELD_NOT_FOUND: 'input_field_not_found',
+    VALIDATION_FAILED: 'input_validation_failed'
   },
 
   // Permission errors
@@ -71,7 +72,10 @@ export const ERROR_CODE = {
   [ERROR_CATEGORY.DOM]: {
     ELEMENT_NOT_FOUND: 'dom_element_not_found',
     EVENT_DISPATCH_FAILED: 'dom_event_dispatch_failed',
-    MANIPULATION_FAILED: 'dom_manipulation_failed'
+    MANIPULATION_FAILED: 'dom_manipulation_failed',
+    INPUT_OPERATION_FAILED: 'dom_input_operation_failed',
+    TWITTER_INPUT_FAILED: 'dom_twitter_input_failed',
+    BUTTON_CLICK_FAILED: 'dom_button_click_failed'
   },
 
   // Unknown errors
@@ -102,6 +106,7 @@ export const ERROR_MESSAGE_KEYS = {
   [ERROR_CODE[ERROR_CATEGORY.INPUT].INVALID_API_KEY_FORMAT]: 'statusApiKeyInvalid',
   [ERROR_CODE[ERROR_CATEGORY.INPUT].EMPTY_CONTENT]: 'errorInputEmptyContent',
   [ERROR_CODE[ERROR_CATEGORY.INPUT].FIELD_NOT_FOUND]: 'errorInputFieldNotFound',
+  [ERROR_CODE[ERROR_CATEGORY.INPUT].VALIDATION_FAILED]: 'errorInputValidationFailed',
 
   // Permission errors
   [ERROR_CODE[ERROR_CATEGORY.PERMISSION].MIC_DENIED]: 'statusSpeechErrorNotAllowed',
@@ -122,6 +127,9 @@ export const ERROR_MESSAGE_KEYS = {
   [ERROR_CODE[ERROR_CATEGORY.DOM].ELEMENT_NOT_FOUND]: 'errorDomElementNotFound',
   [ERROR_CODE[ERROR_CATEGORY.DOM].EVENT_DISPATCH_FAILED]: 'errorDomEventDispatchFailed',
   [ERROR_CODE[ERROR_CATEGORY.DOM].MANIPULATION_FAILED]: 'errorDomManipulationFailed',
+  [ERROR_CODE[ERROR_CATEGORY.DOM].INPUT_OPERATION_FAILED]: 'errorDomInputOperationFailed',
+  [ERROR_CODE[ERROR_CATEGORY.DOM].TWITTER_INPUT_FAILED]: 'errorDomTwitterInputFailed',
+  [ERROR_CODE[ERROR_CATEGORY.DOM].BUTTON_CLICK_FAILED]: 'errorDomButtonClickFailed',
 
   // Unknown errors
   [ERROR_CODE[ERROR_CATEGORY.UNKNOWN].GENERAL]: 'errorUnknown'
