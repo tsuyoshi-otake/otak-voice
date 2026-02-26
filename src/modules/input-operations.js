@@ -178,7 +178,7 @@ export async function proofreadCurrentInput() {
         setState('currentInputElement', currentInputElement);
     }
     // 入力内容を取得
-    let content = '';
+    let content;
     if (currentInputElement.isContentEditable) {
         content = currentInputElement.textContent || '';
     } else {

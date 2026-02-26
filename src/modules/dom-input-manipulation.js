@@ -217,7 +217,7 @@ export function appendToInputField(element, text, completeText = '', isFinal = t
     return true;
   } catch (error) {
     console.error('Error appending to input field:', error);
-    const appError = createError(ERROR_CODE[ERROR_CATEGORY.DOM].INPUT_OPERATION_FAILED, 'Failed to append to input field', error, { element, text, originalText, isFinal }, ERROR_SEVERITY.WARNING);
+    const appError = createError(ERROR_CODE[ERROR_CATEGORY.DOM].INPUT_OPERATION_FAILED, 'Failed to append to input field', error, { element, text, completeText, isFinal }, ERROR_SEVERITY.WARNING);
     handleError(appError, false, false, 'dom-utils');
     return false;
   }

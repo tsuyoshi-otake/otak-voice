@@ -12,6 +12,12 @@ import { showStatus, updateProcessingState } from './ui-status.js';
 import { updateEditProofreadButtonsState } from './ui-core.js';
 import { updateSettingsModalValues } from './ui-settings-modal.js';
 import { showRecognitionTextModal, updateRecognitionModal } from './ui-recognition-modal.js';
+import {
+    updateAutoDetectTooltip,
+    updateAutoCorrectionTooltip,
+    updateUseHistoryContextTooltip,
+    updateShowModalWindowTooltip,
+} from './ui-tooltips.js';
 
 /** Helper: attach a click handler to a button that checks processing state before publishing */
 function addButtonClickHandler(selector, event, eventData) {
@@ -51,45 +57,7 @@ export function toggleModalVisibility() {
     showStatus(newShowModalWindow ? 'statusModalVisible' : 'statusModalHidden');
 }
 
-/** Updates the tooltip for the auto-detect setting toggle */
-export function updateAutoDetectTooltip() {
-    const autoDetectCheckbox = document.getElementById('auto-detect-input-fields-checkbox');
-    const autoDetectLabel = autoDetectCheckbox?.closest('.otak-voice-settings__switch');
-    if (autoDetectCheckbox && autoDetectLabel) {
-        const tooltipKey = autoDetectCheckbox.checked ? 'settingAutoDetectTooltipOn' : 'settingAutoDetectTooltipOff';
-        // Remove title attribute to disable native tooltip
-    }
-}
-
-/** Updates the tooltip for the auto-correction setting toggle */
-export function updateAutoCorrectionTooltip() {
-    const autoCorrectionCheckbox = document.getElementById('auto-correction-checkbox');
-    const autoCorrectionLabel = autoCorrectionCheckbox?.closest('.otak-voice-settings__switch');
-    if (autoCorrectionCheckbox && autoCorrectionLabel) {
-        const tooltipKey = autoCorrectionCheckbox.checked ? 'settingAutoCorrectionTooltipOn' : 'settingAutoCorrectionTooltipOff';
-        // Remove title attribute to disable native tooltip
-    }
-}
-
-/** Updates the tooltip for the history context setting toggle */
-export function updateUseHistoryContextTooltip() {
-    const useHistoryContextCheckbox = document.getElementById('use-history-context-checkbox');
-    const useHistoryContextLabel = useHistoryContextCheckbox?.closest('.otak-voice-settings__switch');
-    if (useHistoryContextCheckbox && useHistoryContextLabel) {
-        const tooltipKey = useHistoryContextCheckbox.checked ? 'settingUseHistoryContextTooltipOn' : 'settingUseHistoryContextTooltipOff';
-        // Remove title attribute to disable native tooltip
-    }
-}
-
-/** Updates the tooltip for the show modal window setting toggle */
-export function updateShowModalWindowTooltip() {
-    const showModalWindowCheckbox = document.getElementById('show-modal-window-checkbox');
-    const showModalWindowLabel = showModalWindowCheckbox?.closest('.otak-voice-settings__switch');
-    if (showModalWindowCheckbox && showModalWindowLabel) {
-        const tooltipKey = showModalWindowCheckbox.checked ? 'settingShowModalWindowTooltipOn' : 'settingShowModalWindowTooltipOff';
-        // Remove title attribute to disable native tooltip
-    }
-}
+export { updateAutoDetectTooltip, updateAutoCorrectionTooltip, updateUseHistoryContextTooltip, updateShowModalWindowTooltip };
 
 /** Set up event subscriptions for UI module */
 export function setupEventSubscriptions() {

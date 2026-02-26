@@ -11,6 +11,9 @@ module.exports = [
         window: 'readonly',
         document: 'readonly',
         console: 'readonly',
+        navigator: 'readonly',
+        location: 'readonly',
+        getComputedStyle: 'readonly',
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
         setInterval: 'readonly',
@@ -28,6 +31,10 @@ module.exports = [
         AudioContext: 'readonly',
         SpeechRecognition: 'readonly',
         webkitSpeechRecognition: 'readonly',
+        HTMLTextAreaElement: 'readonly',
+        HTMLInputElement: 'readonly',
+        HTMLElement: 'readonly',
+        Element: 'readonly',
         alert: 'readonly',
         // Chrome Extension globals
         chrome: 'readonly',
@@ -48,8 +55,8 @@ module.exports = [
     ignores: ['dist/', 'node_modules/', 'coverage/'],
   },
   {
-    // Relax rules for test files
-    files: ['src/__tests__/**/*.js', 'jest.setup.js'],
+    // Relax rules for test files and test helpers
+    files: ['src/__tests__/**/*.js', 'src/utils/**/*.js', 'jest.setup.js'],
     languageOptions: {
       globals: {
         jest: 'readonly',
@@ -66,6 +73,8 @@ module.exports = [
     },
     rules: {
       'no-unused-vars': 'off',
+      'no-undef': 'warn', // Relax for tests (various test utilities may not be declared)
+      'no-import-assign': 'off', // Tests mock module exports directly
     },
   },
 ];

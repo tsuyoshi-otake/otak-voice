@@ -9,6 +9,7 @@ import { publish, EVENTS } from './event-bus.js';
 import { updateSettingsModalValues } from './ui.js';
 import { MENU_ICON } from '../icons.js';
 import { THEME_MODES } from '../constants.js';
+import { updateAutoDetectTooltip, updateAutoCorrectionTooltip, updateUseHistoryContextTooltip } from './ui-tooltips.js';
 
 /**
  * Toggle menu display
@@ -107,29 +108,20 @@ export function toggleSettingsModal() {
 
         if (autoDetectCheckbox) {
             autoDetectCheckbox.checked = autoDetectInputFields === true;
-            // Update tooltip if function exists
-            if (typeof updateAutoDetectTooltip === 'function') {
-                updateAutoDetectTooltip();
-            }
+            updateAutoDetectTooltip();
         }
 
         // Set values for new settings items
         const autoCorrectionCheckbox = document.getElementById('auto-correction-checkbox');
         if (autoCorrectionCheckbox) {
             autoCorrectionCheckbox.checked = autoCorrection === true;
-            // Update tooltip if function exists
-            if (typeof updateAutoCorrectionTooltip === 'function') {
-                updateAutoCorrectionTooltip();
-            }
+            updateAutoCorrectionTooltip();
         }
 
         const useHistoryContextCheckbox = document.getElementById('use-history-context-checkbox');
         if (useHistoryContextCheckbox) {
             useHistoryContextCheckbox.checked = useHistoryContext === true;
-            // Update tooltip if function exists
-            if (typeof updateUseHistoryContextTooltip === 'function') {
-                updateUseHistoryContextTooltip();
-            }
+            updateUseHistoryContextTooltip();
         }
 
         // Set theme select value

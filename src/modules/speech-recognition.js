@@ -51,7 +51,7 @@ function handleMicButtonClick() {
     const previousActiveElement = document.activeElement;
     const wasPreviousElementInput = isInputElement(previousActiveElement);
     publish(EVENTS.RECOGNITION_MODAL_SHOWN, { text: '', isInitial: true });
-    let currentInputElement = null;
+    let currentInputElement;
     if (wasPreviousElementInput) {
         currentInputElement = previousActiveElement;
         setState('currentInputElement', currentInputElement);

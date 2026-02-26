@@ -5,6 +5,7 @@
 import { THEME_MODES } from '../constants.js';
 import { getState } from './state.js';
 import { saveSetting } from './settings.js';
+import { updateAutoDetectTooltip, updateAutoCorrectionTooltip, updateUseHistoryContextTooltip } from './ui-tooltips.js';
 
 /** Toggle settings modal display */
 export function toggleSettingsModal() {
@@ -37,17 +38,17 @@ export function updateSettingsModalValues() {
     if (langSelect) langSelect.value = recognitionLang || 'ja-JP';
     if (autoDetectCheckbox) {
         autoDetectCheckbox.checked = autoDetectInputFields === true;
-        if (typeof updateAutoDetectTooltip === 'function') { updateAutoDetectTooltip(); }
+        updateAutoDetectTooltip();
     }
     const autoCorrectionCheckbox = document.getElementById('auto-correction-checkbox');
     if (autoCorrectionCheckbox) {
         autoCorrectionCheckbox.checked = autoCorrection === true;
-        if (typeof updateAutoCorrectionTooltip === 'function') { updateAutoCorrectionTooltip(); }
+        updateAutoCorrectionTooltip();
     }
     const useHistoryContextCheckbox = document.getElementById('use-history-context-checkbox');
     if (useHistoryContextCheckbox) {
         useHistoryContextCheckbox.checked = useHistoryContext === true;
-        if (typeof updateUseHistoryContextTooltip === 'function') { updateUseHistoryContextTooltip(); }
+        updateUseHistoryContextTooltip();
     }
     if (showModalWindowCheckbox) { showModalWindowCheckbox.checked = showModalWindow === true; }
     if (autoSubmitCheckbox) { autoSubmitCheckbox.checked = autoSubmit; }
@@ -169,10 +170,7 @@ export function createSettingsModal() {
     if (useHistoryContextCheckbox) {
         useHistoryContextCheckbox.addEventListener('change', () => { saveSetting('useHistoryContext', useHistoryContextCheckbox.checked); });
     }
-    // Show modal window checkbox - no immediate change handler
-    const showModalWindowCheckbox = document.getElementById('show-modal-window-checkbox');
-    // Auto-submit checkbox - no immediate change handler
-    const autoSubmitCheckbox = document.getElementById('auto-submit-checkbox');
+    // show-modal-window-checkbox and auto-submit-checkbox have no immediate change handlers
     // Silence timeout input
     const silenceTimeoutInput = document.getElementById('silence-timeout-input');
     if (silenceTimeoutInput) {

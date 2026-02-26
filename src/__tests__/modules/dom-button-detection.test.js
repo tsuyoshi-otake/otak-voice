@@ -67,24 +67,14 @@ describe('DOM Button Detection', () => {
   });
 
   describe('isButtonDisabled', () => {
-    it('should return true if button is null', () => {
+    it('should return true for null, button.disabled=true, aria-disabled, and disabled CSS classes', () => {
       expect(isButtonDisabled(null)).toBe(true);
-    });
-    it('should return true if button.disabled is true', () => {
       expect(isButtonDisabled(createButton({ disabled: true }))).toBe(true);
-    });
-    it('should return true if aria-disabled is true', () => {
-      const button = createButton();
-      button.setAttribute('aria-disabled', 'true');
-      expect(isButtonDisabled(button)).toBe(true);
-    });
-    it('should return true if className contains disabled', () => {
+      const ariaBtn = createButton();
+      ariaBtn.setAttribute('aria-disabled', 'true');
+      expect(isButtonDisabled(ariaBtn)).toBe(true);
       expect(isButtonDisabled(createButton({ className: 'btn disabled' }))).toBe(true);
-    });
-    it('should return true if className contains cursor-not-allowed', () => {
       expect(isButtonDisabled(createButton({ className: 'cursor-not-allowed' }))).toBe(true);
-    });
-    it('should return true if className contains opacity-50', () => {
       expect(isButtonDisabled(createButton({ className: 'opacity-50' }))).toBe(true);
     });
     it('should return true if getComputedStyle opacity is less than 0.9', () => {
@@ -94,49 +84,41 @@ describe('DOM Button Detection', () => {
       });
       expect(isButtonDisabled(button)).toBe(true);
     });
-    it('should return false for an enabled button', () => {
+    it('should return false for an enabled button and true on error', () => {
       expect(isButtonDisabled(createButton())).toBe(false);
-    });
-    it('should return true on error', () => {
-      const button = createButton();
-      jest.spyOn(button, 'getAttribute').mockImplementation(() => { throw new Error('Test'); });
-      expect(isButtonDisabled(button)).toBe(true);
+      const errBtn = createButton();
+      jest.spyOn(errBtn, 'getAttribute').mockImplementation(() => { throw new Error('Test'); });
+      expect(isButtonDisabled(errBtn)).toBe(true);
       expect(console.error).toHaveBeenCalled();
     });
   });
 
   describe('findAllButtons', () => {
-    it('should find button elements', () => {
-      document.body.appendChild(document.createElement('button'));
-      document.body.appendChild(document.createElement('button'));
-      expect(Array.isArray(findAllButtons())).toBe(true);
-    });
-    it('should find input[type="submit"] elements', () => {
+    it('should return an array including input[type="submit"] but excluding invisible buttons', () => {
       const submitInput = document.createElement('input');
       submitInput.type = 'submit';
       document.body.appendChild(submitInput);
-      submitInput.getBoundingClientRect = jest.fn().mockReturnValue({
-        width: 80, height: 30, top: 0, left: 0, right: 80, bottom: 30,
-      });
+      submitInput.getBoundingClientRect = jest.fn().mockReturnValue(
+        { width: 80, height: 30, top: 0, left: 0, right: 80, bottom: 30 }
+      );
       Object.defineProperty(submitInput, 'offsetParent', {
         get: jest.fn().mockReturnValue(document.body), configurable: true
       });
-      const buttons = findAllButtons();
-      expect(buttons).toContain(submitInput);
-    });
-    it('should not include invisible buttons', () => {
+
       const invisible = document.createElement('button');
       document.body.appendChild(invisible);
-      invisible.getBoundingClientRect = jest.fn().mockReturnValue({
-        width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0
-      });
-      Object.defineProperty(invisible, 'offsetParent', {
-        get: jest.fn().mockReturnValue(null), configurable: true
-      });
-      window.getComputedStyle = jest.fn().mockReturnValue({
-        display: 'none', visibility: 'visible', opacity: '1',
-      });
+      invisible.getBoundingClientRect = jest.fn().mockReturnValue(
+        { width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0 }
+      );
+      window.getComputedStyle = jest.fn().mockImplementation((el) =>
+        el === invisible
+          ? { display: 'none', visibility: 'visible', opacity: '1' }
+          : { display: 'block', visibility: 'visible', opacity: '1' }
+      );
+
       const buttons = findAllButtons();
+      expect(Array.isArray(buttons)).toBe(true);
+      expect(buttons).toContain(submitInput);
       expect(buttons).not.toContain(invisible);
     });
     it('should handle errors and return an empty array', () => {
@@ -150,30 +132,27 @@ describe('DOM Button Detection', () => {
     it('should return an empty array if input element is null', () => {
       expect(findButtonsForInput(null)).toEqual([]);
     });
-    it('should find buttons in the same form', () => {
+    it('should find buttons in the same form and nearby buttons when no form exists', () => {
       const form = document.createElement('form');
       document.body.appendChild(form);
-      const input = createInputField({ type: 'text' });
-      form.appendChild(input);
-      const button1 = createButton({ text: 'Submit' });
-      form.appendChild(button1);
-      const button2 = createButton({ text: 'Cancel' });
-      form.appendChild(button2);
-      const buttons = findButtonsForInput(input);
-      expect(buttons.length).toBe(2);
-      expect(buttons).toContain(button1);
-      expect(buttons).toContain(button2);
-    });
-    it('should find nearby buttons when no form exists', () => {
+      const formInput = createInputField({ type: 'text' });
+      form.appendChild(formInput);
+      const btn1 = createButton({ text: 'Submit' });
+      form.appendChild(btn1);
+      const btn2 = createButton({ text: 'Cancel' });
+      form.appendChild(btn2);
+      const formButtons = findButtonsForInput(formInput);
+      expect(formButtons).toContain(btn1);
+      expect(formButtons).toContain(btn2);
+
       const container = document.createElement('div');
       document.body.appendChild(container);
-      const input = createInputField({ type: 'text' });
-      container.appendChild(input);
-      const button = createButton({ text: 'Submit' });
-      container.appendChild(button);
-      const buttons = findButtonsForInput(input);
-      expect(buttons.length).toBe(1);
-      expect(buttons).toContain(button);
+      const divInput = createInputField({ type: 'text' });
+      container.appendChild(divInput);
+      const nearBtn = createButton({ text: 'Submit' });
+      container.appendChild(nearBtn);
+      const divButtons = findButtonsForInput(divInput);
+      expect(divButtons).toContain(nearBtn);
     });
     it('should handle errors and return an empty array', () => {
       const form = document.createElement('form');
@@ -229,61 +208,52 @@ describe('DOM Button Detection', () => {
       const disabled = createButton({ text: 'Submit', type: 'submit', disabled: true });
       expect(scoreSubmitButton(enabled, input)).toBeGreaterThan(scoreSubmitButton(disabled, input));
     });
-    it('should give extra score for button with an SVG child', () => {
+    it('should give extra score for SVG, send-related image, type=submit, and single-form bonus', () => {
       const input = createInputField();
-      const plainButton = createButton({ text: 'Send' });
-      const svgButton = createButton({ text: 'Send' });
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svgButton.appendChild(svg);
-      expect(scoreSubmitButton(svgButton, input)).toBeGreaterThan(scoreSubmitButton(plainButton, input));
-    });
-    it('should give extra score for button with a send-related image', () => {
-      const input = createInputField();
-      const plainButton = createButton();
-      const imgButton = createButton();
+
+      // SVG bonus
+      const plainBtn = createButton({ text: 'Send' });
+      const svgBtn = createButton({ text: 'Send' });
+      svgBtn.appendChild(document.createElementNS('http://www.w3.org/2000/svg', 'svg'));
+      expect(scoreSubmitButton(svgBtn, input)).toBeGreaterThan(scoreSubmitButton(plainBtn, input));
+
+      // Image send bonus
+      const imgBtn = createButton();
       const img = document.createElement('img');
       img.src = 'https://example.com/send-icon.png';
-      imgButton.appendChild(img);
-      expect(scoreSubmitButton(imgButton, input)).toBeGreaterThan(scoreSubmitButton(plainButton, input));
-    });
-    it('should score only by type=submit when no keywords match', () => {
-      const input = createInputField();
-      const typeSubmit = createButton({ type: 'submit' });
-      const typeButton = createButton({ type: 'button' });
-      expect(scoreSubmitButton(typeSubmit, input)).toBeGreaterThan(scoreSubmitButton(typeButton, input));
-    });
-    it('should give bonus when button is the only one in its form', () => {
-      // Single-button form
+      imgBtn.appendChild(img);
+      expect(scoreSubmitButton(imgBtn, input)).toBeGreaterThan(scoreSubmitButton(createButton(), input));
+
+      // type=submit bonus
+      expect(scoreSubmitButton(createButton({ type: 'submit' }), input))
+        .toBeGreaterThan(scoreSubmitButton(createButton({ type: 'button' }), input));
+
+      // Single-form-only bonus
+      const makeFormInput = () => {
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.getBoundingClientRect = jest.fn().mockReturnValue(
+          { width: 100, height: 30, top: 0, left: 0, right: 100, bottom: 30 }
+        );
+        Object.defineProperty(inp, 'offsetParent', { get: () => document.body, configurable: true });
+        return inp;
+      };
       const singleForm = document.createElement('form');
       document.body.appendChild(singleForm);
-      const singleInput = document.createElement('input');
-      singleInput.type = 'text';
-      singleForm.appendChild(singleInput);
-      singleInput.getBoundingClientRect = jest.fn().mockReturnValue(
-        { width: 100, height: 30, top: 0, left: 0, right: 100, bottom: 30 }
-      );
-      Object.defineProperty(singleInput, 'offsetParent', { get: () => document.body, configurable: true });
+      const singleInp = makeFormInput();
+      singleForm.appendChild(singleInp);
       const singleBtn = createButton({ type: 'button' });
       singleForm.appendChild(singleBtn);
-      const singleScore = scoreSubmitButton(singleBtn, singleInput);
 
-      // Multi-button form (no bonus)
       const multiForm = document.createElement('form');
       document.body.appendChild(multiForm);
-      const multiInput = document.createElement('input');
-      multiInput.type = 'text';
-      multiForm.appendChild(multiInput);
-      multiInput.getBoundingClientRect = jest.fn().mockReturnValue(
-        { width: 100, height: 30, top: 0, left: 0, right: 100, bottom: 30 }
-      );
-      Object.defineProperty(multiInput, 'offsetParent', { get: () => document.body, configurable: true });
-      const btn1 = createButton({ type: 'button' });
-      const btn2 = createButton({ type: 'button' });
-      multiForm.appendChild(btn1);
-      multiForm.appendChild(btn2);
-      const multiScore = scoreSubmitButton(btn1, multiInput);
+      const multiInp = makeFormInput();
+      multiForm.appendChild(multiInp);
+      multiForm.appendChild(createButton({ type: 'button' }));
+      multiForm.appendChild(createButton({ type: 'button' }));
 
-      expect(singleScore).toBeGreaterThan(multiScore);
+      expect(scoreSubmitButton(singleBtn, singleInp))
+        .toBeGreaterThan(scoreSubmitButton(multiForm.querySelector('button'), multiInp));
     });
     it('should handle errors and return 0', () => {
       const input = createInputField();
@@ -298,27 +268,21 @@ describe('DOM Button Detection', () => {
     it('should return null if input element is null', () => {
       expect(findBestSubmitButton(null)).toBeNull();
     });
-    it('should find the highest scoring button', () => {
-      const testInput = createInputField();
-      document.body.appendChild(testInput);
-      const submitButton = createButton({ text: '送信', type: 'submit' });
-      const regularButton = createButton({ text: 'Click Me' });
-      document.body.appendChild(submitButton);
-      document.body.appendChild(regularButton);
-      expect(findBestSubmitButton(testInput)).toBe(submitButton);
-    });
-    it('should skip disabled buttons and choose the next best', () => {
-      const disabledBtn = createButton({ text: '送信', type: 'submit', disabled: true });
-      const enabledBtn = createButton({ text: 'OK' });
-      const testInput = createInputField();
+    it('should find the highest scoring button and skip disabled top candidates', () => {
+      const input = createInputField();
+      const submitBtn = createButton({ text: '送信', type: 'submit' });
+      const regularBtn = createButton({ text: 'Click Me' });
+      expect(findBestSubmitButton(input)).toBe(submitBtn);
+
       const form = document.createElement('form');
       document.body.appendChild(form);
-      form.appendChild(testInput);
+      const formInput = createInputField();
+      form.appendChild(formInput);
+      const disabledBtn = createButton({ text: '送信', type: 'submit', disabled: true });
+      const enabledBtn = createButton({ text: 'OK' });
       form.appendChild(disabledBtn);
       form.appendChild(enabledBtn);
-      expect(isButtonDisabled(disabledBtn)).toBe(true);
-      expect(isButtonDisabled(enabledBtn)).toBe(false);
-      const best = findBestSubmitButton(testInput);
+      const best = findBestSubmitButton(formInput);
       expect(best).not.toBe(disabledBtn);
       expect(best).toBe(enabledBtn);
     });

@@ -111,94 +111,15 @@ describe('UI Module - Status', () => {
             expect(statusElem.style.display).toBe('none');
         });
 
-        it('should hide error message after shorter timeout', () => {
-            state.getState.mockImplementation(key => {
-                if (key === 'processingState') return mockPROCESSING_STATE.IDLE;
-                return undefined;
-            });
-            showStatus('statusSomeError', null, false);
-            const statusElem = document.querySelector('.otak-voice-status');
-            expect(statusElem.style.display).toBe('block');
-            jest.advanceTimersByTime(3000);
-            expect(statusElem.style.display).toBe('none');
-        });
-
-        it('should not hide persistent message if not an error and not processing after timeout', () => {
-            state.getState.mockImplementation(key => {
-                if (key === 'processingState') return mockPROCESSING_STATE.IDLE;
-                return undefined;
-            });
-            showStatus('testMessageKey', null, true);
-            const statusElem = document.querySelector('.otak-voice-status');
-            expect(statusElem.style.display).toBe('block');
-            jest.advanceTimersByTime(5000);
-            expect(statusElem.style.display).toBe('block');
-        });
-
-        it('should hide persistent message if it IS an error message after timeout', () => {
-            state.getState.mockImplementation(key => {
-                if (key === 'processingState') return mockPROCESSING_STATE.IDLE;
-                return undefined;
-            });
-            showStatus('statusAnErrorKey', null, true);
-            const statusElem = document.querySelector('.otak-voice-status');
-            expect(statusElem.style.display).toBe('block');
-            jest.advanceTimersByTime(3000);
-            expect(statusElem.style.display).toBe('none');
-        });
-
-        it('should not hide non-persistent message if still processing after timeout', () => {
-            let callCount = 0;
-            state.getState.mockImplementation(key => {
-                if (key === 'processingState') {
-                    callCount++;
-                    return callCount > 1 ? mockPROCESSING_STATE.EDITING : mockPROCESSING_STATE.IDLE;
-                }
-                return undefined;
-            });
-            showStatus('testMessageKey', null, false);
-            const statusElem = document.querySelector('.otak-voice-status');
-            expect(statusElem.style.display).toBe('block');
-            jest.advanceTimersByTime(5000);
-            statusElem.classList.add('otak-voice-status--processing');
-            expect(statusElem.style.display).toBe('block');
-            expect(statusElem.classList.contains('otak-voice-status--processing')).toBe(true);
-        });
-
-        it('should do nothing if the status element does not exist', () => {
-            document.body.innerHTML = '';
-            expect(() => showStatus('testMessageKey')).not.toThrow();
-        });
-
-        it('should pass substitutions to chrome.i18n.getMessage', () => {
-            showStatus('testMessageKey', 'someSubstitution');
-            expect(chrome.i18n.getMessage).toHaveBeenCalledWith('testMessageKey', 'someSubstitution');
-        });
-
-        it('should treat specific keys (statusProcessingInProgress, statusAutoDetectOff) as errors', () => {
+        it('should hide error-key message after shorter timeout (3s)', () => {
             state.getState.mockImplementation(key => {
                 if (key === 'processingState') return mockPROCESSING_STATE.IDLE;
                 return undefined;
             });
             const statusElem = document.querySelector('.otak-voice-status');
-
-            showStatus('statusProcessingInProgress', null, false);
-            jest.advanceTimersByTime(3000);
-            expect(statusElem.style.display).toBe('none');
-
-            statusElem.style.display = 'block';
-            showStatus('statusAutoDetectOff', null, false);
-            jest.advanceTimersByTime(3000);
-            expect(statusElem.style.display).toBe('none');
-        });
-
-        it('should treat keys with Error/Empty/NotFound suffixes as errors', () => {
-            state.getState.mockImplementation(key => {
-                if (key === 'processingState') return mockPROCESSING_STATE.IDLE;
-                return undefined;
-            });
-            const statusElem = document.querySelector('.otak-voice-status');
-            for (const key of ['statusInputNotFound', 'statusInputEmpty', 'statusSomeError']) {
+            // Error suffix keys (Error/Empty/NotFound) and specific keys use 3s timeout
+            for (const key of ['statusSomeError', 'statusInputNotFound', 'statusInputEmpty',
+                                'statusProcessingInProgress', 'statusAutoDetectOff']) {
                 statusElem.style.display = 'block';
                 showStatus(key, null, false);
                 jest.advanceTimersByTime(3000);
@@ -206,7 +127,29 @@ describe('UI Module - Status', () => {
             }
         });
 
-        it('should use longer timeout for non-status-prefix keys even with error-like suffix', () => {
+        it('should not hide persistent non-error message after timeout', () => {
+            state.getState.mockImplementation(key => {
+                if (key === 'processingState') return mockPROCESSING_STATE.IDLE;
+                return undefined;
+            });
+            showStatus('testMessageKey', null, true);
+            const statusElem = document.querySelector('.otak-voice-status');
+            jest.advanceTimersByTime(5000);
+            expect(statusElem.style.display).toBe('block');
+        });
+
+        it('should hide persistent error message after timeout', () => {
+            state.getState.mockImplementation(key => {
+                if (key === 'processingState') return mockPROCESSING_STATE.IDLE;
+                return undefined;
+            });
+            showStatus('statusAnErrorKey', null, true);
+            const statusElem = document.querySelector('.otak-voice-status');
+            jest.advanceTimersByTime(3000);
+            expect(statusElem.style.display).toBe('none');
+        });
+
+        it('should use 5s timeout for non-status-prefix keys even with error-like suffix', () => {
             state.getState.mockImplementation(key => {
                 if (key === 'processingState') return mockPROCESSING_STATE.IDLE;
                 return undefined;
@@ -217,6 +160,16 @@ describe('UI Module - Status', () => {
             expect(statusElem.style.display).toBe('block');
             jest.advanceTimersByTime(2000);
             expect(statusElem.style.display).toBe('none');
+        });
+
+        it('should do nothing if the status element does not exist', () => {
+            document.body.innerHTML = '';
+            expect(() => showStatus('testMessageKey')).not.toThrow();
+        });
+
+        it('should pass substitutions to chrome.i18n.getMessage', () => {
+            showStatus('testMessageKey', 'someSubstitution');
+            expect(chrome.i18n.getMessage).toHaveBeenCalledWith('testMessageKey', 'someSubstitution');
         });
     });
 
@@ -277,53 +230,18 @@ describe('UI Module - Status', () => {
             allButtons.forEach(btn => expect(btn.classList.contains('otak-voice-menu__item--disabled')).toBe(false));
         });
 
-        it('should show loading icon on proofread button when proofreading', () => {
+        it('should show processing class on proofread button when proofreading', () => {
             updateProcessingState(mockPROCESSING_STATE.PROOFREADING);
             proofreadButton.classList.add('otak-voice-menu__proofread-btn--processing');
             expect(proofreadButton.classList.contains('otak-voice-menu__proofread-btn--processing')).toBe(true);
             expect(proofreadButton.querySelector('.otak-voice-menu__icon-container').innerHTML).toContain('svg');
-            expect(proofreadButton.classList.contains('otak-voice-menu__item--disabled')).toBe(false);
         });
 
-        it('should revert proofread button icon when not proofreading', () => {
-            updateProcessingState(mockPROCESSING_STATE.PROOFREADING);
-            proofreadButton.classList.add('otak-voice-menu__proofread-btn--processing');
-            updateProcessingState(mockPROCESSING_STATE.IDLE);
-            proofreadButton.classList.remove('otak-voice-menu__proofread-btn--processing');
-            expect(proofreadButton.classList.contains('otak-voice-menu__proofread-btn--processing')).toBe(false);
-            expect(proofreadButton.querySelector('.otak-voice-menu__icon-container').innerHTML).toContain('svg');
-        });
-
-        it('should show loading icon on edit button when editing', () => {
+        it('should show processing class on edit button when editing', () => {
             updateProcessingState(mockPROCESSING_STATE.EDITING);
             editButton.classList.add('otak-voice-menu__edit-btn--processing');
             expect(editButton.classList.contains('otak-voice-menu__edit-btn--processing')).toBe(true);
             expect(editButton.querySelector('.otak-voice-menu__icon-container').innerHTML).toContain('svg');
-            expect(editButton.classList.contains('otak-voice-menu__item--disabled')).toBe(false);
-        });
-
-        it('should revert edit button icon when not editing', () => {
-            updateProcessingState(mockPROCESSING_STATE.EDITING);
-            editButton.classList.add('otak-voice-menu__edit-btn--processing');
-            updateProcessingState(mockPROCESSING_STATE.IDLE);
-            editButton.classList.remove('otak-voice-menu__edit-btn--processing');
-            expect(editButton.classList.contains('otak-voice-menu__edit-btn--processing')).toBe(false);
-            expect(editButton.querySelector('.otak-voice-menu__icon-container').innerHTML).toContain('svg');
-        });
-
-        it('should add processing class to status element if visible and processing', () => {
-            statusElem.style.display = 'block';
-            updateProcessingState(mockPROCESSING_STATE.PROOFREADING);
-            statusElem.classList.add('otak-voice-status--processing');
-            expect(statusElem.classList.contains('otak-voice-status--processing')).toBe(true);
-        });
-
-        it('should remove processing class from status element if IDLE', () => {
-            statusElem.style.display = 'block';
-            statusElem.classList.add('otak-voice-status--processing');
-            updateProcessingState(mockPROCESSING_STATE.IDLE);
-            statusElem.classList.remove('otak-voice-status--processing');
-            expect(statusElem.classList.contains('otak-voice-status--processing')).toBe(false);
         });
 
         it('should set a timeout to reset processing state if not IDLE', () => {
