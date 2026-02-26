@@ -30,8 +30,8 @@ npm run test:integration # Run integration tests only
 
 ### OpenAI Integration
 
-- `gpt-4o-mini` - Auto-correction (real-time, lightweight)
-- `gpt-4.1` - Proofreading and editing (higher quality)
+- `gpt-4.1-mini` - Auto-correction (real-time, lightweight)
+- `gpt-5.2` - Proofreading and editing (higher quality)
 - Models defined in `src/constants.js` as `GPT_MODELS`
 
 ## Directory Structure

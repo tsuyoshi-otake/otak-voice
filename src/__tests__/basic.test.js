@@ -45,9 +45,9 @@ describe('Constants', () => {
 
   describe('GPT_MODELS', () => {
     it('should define correction and proofreading models', () => {
-      expect(GPT_MODELS.CORRECTION).toBe('gpt-4o-mini');
-      expect(GPT_MODELS.PROOFREADING).toBe('gpt-4.1');
-      expect(GPT_MODELS.EDITING).toBe('gpt-4.1');
+      expect(GPT_MODELS.CORRECTION).toBe('gpt-4.1-mini');
+      expect(GPT_MODELS.PROOFREADING).toBe('gpt-5.2');
+      expect(GPT_MODELS.EDITING).toBe('gpt-5.2');
     });
   });
 

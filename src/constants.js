@@ -20,9 +20,9 @@ export const SITE_TYPES = {
 };
 
 export const GPT_MODELS = {
-  CORRECTION: 'gpt-4o-mini',
-  PROOFREADING: 'gpt-4.1',
-  EDITING: 'gpt-4.1'
+  CORRECTION: 'gpt-4.1-mini',
+  PROOFREADING: 'gpt-5.2',
+  EDITING: 'gpt-5.2'
 };
 
 export const THEME_MODES = {
