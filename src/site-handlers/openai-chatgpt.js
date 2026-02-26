@@ -121,5 +121,5 @@ export function findBestInputField() {
  */
 export function isChatGPTSite() {
     const hostname = window.location.hostname;
-    return hostname.includes('chat.openai.com');
+    return hostname.includes('chat.openai.com') || hostname.includes('chatgpt.com');
 }

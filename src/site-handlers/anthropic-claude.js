@@ -109,7 +109,13 @@ export function findBestInputField() {
     if (textarea) {
         return textarea;
     }
-    
+
+    // Fallback: ProseMirror contenteditable div used by Claude
+    const proseMirror = document.querySelector('div.ProseMirror[contenteditable="true"], div[contenteditable="true"][data-placeholder]');
+    if (proseMirror) {
+        return proseMirror;
+    }
+
     return null;
 }
 
@@ -119,6 +125,5 @@ export function findBestInputField() {
  */
 export function isClaudeSite() {
     const hostname = window.location.hostname;
-    return hostname.includes('claude.ai') || 
-           hostname.includes('anthropic.com');
+    return hostname.includes('claude.ai');
 }

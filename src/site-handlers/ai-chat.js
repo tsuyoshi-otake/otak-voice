@@ -36,12 +36,12 @@ function detectAIChatPlatform() {
     }
     
     // ドメイン名による直接検出
-    if (hostname.includes('chat.openai.com')) {
+    if (hostname.includes('chat.openai.com') || hostname.includes('chatgpt.com')) {
         console.log('Detected OpenAI ChatGPT site by hostname');
         return OpenAIChatGPT;
     }
-    
-    if (hostname.includes('claude.ai') || hostname.includes('anthropic.com')) {
+
+    if (hostname.includes('claude.ai')) {
         console.log('Detected Anthropic Claude site by hostname');
         return AnthropicClaude;
     }
