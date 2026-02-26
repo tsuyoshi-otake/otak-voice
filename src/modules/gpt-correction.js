@@ -31,6 +31,8 @@ export async function correctWithGPT(text) {
     }
     if (!text || text.trim() === '') return text; // Return empty text as is
 
+    updateProcessingState(PROCESSING_STATE.CORRECTING);
+
     try {
         // Use event bus to show status
         publish(EVENTS.STATUS_UPDATED, {

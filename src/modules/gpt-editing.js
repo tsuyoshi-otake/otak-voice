@@ -11,6 +11,7 @@ import { simulateTypingIntoElement } from './input-handler.js';
 import { publish, EVENTS } from './event-bus.js';
 import {
     makeGPTRequest,
+    validateApiKey,
     handleAPIError,
     createError,
     handleError,
@@ -27,6 +28,9 @@ import {
  */
 export async function editWithGPT(currentText, instruction, activeElement) {
     const apiKey = getState('apiKey');
+    if (!validateApiKey(apiKey)) {
+        return;
+    }
 
     try {
         // Use event bus to show status

@@ -44,6 +44,7 @@ export function handleEditButtonClick() {
             showStatus('statusInputFound');
         } else {
             showStatus('statusEditFound');
+            setState('processingState', PROCESSING_STATE.IDLE);
             return;
         }
     }
@@ -53,12 +54,14 @@ export function handleEditButtonClick() {
 
     if (!currentText || currentText.trim() === '') {
         showStatus('statusEditEmpty');
+        setState('processingState', PROCESSING_STATE.IDLE);
         return;
     }
 
     const apiKey = getState('apiKey');
     if (!apiKey || apiKey.trim() === '') {
         showStatus('statusApiKeyMissing');
+        setState('processingState', PROCESSING_STATE.IDLE);
         publish(EVENTS.SETTINGS_MODAL_TOGGLED);
         return;
     }
