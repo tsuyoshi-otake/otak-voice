@@ -6,39 +6,39 @@ Core functionality modules for the otak-voice voice input Chrome Extension.
 
 | File | Lines | Description |
 |------|-------|-------------|
-| `event-bus.js` | 189 | Pub/sub event system with 39 event types across 7 categories |
-| `state.js` | 276 | Observable state management with `getState`/`setState` and subscriber notifications |
+| `event-bus.js` | 199 | Pub/sub event system with 39 event types across 7 categories; includes `publishStatus()` convenience helper |
+| `state.js` | 282 | Observable state management with `getState`/`setState` and subscriber notifications |
 | `error-handler.js` | barrel | Re-exports from `error-types.js` + error handling functions |
-| `error-types.js` | 161 | Error categories, codes, severity, AppError class |
+| `error-types.js` | 169 | Error categories, codes, severity, AppError class |
 | `settings.js` | barrel | Re-exports from settings-schema, settings-storage, settings-theme |
 | `settings-schema.js` | 134 | Settings schema definition and validation |
-| `settings-storage.js` | 276 | Settings load/save operations |
-| `settings-theme.js` | 109 | Theme toggle and application |
+| `settings-storage.js` | 273 | Settings load/save operations |
+| `settings-theme.js` | 99 | Theme toggle and application |
 | `dom-observer.js` | 129 | MutationObserver for SPA navigation with debounced handling |
 | `history.js` | 119 | Voice input history tracking (max 10 entries) |
-| `utils.js` | 143 | Generic utilities: `basicCleanup`, `isInputElement`, `forceSetTextAreaValue` |
+| `utils.js` | 76 | React state retry via `retryInputEvents` only |
 | `dom-utils.js` | barrel | Re-exports from dom-visibility, dom-input-detection, dom-button-detection, dom-input-manipulation |
 | `dom-visibility.js` | 66 | Element visibility detection |
-| `dom-input-detection.js` | 153 | Input element finding and scoring |
+| `dom-input-detection.js` | 153 | Input element finding and scoring; canonical `isInputElement` implementation |
 | `dom-button-detection.js` | 210 | Button finding and scoring |
-| `dom-input-manipulation.js` | 298 | Text input operations, event dispatch, Twitter handling |
+| `dom-input-manipulation.js` | 298 | Text input operations, event dispatch, Twitter handling; `clickButtonWithFeedback(button, delayMs?)` |
 | `ui.js` | barrel | Re-exports from ui-status, ui-core, ui-settings-modal, ui-recognition-modal, ui-events |
 | `ui-status.js` | 174 | Status display and processing state |
-| `ui-core.js` | 247 | Core UI creation and menu items |
-| `ui-settings-modal.js` | 234 | Settings modal and draggable support |
+| `ui-core.js` | 220 | Core UI creation and menu items |
+| `ui-settings-modal.js` | 232 | Settings modal and draggable support |
 | `ui-recognition-modal.js` | 143 | Voice recognition text modal |
-| `ui-events.js` | 209 | Event listeners and event bus subscriptions |
+| `ui-events.js` | 177 | Event listeners and event bus subscriptions |
 | `speech.js` | barrel | Re-exports from speech-utils, speech-recognition, speech-edit |
-| `speech-utils.js` | 238 | Mic button state, audio effects, language update |
+| `speech-utils.js` | 229 | Mic button state, audio effects, language update; re-exports `publishStatus as showStatus` |
 | `speech-recognition.js` | 294 | Core speech recognition lifecycle |
-| `speech-edit.js` | 227 | Speech-based editing functionality |
+| `speech-edit.js` | 230 | Speech-based editing functionality |
 | `input-handler.js` | barrel | Re-exports from input-storage, input-menu, input-operations, input-handler-init |
 | `input-storage.js` | 186 | Chrome storage operations for menu/auto-submit state |
-| `input-menu.js` | 236 | Menu toggle, settings modal, auto-submit UI |
-| `input-operations.js` | 265 | Input field operations, proofread, enhance handlers |
-| `input-handler-init.js` | 176 | Initialization and event subscriptions |
+| `input-menu.js` | 156 | Menu toggle, settings modal, auto-submit UI |
+| `input-operations.js` | 255 | Input field operations, proofread, enhance handlers |
+| `input-handler-init.js` | 171 | Initialization and event subscriptions |
 | `gpt-service.js` | barrel | Re-exports from gpt-correction, gpt-proofreading, gpt-editing |
-| `gpt-api-client.js` | 93 | Shared OpenAI API request infrastructure |
+| `gpt-api-client.js` | 86 | Shared OpenAI API request infrastructure (`makeGPTRequest`, `validateApiKey`, `handleAPIError`) |
 | `gpt-correction.js` | 142 | Voice input auto-correction |
 | `gpt-proofreading.js` | 100 | Text proofreading |
 | `gpt-editing.js` | 141 | Instruction-based text editing |
@@ -57,7 +57,7 @@ Layer 1 (no deps):     constants.js, icons.js, event-bus.js
 
 - **Layer 1** - No internal dependencies. `constants.js` and `icons.js` live in `src/` (parent directory).
 - **Layer 2** - Depends only on Layer 1. `state.js` imports from `constants.js`; `error-handler.js` imports from `event-bus.js`.
-- **Layer 3** - Depends on Layers 1-2. `settings.js` uses state, event-bus, and error-handler.
+- **Layer 3** - Depends on Layers 1-2. `settings.js` uses state, event-bus, and error-handler. `utils.js` imports from state, event-bus, and dom-utils.
 - **Layer 4** - Depends on all lower layers. These are the main feature modules.
 
 ## Event Bus Reference
@@ -65,17 +65,25 @@ Layer 1 (no deps):     constants.js, icons.js, event-bus.js
 ### Usage Pattern
 
 ```javascript
-import { publish, subscribe, EVENTS } from './event-bus.js';
+import { publish, subscribe, publishStatus, EVENTS } from './event-bus.js';
 
 // Subscribe (returns unsubscribe function)
 const unsub = subscribe(EVENTS.SPEECH_RECOGNITION_STARTED, (data) => { ... });
 
-// Publish
+// Publish a generic event
 publish(EVENTS.SPEECH_RECOGNITION_RESULT, { final: true, text: 'hello', append: false });
+
+// Publish a STATUS_UPDATED event (preferred shorthand)
+publishStatus('statusClearSuccess');
+publishStatus('statusProofreading', undefined, true); // persistent
 
 // Cleanup
 unsub();
 ```
+
+`publishStatus(messageKey, substitutions?, persistent?)` is a Layer-1 convenience wrapper for
+`publish(EVENTS.STATUS_UPDATED, { messageKey, substitutions, persistent })`.
+All layers can import it safely — no need for private proxy functions.
 
 ### Event Categories (39 total)
 
@@ -151,6 +159,9 @@ const result = await tryCatch(asyncFn, {
 
 **Categories:** NETWORK, API, INPUT, PERMISSION, SPEECH, STORAGE, DOM, UNKNOWN
 
+> **Note:** Import error utilities directly from `error-handler.js`. `gpt-api-client.js` no longer
+> re-exports them; it only exports `makeGPTRequest`, `validateApiKey`, and `handleAPIError`.
+
 ## Barrel Files
 
 Large modules have been split into focused sub-modules. Original files are now barrel re-exports for backward compatibility. Import from either the barrel or the specific sub-module:
@@ -169,3 +180,5 @@ import { showStatus } from './ui-status.js';     // direct
 4. **Error handling:** Use `error-handler.js` (`createError`/`handleError`/`tryCatch`). Never swallow errors silently.
 5. **Event naming:** Use namespace pattern `category:subcategory:action` (e.g., `speech:recognition:started`).
 6. **i18n:** All user-facing strings use `chrome.i18n.getMessage()`. Error codes map to i18n keys via `ERROR_MESSAGE_KEYS`.
+7. **Status messages:** Use `publishStatus(messageKey)` from `event-bus.js` instead of a private `showStatus` proxy. Do not duplicate the proxy pattern.
+8. **`isInputElement`:** The canonical implementation is in `dom-input-detection.js` (includes visibility check). Import via `dom-utils.js`. Do not use the removed version from `utils.js`.

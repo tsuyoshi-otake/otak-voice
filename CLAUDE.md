@@ -23,7 +23,7 @@ npm run test:integration # Run integration tests only
 
 ### Core Patterns
 
-- **Event Bus** (`src/modules/event-bus.js`): Publish-subscribe pattern for decoupled cross-module communication. All event names defined in `EVENTS` constant. Use `publish(EVENTS.X, data)` and `subscribe(EVENTS.X, handler)`.
+- **Event Bus** (`src/modules/event-bus.js`): Publish-subscribe pattern for decoupled cross-module communication. All event names defined in `EVENTS` constant. Use `publish(EVENTS.X, data)` and `subscribe(EVENTS.X, handler)`. Use `publishStatus(messageKey, substitutions?, persistent?)` as a convenience wrapper for `STATUS_UPDATED` events — importable by all layers without circular dependency risk.
 - **Observable State** (`src/modules/state.js`): Centralized state with `getState(key)` / `setState(key, value)`. Supports subscriber notifications on change. No window globals for state.
 - **Site Handler Strategy** (`src/site-handlers/`): `site-detector.js` detects the current site and returns the appropriate handler (systemexe, twitter, ai-chat, default). Each handler exports a consistent interface for site-specific behavior.
 - **Error Handling** (`src/modules/error-handler.js`): Structured errors via `AppError` class with `ERROR_CATEGORY`, `ERROR_CODE`, and `ERROR_SEVERITY`. Use `createError()`, `handleError()`, or `tryCatch()`.
@@ -40,7 +40,7 @@ npm run test:integration # Run integration tests only
 src/
   content.js              # Content script entry point
   background.js           # Background service worker entry point
-  constants.js            # Shared constants (GPT_MODELS, SITE_TYPES, DEFAULT_SETTINGS)
+  constants.js            # Shared constants (GPT_MODELS, SITE_TYPES, DEFAULT_SETTINGS, UI_FEEDBACK, GPT_PARAMS, PAPER_PLANE_SVG)
   icons.js                # SVG icon definitions
   modules/                # Core functionality modules
     event-bus.js           # Pub-sub event system

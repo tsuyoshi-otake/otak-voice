@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">68.42% </span>
+                <span class="strong">72.22% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>39/57</span>
+                <span class='fraction'>39/54</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">72.72% </span>
+                <span class="strong">74.41% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>32/44</span>
+                <span class='fraction'>32/43</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">68.42% </span>
+                <span class="strong">72.22% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>39/57</span>
+                <span class='fraction'>39/54</span>
             </div>
         
             
@@ -213,17 +213,7 @@
 <a name='L148'></a><a href='#L148'>148</a>
 <a name='L149'></a><a href='#L149'>149</a>
 <a name='L150'></a><a href='#L150'>150</a>
-<a name='L151'></a><a href='#L151'>151</a>
-<a name='L152'></a><a href='#L152'>152</a>
-<a name='L153'></a><a href='#L153'>153</a>
-<a name='L154'></a><a href='#L154'>154</a>
-<a name='L155'></a><a href='#L155'>155</a>
-<a name='L156'></a><a href='#L156'>156</a>
-<a name='L157'></a><a href='#L157'>157</a>
-<a name='L158'></a><a href='#L158'>158</a>
-<a name='L159'></a><a href='#L159'>159</a>
-<a name='L160'></a><a href='#L160'>160</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L151'></a><a href='#L151'>151</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -293,18 +283,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
@@ -392,8 +374,7 @@
 import * as OpenAIChatGPT from './openai-chatgpt.js';
 import * as AnthropicClaude from './anthropic-claude.js';
 import * as GoogleGemini from './google-gemini.js';
-import { showStatus } from '../modules/ui.js';
-import { publish, EVENTS } from '../modules/event-bus.js';
+import { PAPER_PLANE_SVG } from '../constants.js';
 &nbsp;
 /**
  * どのAIチャットプラットフォームかを検出
@@ -452,20 +433,12 @@ function detectAIChatPlatform() {
  */
 function findGenericPaperPlaneButton() {
     const allButtons = document.querySelectorAll('button');
-&nbsp;
     for (const button of allButtons) {
-        // ペーパープレーンアイコンのSVGパターンをチェック
         const svg = <span class="cstat-no" title="statement not covered" >button.querySelector('svg');</span>
-<span class="cstat-no" title="statement not covered" >        if (svg) {</span>
-            const hasLine = <span class="cstat-no" title="statement not covered" >svg.querySelector('line[x1="22"][y1="2"][x2="11"][y2="13"]');</span>
-            const hasPolygon = <span class="cstat-no" title="statement not covered" >svg.querySelector('polygon[points="22 2 15 22 11 13 2 9 22 2"]');</span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >            if (hasLine &amp;&amp; hasPolygon) {</span>
-<span class="cstat-no" title="statement not covered" >                return true;</span>
-            }
+<span class="cstat-no" title="statement not covered" >        if (svg &amp;&amp; svg.querySelector(PAPER_PLANE_SVG.LINE_SELECTOR) &amp;&amp; svg.querySelector(PAPER_PLANE_SVG.POLYGON_SELECTOR)) {</span>
+<span class="cstat-no" title="statement not covered" >            return true;</span>
         }
     }
-&nbsp;
     return false;
 }
 &nbsp;
@@ -547,7 +520,7 @@ export function findBestInputField() {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-26T22:15:14.831Z
+                at 2026-02-26T23:08:14.650Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

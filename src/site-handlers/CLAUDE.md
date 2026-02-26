@@ -6,7 +6,7 @@ Platform-specific DOM manipulation handlers for the otak-voice Chrome Extension.
 
 ```
 src/site-handlers/
-  site-detector.js       # Detects current site, returns appropriate handler
+  site-detector.js       # Detects current site, returns appropriate handler; exports hasPaperPlaneSVG()
   ai-chat.js             # Central dispatcher for AI chat platforms
   openai-chatgpt.js      # ChatGPT (chat.openai.com)
   anthropic-claude.js    # Claude (claude.ai)
@@ -40,7 +40,7 @@ Every handler exports these functions:
 Returns the best `Element` for text input on the platform, or `null`. Each handler defines platform-specific CSS selectors (e.g., `CHATGPT_SELECTORS`, `CLAUDE_SELECTORS`, `GEMINI_SELECTORS`) to locate the correct textarea or contenteditable element.
 
 ### `submitAfterVoiceInput(inputField?)`
-Locates and clicks the submit button after voice input. Returns `true` if submission started, `false` otherwise. Checks for disabled state before clicking.
+Locates and clicks the submit button after voice input. Returns `true` if submission started, `false` otherwise. AI chat handlers delegate to `clickButtonWithFeedback(button, UI_FEEDBACK.SUBMIT_DELAY_MS)` from `dom-utils.js` — do not duplicate button-highlight logic.
 
 ### `findSubmitButtonForInput(inputElement)`
 Finds the submit button associated with a given input element. Returns `Element | null`.
@@ -58,25 +58,46 @@ Handlers import common DOM helpers:
 |---|---|
 | `isButtonDisabled(button)` | Check if a button is disabled (attribute, class, or aria) |
 | `filterVisibleElements(elements)` | Filter an element list to only visible elements |
-| `isInputElement(element)` | Check if an element is a valid input target |
+| `isInputElement(element)` | Check if an element is a valid input target (with visibility check) |
 | `findBestSubmitButton(inputElement)` | Score and rank nearby submit buttons |
 | `findBestInputField()` | Generic input field detection with scoring |
-| `clickButtonWithFeedback(button)` | Click a button and provide visual feedback |
+| `clickButtonWithFeedback(button, delayMs?)` | Highlight button, wait `delayMs` ms (default 500), then click |
 | `findElement(selector)` | Query a single element |
 | `findAllElements(selector)` | Query all matching elements |
 | `setInputValue(element, text)` | Set value with proper event dispatch |
 | `dispatchEvent(element, eventType)` | Dispatch synthetic DOM events |
 
+## Paper Plane SVG Detection
+
+The paper plane icon is used to identify AI chat submit buttons. Use the helpers instead of duplicating selectors:
+
+```javascript
+// In site-detector.js — safe to import from here:
+import { hasPaperPlaneSVG } from './site-detector.js';
+// Returns true if the SVG element contains the paper plane line + polygon
+
+// In ai-chat.js / systemexe.js — do NOT import from site-detector.js (circular dependency)
+// Use PAPER_PLANE_SVG constants from constants.js directly:
+import { PAPER_PLANE_SVG } from '../constants.js';
+const hasLine = svg.querySelector(PAPER_PLANE_SVG.LINE_SELECTOR);
+const hasPolygon = svg.querySelector(PAPER_PLANE_SVG.POLYGON_SELECTOR);
+```
+
 ## Adding a New Handler
 
 1. **Create the handler file** at `src/site-handlers/new-platform.js`:
    ```js
-   import { isButtonDisabled, filterVisibleElements } from '../modules/dom-utils.js';
+   import { isButtonDisabled, filterVisibleElements, clickButtonWithFeedback } from '../modules/dom-utils.js';
+   import { UI_FEEDBACK } from '../constants.js';
 
    const SELECTORS = [ /* platform-specific CSS selectors */ ];
 
    export function findBestInputField() { /* ... */ }
-   export function submitAfterVoiceInput() { /* ... */ }
+   export function submitAfterVoiceInput() {
+       const button = findSubmitButton();
+       if (!button || isButtonDisabled(button)) return false;
+       return clickButtonWithFeedback(button, UI_FEEDBACK.SUBMIT_DELAY_MS);
+   }
    export function findSubmitButtonForInput(inputElement) { /* ... */ }
    ```
 
@@ -95,4 +116,6 @@ Handlers import common DOM helpers:
 - **Twitter** uses a modal-based approach instead of direct DOM insertion because X.com's React/Draft.js editor breaks when the DOM is manipulated directly.
 - **AI chat dispatcher** (`ai-chat.js`) tries detection functions first, then hostname matching, then falls back to OpenAI as the default handler.
 - All handlers use `chrome.i18n.getMessage()` for user-facing log messages.
-- Event bus (`src/modules/event-bus.js`) is used for status updates via `publish(EVENTS.STATUS_UPDATED, ...)`.
+- Status messages use `publishStatus()` from `event-bus.js` — not `publish(EVENTS.STATUS_UPDATED, ...)` directly.
+- Submit button feedback uses `UI_FEEDBACK` constants (`BUTTON_HIGHLIGHT_COLOR`, `BUTTON_HIGHLIGHT_BORDER`, `SUBMIT_DELAY_MS`) from `src/constants.js`.
+- **Circular dependency warning:** `ai-chat.js` and `systemexe.js` are imported by `site-detector.js`, so they cannot import from `site-detector.js`. Use `PAPER_PLANE_SVG` constants from `constants.js` instead of `hasPaperPlaneSVG()`.

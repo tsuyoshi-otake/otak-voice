@@ -47,28 +47,47 @@ global.chrome = {
 
 ## Module Mocking Pattern
 
+### event-bus mock
+
+Always include `publishStatus` in the event-bus mock. Modules such as `speech-utils.js` re-export
+`publishStatus as showStatus` from `event-bus.js`, so omitting it causes `showStatus is not a function` errors at runtime.
+
 ```javascript
 jest.mock('../../modules/event-bus', () => ({
   publish: jest.fn(),
+  publishStatus: jest.fn(),
   subscribe: jest.fn(),
-  EVENTS: { /* constants */ }
+  EVENTS: { STATUS_UPDATED: 'status:updated', /* other keys */ }
 }));
 ```
 
-## Window Globals
+### dom-utils mock
 
-`jest.setup.js` sets extension-specific window properties:
+Modules that previously imported `isInputElement` from `utils.js` now import it from `dom-utils.js`.
+When testing those modules (e.g., `speech-recognition.js`, `speech-edit.js`, `ui-events.js`), mock
+`dom-utils` and set the implementation there — not on `utils`:
 
 ```javascript
-global.window = {
-  ...global.window,
-  currentInputElement: null,
-  isListening: false,
-  apiKey: '',
-  recognitionLang: 'ja-JP',
-  processingState: 'idle',
-  // ... other extension state
-};
+import * as domUtils from '../../modules/dom-utils';
+jest.mock('../../modules/dom-utils');
+
+// In beforeEach:
+domUtils.isInputElement.mockImplementation(el =>
+  el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)
+);
+```
+
+### General pattern
+
+```javascript
+jest.mock('../../modules/state');
+jest.mock('../../modules/error-handler', () => ({
+  handleError: jest.fn(),
+  createError: jest.fn((code, msg, orig, ctx, sev) => ({ code, message: msg, originalError: orig })),
+  ERROR_CODE: { SPEECH: { STOP_FAILED: 'SPEECH_STOP_FAILED' }, DOM: { ELEMENT_NOT_FOUND: '...' } },
+  ERROR_CATEGORY: { SPEECH: 'SPEECH', DOM: 'DOM', API: 'API' },
+  ERROR_SEVERITY: { INFO: 'INFO', WARNING: 'WARNING', ERROR: 'ERROR', CRITICAL: 'CRITICAL' }
+}));
 ```
 
 ## Conventions
