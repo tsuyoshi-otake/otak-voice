@@ -116,4 +116,52 @@ describe('Event Bus Module', () => {
     expect(EVENTS.HISTORY_ADDED).toBeDefined();
     expect(EVENTS.INITIALIZATION_COMPLETE).toBeDefined();
   });
+
+  test('EVENTS values are unique strings', () => {
+    const values = Object.values(EVENTS);
+    const uniqueValues = new Set(values);
+    expect(uniqueValues.size).toBe(values.length);
+    values.forEach(value => {
+      expect(typeof value).toBe('string');
+    });
+  });
+
+  test('EVENTS values follow namespace pattern', () => {
+    Object.values(EVENTS).forEach(value => {
+      expect(value).toMatch(/^[a-z]+:[a-z:]+$/);
+    });
+  });
+
+  test('multiple handlers receive same event', () => {
+    const handler1 = jest.fn();
+    const handler2 = jest.fn();
+
+    subscribe('multi-event', handler1);
+    subscribe('multi-event', handler2);
+
+    publish('multi-event', { test: true });
+
+    expect(handler1).toHaveBeenCalledWith({ test: true });
+    expect(handler2).toHaveBeenCalledWith({ test: true });
+  });
+
+  test('publish to non-subscribed event does not throw', () => {
+    expect(() => publish('non-existent-event', {})).not.toThrow();
+  });
+
+  test('error in one handler does not prevent other handlers from running', () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const handler1 = jest.fn(() => { throw new Error('fail'); });
+    const handler2 = jest.fn();
+
+    subscribe('error-test', handler1);
+    subscribe('error-test', handler2);
+
+    publish('error-test', {});
+
+    expect(handler1).toHaveBeenCalled();
+    expect(handler2).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+  });
 });

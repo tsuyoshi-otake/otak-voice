@@ -112,11 +112,38 @@ describe('content script', () => {
     });
   });
 
-  // Skip problematic initVoiceInput tests for now
   describe('initVoiceInput', () => {
-    test('skipping problematic tests for now', () => {
-      // この関数のテストは複雑なため、一時的にスキップします
-      expect(true).toBe(true);
+    test('should check for SpeechRecognition API support', async () => {
+      // Remove SpeechRecognition to test unsupported case
+      delete global.window.webkitSpeechRecognition;
+      delete global.window.SpeechRecognition;
+
+      await initVoiceInput();
+
+      expect(global.window.alert).toHaveBeenCalled();
+
+      // Restore
+      global.window.webkitSpeechRecognition = jest.fn();
+      global.window.SpeechRecognition = jest.fn();
+    });
+
+    test('should create UI when menu button does not exist', async () => {
+      document.body.innerHTML = '<div id="root"></div>';
+
+      await initVoiceInput();
+
+      expect(require('../modules/ui').createUI).toHaveBeenCalled();
+      expect(require('../modules/ui').setupEventListeners).toHaveBeenCalled();
+      expect(require('../modules/input-handler').updateMenuState).toHaveBeenCalled();
+    });
+
+    test('should not recreate UI when menu button already exists', async () => {
+      document.body.innerHTML = '<button id="otak-voice-menu-btn"></button>';
+
+      await initVoiceInput();
+
+      expect(require('../modules/ui').createUI).not.toHaveBeenCalled();
+      expect(require('../modules/input-handler').updateMenuState).toHaveBeenCalled();
     });
   });
 
