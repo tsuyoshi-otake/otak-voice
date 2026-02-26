@@ -3,6 +3,7 @@ node_modules/
 
 # Build output
 dist/
+content.js
 .state/tasks
 
 # Release files

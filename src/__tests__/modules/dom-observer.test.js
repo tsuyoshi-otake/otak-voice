@@ -1,5 +1,5 @@
 import { setupDOMObserver } from '../../modules/dom-observer';
-import { publish, subscribe, EVENTS } from '../../modules/event-bus';
+import { publish, EVENTS } from '../../modules/event-bus';
 import { enhanceInputElementHandlers } from '../../modules/input-handler';
 
 // Mock chrome.i18n
@@ -25,16 +25,19 @@ global.MutationObserver = jest.fn((callback) => {
     };
 });
 
-// Mock setInterval
+// Mock setInterval and setTimeout for debounce
 const mockSetInterval = jest.fn();
 const mockClearInterval = jest.fn();
+const mockSetTimeout = jest.fn((fn) => { mockSetTimeout.lastCallback = fn; return 1; });
+const mockClearTimeout = jest.fn();
 global.setInterval = mockSetInterval;
 global.clearInterval = mockClearInterval;
+global.setTimeout = mockSetTimeout;
+global.clearTimeout = mockClearTimeout;
 
 // Mock event-bus
 jest.mock('../../modules/event-bus', () => ({
     publish: jest.fn(),
-    subscribe: jest.fn(),
     EVENTS: {
         UI_RECOVERY_NEEDED: 'UI_RECOVERY_NEEDED',
         MENU_STATE_UPDATE_NEEDED: 'MENU_STATE_UPDATE_NEEDED',
@@ -73,6 +76,7 @@ describe('dom-observer', () => {
         publish.mockClear(); // Add this line to clear publish mock calls
         // Reset MutationObserver callback
         MutationObserver.mock.callback = null;
+        mockSetTimeout.lastCallback = null;
     });
 
     afterAll(() => {
@@ -95,9 +99,6 @@ describe('dom-observer', () => {
         // Check if setInterval was called
         expect(mockSetInterval).toHaveBeenCalledTimes(1);
         expect(mockSetInterval).toHaveBeenCalledWith(expect.any(Function), 5000);
-
-        // No-op event subscriptions were removed - events are handled by their respective modules
-        expect(subscribe).not.toHaveBeenCalled();
 
         // Check initial log
         expect(mockConsoleLog).toHaveBeenCalledWith('mock_logDomObserverStart');
@@ -125,6 +126,10 @@ describe('dom-observer', () => {
         // Trigger the MutationObserver callback
         MutationObserver.mock.callback([mutation]);
 
+        // Flush debounce timer
+        expect(mockSetTimeout).toHaveBeenCalled();
+        mockSetTimeout.lastCallback();
+
         // Check if UI reinit event was published
         expect(publish).toHaveBeenCalledWith(EVENTS.UI_RECOVERY_NEEDED);
         // Check if input handlers update event was published
@@ -133,7 +138,6 @@ describe('dom-observer', () => {
         expect(enhanceInputElementHandlers).toHaveBeenCalledTimes(1);
 
         // Check logs
-        expect(mockConsoleLog).toHaveBeenCalledWith('mock_logSpaNavigationDetected', [addedTextarea]);
         expect(mockConsoleLog).toHaveBeenCalledWith('mock_logSpaUiReinit');
     });
 
@@ -157,17 +161,13 @@ describe('dom-observer', () => {
         // Trigger the MutationObserver callback
         MutationObserver.mock.callback([mutation]);
 
-        // 修正: publish関数が呼ばれた際の引数をチェック
+        // Flush debounce timer
+        mockSetTimeout.lastCallback();
+
         const publishCalls = publish.mock.calls.map(call => call[0]);
         expect(publishCalls).toContain(EVENTS.MENU_STATE_UPDATE_NEEDED);
-        // Check if input handlers update event was published
         expect(publish).toHaveBeenCalledWith(EVENTS.INPUT_HANDLERS_UPDATE_NEEDED);
-        // Check if enhanceInputElementHandlers was called
         expect(enhanceInputElementHandlers).toHaveBeenCalledTimes(1);
-
-        // Check logs
-        expect(mockConsoleLog).toHaveBeenCalledWith('mock_logSpaNavigationDetected', [addedTextarea]);
-        // ログメッセージの検証を削除 - 実装が変更されたため、このメッセージは出力されない
     });
 
     test('MutationObserver callback should handle errors during enhanceInputElementHandlers', () => {
@@ -193,8 +193,9 @@ describe('dom-observer', () => {
             throw mockError;
         });
 
-        // Trigger the MutationObserver callback
+        // Trigger the MutationObserver callback and flush debounce
         MutationObserver.mock.callback([mutation]);
+        mockSetTimeout.lastCallback();
 
         // Check if error event was published
         expect(publish).toHaveBeenCalledWith(EVENTS.ERROR_OCCURRED, {
@@ -202,7 +203,6 @@ describe('dom-observer', () => {
             message: 'Error enhancing input handlers after SPA navigation',
             error: mockError,
         });
-        // Check if console.error was called
         expect(mockConsoleError).toHaveBeenCalledWith('Error enhancing input handlers after SPA navigation:', mockError);
     });
 
@@ -229,12 +229,12 @@ describe('dom-observer', () => {
             throw invalidatedError;
         });
 
-        // Trigger the MutationObserver callback
+        // Trigger the MutationObserver callback and flush debounce
         MutationObserver.mock.callback([mutation]);
+        mockSetTimeout.lastCallback();
 
         // Check if error event was NOT published
         expect(publish).not.toHaveBeenCalledWith(EVENTS.ERROR_OCCURRED, expect.anything());
-        // Check if console.error was NOT called
         expect(mockConsoleError).not.toHaveBeenCalled();
     });
 
@@ -337,13 +337,44 @@ describe('dom-observer', () => {
         expect(mockConsoleError).not.toHaveBeenCalled();
     });
 
-    test('setupEventSubscriptions should be called without subscribing to no-op events', () => {
-        // Call setupDOMObserver to trigger setupEventSubscriptions
+    test('MutationObserver callback should debounce rapid mutations', () => {
         setupDOMObserver();
 
-        // No-op subscriptions were removed - event handling is delegated to respective modules
-        // (input-handler.js for MENU_STATE_UPDATE_NEEDED and INPUT_HANDLERS_UPDATE_NEEDED,
-        //  content.js for UI_RECOVERY_NEEDED)
-        expect(subscribe).not.toHaveBeenCalled();
+        const addedNode = {
+            nodeType: Node.ELEMENT_NODE,
+            querySelectorAll: jest.fn().mockReturnValue([document.createElement('textarea')]),
+        };
+        const mutation = { type: 'childList', addedNodes: [addedNode] };
+
+        mockGetElementById.mockReturnValue(document.createElement('button'));
+
+        // Trigger multiple rapid mutations
+        MutationObserver.mock.callback([mutation]);
+        MutationObserver.mock.callback([mutation]);
+        MutationObserver.mock.callback([mutation]);
+
+        // clearTimeout should be called for prior pending timers
+        expect(mockClearTimeout).toHaveBeenCalled();
+
+        // Flush the last debounce timer
+        mockSetTimeout.lastCallback();
+
+        // enhanceInputElementHandlers should only be called once (debounced)
+        expect(enhanceInputElementHandlers).toHaveBeenCalledTimes(1);
+    });
+
+    test('MutationObserver callback should skip mutations without textareas', () => {
+        setupDOMObserver();
+
+        const addedNode = {
+            nodeType: Node.ELEMENT_NODE,
+            querySelectorAll: jest.fn().mockReturnValue([]),
+        };
+        const mutation = { type: 'childList', addedNodes: [addedNode] };
+
+        MutationObserver.mock.callback([mutation]);
+
+        // setTimeout should NOT have been called since no textareas
+        expect(mockSetTimeout).not.toHaveBeenCalled();
     });
 });
