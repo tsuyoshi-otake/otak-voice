@@ -5,14 +5,14 @@
 otak-voiceは、あらゆるウェブサイトで使えるChrome向け高度な音声入力拡張機能です。
 
 [![GitHub](https://img.shields.io/badge/GitHub-リポジトリ-blue?logo=github)](https://github.com/tsuyoshi-otake/otak-voice)
-[![Latest Release](https://img.shields.io/badge/最新リリース-v3.1-green)](https://github.com/tsuyoshi-otake/otak-voice/releases/tag/v3.1)
+[![Latest Release](https://img.shields.io/badge/最新リリース-v3.2-green)](https://github.com/tsuyoshi-otake/otak-voice/releases/tag/v3.2)
 [![Jest Tests](https://img.shields.io/badge/テスト-Jest-C21325?logo=jest)](https://jestjs.io/)
 [![Snyk Security](https://img.shields.io/badge/セキュリティ-Snyk-4C4A73?logo=snyk)](https://snyk.io/)
 
 ## 主な機能
 
 - **どこでも使える音声入力**: あらゆるウェブサイトのテキスト入力欄で使用可能
-- **gpt-5.2-miniによる自動文脈修正**: 音声認識結果を自動的に校正
+- **gpt-4.1-miniによる自動文脈修正**: 音声認識結果を自動的に校正
 - **gpt-5.2による高精度校閲**: 入力内容全体を高精度AIモデルで校閲
 - **SPA（シングルページアプリケーション）対応**: 画面遷移後も自動的に再初期化
 - **自動送信機能**: 音声入力後に自動的に送信ボタンをクリック
