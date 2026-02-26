@@ -97,14 +97,14 @@ const SETTINGS_SCHEMA = {
     key: AUTO_CORRECTION_PROMPT_STORAGE_KEY,
     type: 'string',
     default: DEFAULT_SETTINGS.AUTO_CORRECTION_PROMPT,
-    validate: (value) => typeof value === 'string' && value.length > 0,
+    validate: (value) => typeof value === 'string',
     errorMessage: 'errorInvalidPrompt'
   },
   proofreadingPrompt: {
     key: PROOFREADING_PROMPT_STORAGE_KEY,
     type: 'string',
     default: DEFAULT_SETTINGS.PROOFREADING_PROMPT,
-    validate: (value) => typeof value === 'string' && value.length > 0,
+    validate: (value) => typeof value === 'string',
     errorMessage: 'errorInvalidPrompt'
   }
 };

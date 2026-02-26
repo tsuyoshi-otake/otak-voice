@@ -170,7 +170,7 @@ export function setupEventListeners() {
 
     // Automatically turn on the microphone when a text area is focused (only if auto-recognition is off)
     document.addEventListener('focusin', e => {
-        if (isInputElement(e.target) && getState('autoDetectInputFields') === false && !getState('isListening')) {
+        if (isInputElement(e.target) && getState('autoDetectInputFields') === true && !getState('isListening')) {
             publish(EVENTS.MIC_BUTTON_CLICKED);
         }
     });
