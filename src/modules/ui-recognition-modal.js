@@ -59,8 +59,11 @@ export function showRecognitionTextModal(text = '', isInitial = false) {
     const copyButton = modal.querySelector('.otak-voice-recognition__copy-btn');
     copyButton.onclick = () => {
       const textarea = modal.querySelector('textarea');
-      textarea.select();
-      document.execCommand('copy');
+      const textToCopy = textarea.value;
+      navigator.clipboard.writeText(textToCopy).catch(() => {
+        textarea.select();
+        document.execCommand('copy');
+      });
 
       // Save original button text
       const originalText = copyButton.textContent;

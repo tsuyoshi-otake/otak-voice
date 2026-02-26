@@ -130,7 +130,7 @@ export function toggleAutoSubmit(fromMenuButton = false) {
 
         // Save state to sync storage
         console.log('Toggling auto submit state to:', newAutoSubmit);
-        saveAutoSubmitState(newAutoSubmit);
+        saveAutoSubmitState(newAutoSubmit).catch(() => {});
 
         // Update UI to reflect the new state
         updateAutoSubmitButtonState(newAutoSubmit);

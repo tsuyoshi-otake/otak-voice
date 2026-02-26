@@ -11,7 +11,7 @@ const _state = {
   // Input handling state
   currentInputElement: null,
   lastClickedInput: null,
-  autoSubmit: true,
+  autoSubmit: false,
   originalText: '',
   interimText: '',
   lastRecognizedText: '',
