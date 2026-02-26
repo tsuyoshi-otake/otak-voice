@@ -10,7 +10,9 @@
     "test:integration": "jest --testMatch='**/__tests__/integration/**/*.js'",
     "test:site-handlers": "jest --testMatch='**/__tests__/site-handlers/**/*.js'",
     "build": "esbuild src/content.js --bundle --outdir=dist --format=iife && esbuild src/background.js --bundle --outdir=dist --format=esm && npm run copy-assets",
-    "copy-assets": "node scripts/copy-assets.js"
+    "copy-assets": "node scripts/copy-assets.js",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix"
   },
   "repository": {
     "type": "git",
@@ -26,9 +28,11 @@
   "devDependencies": {
     "@babel/core": "^7.27.1",
     "@babel/preset-env": "^7.27.1",
+    "@eslint/js": "^10.0.1",
     "@types/jest": "^29.5.14",
     "babel-jest": "^29.7.0",
     "esbuild": "^0.25.3",
+    "eslint": "^10.0.2",
     "fs-extra": "^11.3.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0"

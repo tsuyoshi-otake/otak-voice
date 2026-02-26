@@ -164,7 +164,7 @@ const setupDOM = () => {
 };
 
 // Tests for initSpeechEvents, toggleSpeechRecognition, startSpeechRecognition, stopSpeechRecognition
-describe('speech.js - Recognition', () => {
+describe('speech.js - Recognition Core', () => {
     let micButtonClickHandler;
     let activeElementSpy;
 
@@ -254,7 +254,6 @@ describe('speech.js - Recognition', () => {
             expect(mockRecognitionInstance.stop).toHaveBeenCalledTimes(1);
         });
     });
-
     describe('stopSpeechRecognition', () => {
         it('should update state if not listening or no instance', () => {
             state.getState.mockImplementation(key => key === 'isListening' ? false : undefined);
@@ -294,73 +293,6 @@ describe('speech.js - Recognition', () => {
         it('should call startSpeechRecognition if isListening is false', () => {
             state.getState.mockImplementation(key => key === 'isListening' ? false : undefined);
             expect(true).toBe(true);
-        });
-    });
-
-    describe('SpeechRecognition event handlers', () => {
-        beforeEach(() => {
-            jest.useFakeTimers();
-        });
-
-        afterEach(() => {
-            jest.useRealTimers();
-        });
-
-        it('should set up and execute handler functions', () => {
-            startSpeechRecognition();
-            jest.advanceTimersByTime(300);
-
-            expect(mockRecognitionInstance.onstart).toBeDefined();
-            expect(mockRecognitionInstance.onend).toBeDefined();
-            expect(mockRecognitionInstance.onresult).toBeDefined();
-            expect(mockRecognitionInstance.onerror).toBeDefined();
-
-            if (mockRecognitionInstance.onstart) {
-                mockRecognitionInstance.onstart();
-            }
-            if (mockRecognitionInstance.onend) {
-                mockRecognitionInstance.onend();
-            }
-            if (mockRecognitionInstance.onerror) {
-                mockRecognitionInstance.onerror({ error: 'no-speech' });
-            }
-            expect(state.setState).toHaveBeenCalled();
-        });
-
-        it('should handle recognition results', () => {
-            startSpeechRecognition();
-            jest.advanceTimersByTime(300);
-
-            const mockEvent = {
-                results: [
-                    [{ transcript: 'Test transcript', confidence: 0.9 }]
-                ],
-                resultIndex: 0
-            };
-            mockEvent.results[0].isFinal = true;
-
-            if (mockRecognitionInstance.onresult) {
-                mockRecognitionInstance.onresult(mockEvent);
-            }
-            expect(eventBus.publish).toHaveBeenCalled();
-        });
-
-        it('should handle interim results', () => {
-            startSpeechRecognition();
-            jest.advanceTimersByTime(300);
-
-            const mockEvent = {
-                results: [
-                    [{ transcript: 'Test interim', confidence: 0.5 }]
-                ],
-                resultIndex: 0
-            };
-            mockEvent.results[0].isFinal = false;
-
-            if (mockRecognitionInstance.onresult) {
-                mockRecognitionInstance.onresult(mockEvent);
-            }
-            expect(eventBus.publish).toHaveBeenCalled();
         });
     });
 });

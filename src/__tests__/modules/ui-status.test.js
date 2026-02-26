@@ -164,6 +164,60 @@ describe('UI Module - Status', () => {
             expect(statusElem.style.display).toBe('block');
             expect(statusElem.classList.contains('otak-voice-status--processing')).toBe(true);
         });
+
+        it('should do nothing if the status element does not exist', () => {
+            document.body.innerHTML = '';
+            expect(() => showStatus('testMessageKey')).not.toThrow();
+        });
+
+        it('should pass substitutions to chrome.i18n.getMessage', () => {
+            showStatus('testMessageKey', 'someSubstitution');
+            expect(chrome.i18n.getMessage).toHaveBeenCalledWith('testMessageKey', 'someSubstitution');
+        });
+
+        it('should treat specific keys (statusProcessingInProgress, statusAutoDetectOff) as errors', () => {
+            state.getState.mockImplementation(key => {
+                if (key === 'processingState') return mockPROCESSING_STATE.IDLE;
+                return undefined;
+            });
+            const statusElem = document.querySelector('.otak-voice-status');
+
+            showStatus('statusProcessingInProgress', null, false);
+            jest.advanceTimersByTime(3000);
+            expect(statusElem.style.display).toBe('none');
+
+            statusElem.style.display = 'block';
+            showStatus('statusAutoDetectOff', null, false);
+            jest.advanceTimersByTime(3000);
+            expect(statusElem.style.display).toBe('none');
+        });
+
+        it('should treat keys with Error/Empty/NotFound suffixes as errors', () => {
+            state.getState.mockImplementation(key => {
+                if (key === 'processingState') return mockPROCESSING_STATE.IDLE;
+                return undefined;
+            });
+            const statusElem = document.querySelector('.otak-voice-status');
+            for (const key of ['statusInputNotFound', 'statusInputEmpty', 'statusSomeError']) {
+                statusElem.style.display = 'block';
+                showStatus(key, null, false);
+                jest.advanceTimersByTime(3000);
+                expect(statusElem.style.display).toBe('none');
+            }
+        });
+
+        it('should use longer timeout for non-status-prefix keys even with error-like suffix', () => {
+            state.getState.mockImplementation(key => {
+                if (key === 'processingState') return mockPROCESSING_STATE.IDLE;
+                return undefined;
+            });
+            showStatus('aRegularMessageError', null, false);
+            const statusElem = document.querySelector('.otak-voice-status');
+            jest.advanceTimersByTime(3000);
+            expect(statusElem.style.display).toBe('block');
+            jest.advanceTimersByTime(2000);
+            expect(statusElem.style.display).toBe('none');
+        });
     });
 
     describe('updateProcessingState', () => {

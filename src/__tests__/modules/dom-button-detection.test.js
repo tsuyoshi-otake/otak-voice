@@ -81,8 +81,27 @@ describe('DOM Button Detection', () => {
     it('should return true if className contains disabled', () => {
       expect(isButtonDisabled(createButton({ className: 'btn disabled' }))).toBe(true);
     });
+    it('should return true if className contains cursor-not-allowed', () => {
+      expect(isButtonDisabled(createButton({ className: 'cursor-not-allowed' }))).toBe(true);
+    });
+    it('should return true if className contains opacity-50', () => {
+      expect(isButtonDisabled(createButton({ className: 'opacity-50' }))).toBe(true);
+    });
+    it('should return true if getComputedStyle opacity is less than 0.9', () => {
+      const button = createButton();
+      window.getComputedStyle = jest.fn().mockReturnValue({
+        display: 'block', visibility: 'visible', opacity: '0.5',
+      });
+      expect(isButtonDisabled(button)).toBe(true);
+    });
     it('should return false for an enabled button', () => {
       expect(isButtonDisabled(createButton())).toBe(false);
+    });
+    it('should return true on error', () => {
+      const button = createButton();
+      jest.spyOn(button, 'getAttribute').mockImplementation(() => { throw new Error('Test'); });
+      expect(isButtonDisabled(button)).toBe(true);
+      expect(console.error).toHaveBeenCalled();
     });
   });
 
@@ -91,6 +110,34 @@ describe('DOM Button Detection', () => {
       document.body.appendChild(document.createElement('button'));
       document.body.appendChild(document.createElement('button'));
       expect(Array.isArray(findAllButtons())).toBe(true);
+    });
+    it('should find input[type="submit"] elements', () => {
+      const submitInput = document.createElement('input');
+      submitInput.type = 'submit';
+      document.body.appendChild(submitInput);
+      submitInput.getBoundingClientRect = jest.fn().mockReturnValue({
+        width: 80, height: 30, top: 0, left: 0, right: 80, bottom: 30,
+      });
+      Object.defineProperty(submitInput, 'offsetParent', {
+        get: jest.fn().mockReturnValue(document.body), configurable: true
+      });
+      const buttons = findAllButtons();
+      expect(buttons).toContain(submitInput);
+    });
+    it('should not include invisible buttons', () => {
+      const invisible = document.createElement('button');
+      document.body.appendChild(invisible);
+      invisible.getBoundingClientRect = jest.fn().mockReturnValue({
+        width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0
+      });
+      Object.defineProperty(invisible, 'offsetParent', {
+        get: jest.fn().mockReturnValue(null), configurable: true
+      });
+      window.getComputedStyle = jest.fn().mockReturnValue({
+        display: 'none', visibility: 'visible', opacity: '1',
+      });
+      const buttons = findAllButtons();
+      expect(buttons).not.toContain(invisible);
     });
     it('should handle errors and return an empty array', () => {
       document.querySelectorAll = jest.fn(() => { throw new Error('Test error'); });
@@ -181,6 +228,62 @@ describe('DOM Button Detection', () => {
       const enabled = createButton({ text: 'Submit', type: 'submit' });
       const disabled = createButton({ text: 'Submit', type: 'submit', disabled: true });
       expect(scoreSubmitButton(enabled, input)).toBeGreaterThan(scoreSubmitButton(disabled, input));
+    });
+    it('should give extra score for button with an SVG child', () => {
+      const input = createInputField();
+      const plainButton = createButton({ text: 'Send' });
+      const svgButton = createButton({ text: 'Send' });
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svgButton.appendChild(svg);
+      expect(scoreSubmitButton(svgButton, input)).toBeGreaterThan(scoreSubmitButton(plainButton, input));
+    });
+    it('should give extra score for button with a send-related image', () => {
+      const input = createInputField();
+      const plainButton = createButton();
+      const imgButton = createButton();
+      const img = document.createElement('img');
+      img.src = 'https://example.com/send-icon.png';
+      imgButton.appendChild(img);
+      expect(scoreSubmitButton(imgButton, input)).toBeGreaterThan(scoreSubmitButton(plainButton, input));
+    });
+    it('should score only by type=submit when no keywords match', () => {
+      const input = createInputField();
+      const typeSubmit = createButton({ type: 'submit' });
+      const typeButton = createButton({ type: 'button' });
+      expect(scoreSubmitButton(typeSubmit, input)).toBeGreaterThan(scoreSubmitButton(typeButton, input));
+    });
+    it('should give bonus when button is the only one in its form', () => {
+      // Single-button form
+      const singleForm = document.createElement('form');
+      document.body.appendChild(singleForm);
+      const singleInput = document.createElement('input');
+      singleInput.type = 'text';
+      singleForm.appendChild(singleInput);
+      singleInput.getBoundingClientRect = jest.fn().mockReturnValue(
+        { width: 100, height: 30, top: 0, left: 0, right: 100, bottom: 30 }
+      );
+      Object.defineProperty(singleInput, 'offsetParent', { get: () => document.body, configurable: true });
+      const singleBtn = createButton({ type: 'button' });
+      singleForm.appendChild(singleBtn);
+      const singleScore = scoreSubmitButton(singleBtn, singleInput);
+
+      // Multi-button form (no bonus)
+      const multiForm = document.createElement('form');
+      document.body.appendChild(multiForm);
+      const multiInput = document.createElement('input');
+      multiInput.type = 'text';
+      multiForm.appendChild(multiInput);
+      multiInput.getBoundingClientRect = jest.fn().mockReturnValue(
+        { width: 100, height: 30, top: 0, left: 0, right: 100, bottom: 30 }
+      );
+      Object.defineProperty(multiInput, 'offsetParent', { get: () => document.body, configurable: true });
+      const btn1 = createButton({ type: 'button' });
+      const btn2 = createButton({ type: 'button' });
+      multiForm.appendChild(btn1);
+      multiForm.appendChild(btn2);
+      const multiScore = scoreSubmitButton(btn1, multiInput);
+
+      expect(singleScore).toBeGreaterThan(multiScore);
     });
     it('should handle errors and return 0', () => {
       const input = createInputField();

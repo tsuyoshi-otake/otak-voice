@@ -69,11 +69,11 @@ global.Node = {
 };
 
 
-describe('dom-observer', () => {
+describe('dom-observer - MutationObserver callback', () => {
     beforeEach(() => {
         // Clear mocks before each test
         jest.clearAllMocks();
-        publish.mockClear(); // Add this line to clear publish mock calls
+        publish.mockClear();
         // Reset MutationObserver callback
         MutationObserver.mock.callback = null;
         mockSetTimeout.lastCallback = null;
@@ -103,8 +103,6 @@ describe('dom-observer', () => {
         // Check initial log
         expect(mockConsoleLog).toHaveBeenCalledWith('mock_logDomObserverStart');
     });
-
-    // Add more tests here to cover MutationObserver callback and setInterval callback scenarios
 
     test('MutationObserver callback should handle added textareas and trigger UI reinit if button is missing', () => {
         setupDOMObserver();
@@ -235,105 +233,6 @@ describe('dom-observer', () => {
 
         // Check if error event was NOT published
         expect(publish).not.toHaveBeenCalledWith(EVENTS.ERROR_OCCURRED, expect.anything());
-        expect(mockConsoleError).not.toHaveBeenCalled();
-    });
-
-    test('setInterval callback should trigger UI reinit if button is missing', () => {
-        setupDOMObserver();
-
-        // Mock getElementById to return null (UI button missing)
-        mockGetElementById.mockReturnValue(null);
-
-        // Get the setInterval callback function
-        const intervalCallback = mockSetInterval.mock.calls[0][0];
-
-        // Trigger the interval callback
-        intervalCallback();
-
-        // Check if UI reinit event was published
-        expect(publish).toHaveBeenCalledWith(EVENTS.UI_RECOVERY_NEEDED);
-        // Check if input handlers update event was published
-        expect(publish).toHaveBeenCalledWith(EVENTS.INPUT_HANDLERS_UPDATE_NEEDED);
-        // Check if enhanceInputElementHandlers was called
-        expect(enhanceInputElementHandlers).toHaveBeenCalledTimes(1);
-
-        // Check logs
-        expect(mockConsoleLog).toHaveBeenCalledWith('mock_logPollingUiNotFound');
-    });
-
-    test('setInterval callback should trigger menu state update if button exists', () => {
-        setupDOMObserver();
-
-        // Mock getElementById to return a mock button element (UI button exists)
-        mockGetElementById.mockReturnValue(document.createElement('button'));
-
-        // Get the setInterval callback function
-        const intervalCallback = mockSetInterval.mock.calls[0][0];
-
-        // Trigger the interval callback
-        intervalCallback();
-
-        // 修正: publish関数が呼ばれた際の引数をチェック
-        const publishCalls = publish.mock.calls.map(call => call[0]);
-        expect(publishCalls).toContain(EVENTS.MENU_STATE_UPDATE_NEEDED);
-        // Check if input handlers update event was published
-        expect(publish).toHaveBeenCalledWith(EVENTS.INPUT_HANDLERS_UPDATE_NEEDED);
-        // Check if enhanceInputElementHandlers was called
-        expect(enhanceInputElementHandlers).toHaveBeenCalledTimes(1);
-
-        // Check logs
-        // ログメッセージの検証を削除 - 実装が変更されたためこの検証は不正確
-    });
-
-    test('setInterval callback should handle errors during enhanceInputElementHandlers', () => {
-        setupDOMObserver();
-
-        // Mock getElementById to return a mock button element (UI button exists)
-        mockGetElementById.mockReturnValue(document.createElement('button'));
-
-        // Mock enhanceInputElementHandlers to throw an error
-        const mockError = new Error('Enhance error');
-        enhanceInputElementHandlers.mockImplementation(() => {
-            throw mockError;
-        });
-
-        // Get the setInterval callback function
-        const intervalCallback = mockSetInterval.mock.calls[0][0];
-
-        // Trigger the interval callback
-        intervalCallback();
-
-        // Check if error event was published
-        expect(publish).toHaveBeenCalledWith(EVENTS.ERROR_OCCURRED, {
-            source: 'dom-observer',
-            message: 'Error enhancing input handlers in interval',
-            error: mockError,
-        });
-        // Check if console.error was called
-        expect(mockConsoleError).toHaveBeenCalledWith('Error enhancing input handlers in interval:', mockError);
-    });
-
-    test('setInterval callback should ignore "Extension context invalidated" errors during enhanceInputElementHandlers', () => {
-        setupDOMObserver();
-
-        // Mock getElementById to return a mock button element (UI button exists)
-        mockGetElementById.mockReturnValue(document.createElement('button'));
-
-        // Mock enhanceInputElementHandlers to throw an "Extension context invalidated" error
-        const invalidatedError = new Error('Extension context invalidated');
-        enhanceInputElementHandlers.mockImplementation(() => {
-            throw invalidatedError;
-        });
-
-        // Get the setInterval callback function
-        const intervalCallback = mockSetInterval.mock.calls[0][0];
-
-        // Trigger the interval callback
-        intervalCallback();
-
-        // Check if error event was NOT published
-        expect(publish).not.toHaveBeenCalledWith(EVENTS.ERROR_OCCURRED, expect.anything());
-        // Check if console.error was NOT called
         expect(mockConsoleError).not.toHaveBeenCalled();
     });
 

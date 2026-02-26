@@ -45,6 +45,7 @@ function createInputField(options = {}) {
 
 describe('DOM Input Detection', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     resetDOM();
 
     window.getComputedStyle = jest.fn().mockReturnValue({
@@ -57,12 +58,10 @@ describe('DOM Input Detection', () => {
     Object.defineProperty(window, 'innerHeight', { value: 768, configurable: true });
 
     jest.spyOn(console, 'error').mockImplementation(() => {});
-    jest.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    console.error.mockRestore();
+    jest.restoreAllMocks();
   });
 
   describe('isInputElement', () => {
@@ -154,9 +153,14 @@ describe('DOM Input Detection', () => {
     });
 
     it('should handle errors and return an empty array', () => {
+      const originalQuerySelectorAll = document.querySelectorAll.bind(document);
       document.querySelectorAll = jest.fn(() => { throw new Error('Test error'); });
-      expect(findAllInputElements()).toEqual([]);
-      expect(console.error).toHaveBeenCalled();
+      try {
+        expect(findAllInputElements()).toEqual([]);
+        expect(console.error).toHaveBeenCalled();
+      } finally {
+        document.querySelectorAll = originalQuerySelectorAll;
+      }
     });
   });
 
@@ -165,7 +169,7 @@ describe('DOM Input Detection', () => {
       expect(scoreInputField(null)).toBe(0);
     });
 
-    it('should give lower score to invisible elements', () => {
+    it('should return 0 for an invisible element (zero dimensions)', () => {
       const invisibleInput = document.createElement('input');
       invisibleInput.type = 'text';
       document.body.appendChild(invisibleInput);
@@ -175,18 +179,28 @@ describe('DOM Input Detection', () => {
       });
 
       const score = scoreInputField(invisibleInput);
-      expect(score).toBeLessThanOrEqual(1);
+      expect(score).toBe(0);
     });
 
-    it('should score based on element attributes', () => {
-      const chatInput = createInputField({ placeholder: 'Type your message here' });
-      const searchInput = createInputField({ placeholder: 'Search' });
+    it('should score chat keywords higher than search keywords', () => {
+      const chatInput = createInputField({ placeholder: 'chat message' });
+      const searchInput = createInputField({ placeholder: 'search here' });
+      expect(scoreInputField(chatInput)).toBeGreaterThan(0);
+      expect(scoreInputField(searchInput)).toBeGreaterThan(0);
+      expect(scoreInputField(chatInput)).toBeGreaterThan(scoreInputField(searchInput));
+    });
 
-      const chatScore = scoreInputField(chatInput);
-      const searchScore = scoreInputField(searchInput);
+    it('should give score bonus for in-viewport element and for chat/comment keywords in id/placeholder', () => {
+      const inViewport = createInputField({ top: 0, left: 0, width: 100, height: 30 });
+      const outViewport = createInputField({ top: 9999, left: 0, width: 100, height: 30 });
+      expect(scoreInputField(inViewport)).toBeGreaterThan(scoreInputField(outViewport));
 
-      expect(chatScore).toBeGreaterThan(0);
-      expect(searchScore).toBeGreaterThan(0);
+      const inputWithId = createInputField();
+      inputWithId.id = 'main-input-field';
+      expect(scoreInputField(inputWithId)).toBeGreaterThan(0);
+
+      const inputWithComment = createInputField({ placeholder: 'Add a comment' });
+      expect(scoreInputField(inputWithComment)).toBeGreaterThan(0);
     });
 
     it('should give higher score to textarea elements', () => {
@@ -197,6 +211,21 @@ describe('DOM Input Detection', () => {
       const textareaScore = scoreInputField(textareaInput);
 
       expect(textareaScore).toBeGreaterThan(textScore);
+    });
+
+    it('should give contentEditable element a lower score than textarea', () => {
+      const textarea = createInputField({ type: 'textarea' });
+      const contentEditable = document.createElement('div');
+      Object.defineProperty(contentEditable, 'isContentEditable', { get: () => true, configurable: true });
+      document.body.appendChild(contentEditable);
+      contentEditable.getBoundingClientRect = jest.fn().mockReturnValue({
+        width: 100, height: 30, top: 0, left: 0, right: 100, bottom: 30
+      });
+      Object.defineProperty(contentEditable, 'offsetParent', {
+        get: jest.fn().mockReturnValue(document.body), configurable: true
+      });
+
+      expect(scoreInputField(textarea)).toBeGreaterThan(scoreInputField(contentEditable));
     });
 
     it('should score based on element size', () => {
@@ -219,20 +248,41 @@ describe('DOM Input Detection', () => {
   });
 
   describe('findBestInputField', () => {
+    let originalQuerySelectorAll;
+
+    beforeEach(() => {
+      // Save and restore in case a prior test replaced document.querySelectorAll
+      originalQuerySelectorAll = document.querySelectorAll.bind(document);
+    });
+
+    afterEach(() => {
+      document.querySelectorAll = originalQuerySelectorAll;
+    });
+
     it('should return null when no input elements exist', () => {
       document.body.innerHTML = '';
       expect(findBestInputField()).toBeNull();
     });
 
-    it('should find an input element when one exists', () => {
-      expect(typeof findBestInputField).toBe('function');
-      expect(() => findBestInputField()).not.toThrow();
+    it('should return the single input when only one exists', () => {
+      const input = createInputField({ type: 'textarea' });
+      const result = findBestInputField();
+      expect(result).toBe(input);
+    });
+
+    it('should return the highest-scoring input and a non-null result', () => {
+      createInputField({ type: 'textarea', width: 50, height: 20 });
+      const bestInput = createInputField({ type: 'textarea', placeholder: 'chat message', width: 200, height: 80 });
+      const result = findBestInputField();
+      expect(result).not.toBeNull();
+      expect(result).toBe(bestInput);
     });
 
     it('should handle errors and return null', () => {
       document.querySelectorAll = jest.fn(() => { throw new Error('Test error'); });
       expect(findBestInputField()).toBeNull();
       expect(console.error).toHaveBeenCalled();
+      // Restore is handled by afterEach
     });
   });
 });

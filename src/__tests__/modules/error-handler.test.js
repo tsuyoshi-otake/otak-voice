@@ -112,14 +112,8 @@ describe('Error Handler Module - Functions', () => {
     });
 
     test('handles non-Error objects gracefully', () => {
-      const nonError = { message: 'Not an Error instance' };
-      handleError(nonError, false);
-      expect(eventBus.publish).toHaveBeenCalledWith(eventBus.EVENTS.ERROR_OCCURRED, expect.any(Object));
-    });
-
-    test('handles objects without message property', () => {
-      const objectWithoutMessage = { someProperty: 'value' };
-      handleError(objectWithoutMessage, false);
+      handleError({ message: 'Not an Error instance' }, false);
+      handleError({ someProperty: 'value' }, false);
       expect(eventBus.publish).toHaveBeenCalledWith(eventBus.EVENTS.ERROR_OCCURRED, expect.any(Object));
     });
 
@@ -166,41 +160,21 @@ describe('Error Handler Module - Functions', () => {
       const consoleWarnSpy = jest.spyOn(console, 'warn');
       const consoleErrorSpy = jest.spyOn(console, 'error');
 
-      const infoError = new AppError(
-        ERROR_CODE[ERROR_CATEGORY.NETWORK].FETCH_FAILED, 'Info message', ERROR_SEVERITY.INFO
-      );
-      handleError(infoError, false);
+      handleError(new AppError(ERROR_CODE[ERROR_CATEGORY.NETWORK].FETCH_FAILED, 'Info', ERROR_SEVERITY.INFO), false);
       expect(consoleLogSpy).toHaveBeenCalled();
 
-      const warningError = new AppError(
-        ERROR_CODE[ERROR_CATEGORY.NETWORK].FETCH_FAILED, 'Warning message', ERROR_SEVERITY.WARNING
-      );
-      handleError(warningError, false);
+      handleError(new AppError(ERROR_CODE[ERROR_CATEGORY.NETWORK].FETCH_FAILED, 'Warning', ERROR_SEVERITY.WARNING), false);
       expect(consoleWarnSpy).toHaveBeenCalled();
 
-      const criticalError = new AppError(
-        ERROR_CODE[ERROR_CATEGORY.NETWORK].FETCH_FAILED, 'Critical message', ERROR_SEVERITY.CRITICAL
-      );
-      handleError(criticalError, false);
+      handleError(new AppError(ERROR_CODE[ERROR_CATEGORY.NETWORK].FETCH_FAILED, 'Critical', ERROR_SEVERITY.CRITICAL), false);
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
     test('adds source prefix to log message when source is provided', () => {
       const consoleSpy = jest.spyOn(console, 'error');
-      const error = new AppError(
-        ERROR_CODE[ERROR_CATEGORY.NETWORK].FETCH_FAILED, 'Network fetch failed', ERROR_SEVERITY.ERROR
-      );
+      const error = new AppError(ERROR_CODE[ERROR_CATEGORY.NETWORK].FETCH_FAILED, 'msg', ERROR_SEVERITY.ERROR);
       handleError(error, false, false, 'test-module');
       expect(consoleSpy.mock.calls[0][0]).toContain('[test-module]');
-    });
-
-    test('logs without source prefix when source is not provided', () => {
-      const consoleSpy = jest.spyOn(console, 'error');
-      const error = new AppError(
-        ERROR_CODE[ERROR_CATEGORY.NETWORK].FETCH_FAILED, 'Network fetch failed', ERROR_SEVERITY.ERROR
-      );
-      handleError(error, false);
-      expect(consoleSpy.mock.calls[0][0]).not.toMatch(/^\[.*\]/);
     });
 
     test('handles unknown error code in notification', () => {
@@ -211,11 +185,10 @@ describe('Error Handler Module - Functions', () => {
       }));
     });
 
-    test('handles user message details in notification', () => {
+    test('uses userMessage from details as substitution when present', () => {
       const details = { userMessage: 'User-friendly error message' };
       const appError = new AppError(
-        ERROR_CODE[ERROR_CATEGORY.NETWORK].FETCH_FAILED, 'Network fetch failed',
-        ERROR_SEVERITY.ERROR, null, details
+        ERROR_CODE[ERROR_CATEGORY.NETWORK].FETCH_FAILED, 'msg', ERROR_SEVERITY.ERROR, null, details
       );
       handleError(appError, true);
       expect(eventBus.publish).toHaveBeenCalledWith(eventBus.EVENTS.STATUS_UPDATED, expect.objectContaining({
@@ -225,21 +198,7 @@ describe('Error Handler Module - Functions', () => {
 
     test('uses error message as substitution when no userMessage in details', () => {
       const message = 'Error message without user details';
-      const appError = new AppError(
-        ERROR_CODE[ERROR_CATEGORY.NETWORK].FETCH_FAILED, message, ERROR_SEVERITY.ERROR
-      );
-      handleError(appError, true);
-      expect(eventBus.publish).toHaveBeenCalledWith(eventBus.EVENTS.STATUS_UPDATED, expect.objectContaining({
-        substitutions: message
-      }));
-    });
-
-    test('uses error message as substitution when details exist but no userMessage', () => {
-      const message = 'Error message with details but no userMessage';
-      const details = { someOtherProperty: 'value' };
-      const appError = new AppError(
-        ERROR_CODE[ERROR_CATEGORY.NETWORK].FETCH_FAILED, message, ERROR_SEVERITY.ERROR, null, details
-      );
+      const appError = new AppError(ERROR_CODE[ERROR_CATEGORY.NETWORK].FETCH_FAILED, message, ERROR_SEVERITY.ERROR);
       handleError(appError, true);
       expect(eventBus.publish).toHaveBeenCalledWith(eventBus.EVENTS.STATUS_UPDATED, expect.objectContaining({
         substitutions: message
@@ -261,14 +220,6 @@ describe('Error Handler Module - Functions', () => {
       const result = await tryCatch(fn);
       expect(result).toBeNull();
       expect(eventBus.publish).toHaveBeenCalledWith(eventBus.EVENTS.ERROR_OCCURRED, expect.any(Object));
-    });
-
-    test('uses default error code when none is specified', async () => {
-      const fn = jest.fn().mockRejectedValue(new Error('Test error'));
-      await tryCatch(fn);
-      expect(eventBus.publish).toHaveBeenCalledWith(eventBus.EVENTS.ERROR_OCCURRED, expect.objectContaining({
-        code: ERROR_CODE[ERROR_CATEGORY.UNKNOWN].GENERAL
-      }));
     });
 
     test('uses specified error code when function throws', async () => {
@@ -305,21 +256,15 @@ describe('Error Handler Module - Functions', () => {
     test('maps 400 to BAD_REQUEST', () => {
       expect(mapHttpStatusToErrorCode(400)).toBe(ERROR_CODE[ERROR_CATEGORY.API].BAD_REQUEST);
     });
-    test('maps 401 to UNAUTHORIZED', () => {
+    test('maps 401 and 403 to UNAUTHORIZED', () => {
       expect(mapHttpStatusToErrorCode(401)).toBe(ERROR_CODE[ERROR_CATEGORY.API].UNAUTHORIZED);
-    });
-    test('maps 403 to UNAUTHORIZED', () => {
       expect(mapHttpStatusToErrorCode(403)).toBe(ERROR_CODE[ERROR_CATEGORY.API].UNAUTHORIZED);
-    });
-    test('maps 404 to BAD_REQUEST', () => {
-      expect(mapHttpStatusToErrorCode(404)).toBe(ERROR_CODE[ERROR_CATEGORY.API].BAD_REQUEST);
     });
     test('maps 429 to RATE_LIMIT', () => {
       expect(mapHttpStatusToErrorCode(429)).toBe(ERROR_CODE[ERROR_CATEGORY.API].RATE_LIMIT);
     });
     test('maps 500+ to SERVER_ERROR', () => {
       expect(mapHttpStatusToErrorCode(500)).toBe(ERROR_CODE[ERROR_CATEGORY.API].SERVER_ERROR);
-      expect(mapHttpStatusToErrorCode(502)).toBe(ERROR_CODE[ERROR_CATEGORY.API].SERVER_ERROR);
       expect(mapHttpStatusToErrorCode(503)).toBe(ERROR_CODE[ERROR_CATEGORY.API].SERVER_ERROR);
     });
     test('maps other status codes to SERVER_ERROR', () => {

@@ -5,6 +5,7 @@
  */
 
 import {
+  filterVisibleElements,
   isElementVisible,
   isElementInViewport,
 } from '../../modules/dom-utils';
@@ -40,6 +41,116 @@ function createInputField(options = {}) {
 
   return input;
 }
+
+describe('filterVisibleElements', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    window.getComputedStyle = jest.fn().mockReturnValue({
+      display: 'block',
+      visibility: 'visible',
+      opacity: '1',
+    });
+    Object.defineProperty(window, 'innerWidth', { value: 1024, configurable: true });
+    Object.defineProperty(window, 'innerHeight', { value: 768, configurable: true });
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    console.error.mockRestore();
+  });
+
+  it('should return only visible elements from a NodeList', () => {
+    const el1 = document.createElement('div');
+    const el2 = document.createElement('div');
+    document.body.appendChild(el1);
+    document.body.appendChild(el2);
+
+    el1.getBoundingClientRect = jest.fn().mockReturnValue({ width: 50, height: 20 });
+    el2.getBoundingClientRect = jest.fn().mockReturnValue({ width: 50, height: 20 });
+    Object.defineProperty(el1, 'offsetParent', { get: () => document.body, configurable: true });
+    Object.defineProperty(el2, 'offsetParent', { get: () => document.body, configurable: true });
+
+    const result = filterVisibleElements([el1, el2]);
+    expect(result).toHaveLength(2);
+    expect(result).toContain(el1);
+    expect(result).toContain(el2);
+  });
+
+  it('should exclude elements with display none', () => {
+    const visibleEl = document.createElement('div');
+    const hiddenEl = document.createElement('div');
+    document.body.appendChild(visibleEl);
+    document.body.appendChild(hiddenEl);
+
+    visibleEl.getBoundingClientRect = jest.fn().mockReturnValue({ width: 50, height: 20 });
+    hiddenEl.getBoundingClientRect = jest.fn().mockReturnValue({ width: 50, height: 20 });
+    Object.defineProperty(visibleEl, 'offsetParent', { get: () => document.body, configurable: true });
+    Object.defineProperty(hiddenEl, 'offsetParent', { get: () => document.body, configurable: true });
+
+    window.getComputedStyle = jest.fn().mockImplementation((el) => {
+      if (el === hiddenEl) return { display: 'none', visibility: 'visible', opacity: '1' };
+      return { display: 'block', visibility: 'visible', opacity: '1' };
+    });
+
+    const result = filterVisibleElements([visibleEl, hiddenEl]);
+    expect(result).toHaveLength(1);
+    expect(result).toContain(visibleEl);
+    expect(result).not.toContain(hiddenEl);
+  });
+
+  it('should exclude elements with visibility hidden', () => {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    el.getBoundingClientRect = jest.fn().mockReturnValue({ width: 50, height: 20 });
+    window.getComputedStyle = jest.fn().mockReturnValue({
+      display: 'block', visibility: 'hidden', opacity: '1'
+    });
+
+    expect(filterVisibleElements([el])).toHaveLength(0);
+  });
+
+  it('should exclude elements with opacity 0', () => {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    el.getBoundingClientRect = jest.fn().mockReturnValue({ width: 50, height: 20 });
+    window.getComputedStyle = jest.fn().mockReturnValue({
+      display: 'block', visibility: 'visible', opacity: '0'
+    });
+
+    expect(filterVisibleElements([el])).toHaveLength(0);
+  });
+
+  it('should exclude elements with zero width', () => {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    el.getBoundingClientRect = jest.fn().mockReturnValue({ width: 0, height: 20 });
+
+    expect(filterVisibleElements([el])).toHaveLength(0);
+  });
+
+  it('should exclude elements with zero height', () => {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    el.getBoundingClientRect = jest.fn().mockReturnValue({ width: 50, height: 0 });
+
+    expect(filterVisibleElements([el])).toHaveLength(0);
+  });
+
+  it('should return empty array for an empty input', () => {
+    expect(filterVisibleElements([])).toEqual([]);
+  });
+
+  it('should accept a NodeList as well as an array', () => {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    el.getBoundingClientRect = jest.fn().mockReturnValue({ width: 50, height: 20 });
+
+    const nodeList = document.querySelectorAll('div');
+    const result = filterVisibleElements(nodeList);
+    expect(result).toHaveLength(1);
+  });
+});
 
 describe('DOM Visibility', () => {
   beforeEach(() => {
