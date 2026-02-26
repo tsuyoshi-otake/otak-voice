@@ -8,16 +8,40 @@ Core functionality modules for the otak-voice voice input Chrome Extension.
 |------|-------|-------------|
 | `event-bus.js` | 189 | Pub/sub event system with 39 event types across 7 categories |
 | `state.js` | 276 | Observable state management with `getState`/`setState` and subscriber notifications |
-| `error-handler.js` | 351 | Centralized error handling with categories, codes, severity levels, and i18n mapping |
-| `settings.js` | 595 | Chrome storage sync settings with schema validation and event-driven persistence |
-| `dom-observer.js` | 129 | MutationObserver for SPA navigation support with debounced mutation handling |
-| `history.js` | 119 | Voice input history tracking (max 10 entries) with deduplication |
+| `error-handler.js` | barrel | Re-exports from `error-types.js` + error handling functions |
+| `error-types.js` | 161 | Error categories, codes, severity, AppError class |
+| `settings.js` | barrel | Re-exports from settings-schema, settings-storage, settings-theme |
+| `settings-schema.js` | 134 | Settings schema definition and validation |
+| `settings-storage.js` | 276 | Settings load/save operations |
+| `settings-theme.js` | 109 | Theme toggle and application |
+| `dom-observer.js` | 129 | MutationObserver for SPA navigation with debounced handling |
+| `history.js` | 119 | Voice input history tracking (max 10 entries) |
 | `utils.js` | 143 | Generic utilities: `basicCleanup`, `isInputElement`, `forceSetTextAreaValue` |
-| `dom-utils.js` | 913 | DOM operations: visibility checks, input detection, button detection, input manipulation, element actions |
-| `ui.js` | 1357 | UI components: core menu, settings modal, recognition modal, event wiring |
-| `speech.js` | 972 | Speech recognition lifecycle, edit mode, and speech utilities |
-| `input-handler.js` | 942 | Input field management: storage, menu control, operations, initialization |
-| `gpt-service.js` | 394 | OpenAI GPT integration: API client, auto-correction, proofreading, editing |
+| `dom-utils.js` | barrel | Re-exports from dom-visibility, dom-input-detection, dom-button-detection, dom-input-manipulation |
+| `dom-visibility.js` | 66 | Element visibility detection |
+| `dom-input-detection.js` | 153 | Input element finding and scoring |
+| `dom-button-detection.js` | 210 | Button finding and scoring |
+| `dom-input-manipulation.js` | 298 | Text input operations, event dispatch, Twitter handling |
+| `ui.js` | barrel | Re-exports from ui-status, ui-core, ui-settings-modal, ui-recognition-modal, ui-events |
+| `ui-status.js` | 174 | Status display and processing state |
+| `ui-core.js` | 247 | Core UI creation and menu items |
+| `ui-settings-modal.js` | 234 | Settings modal and draggable support |
+| `ui-recognition-modal.js` | 143 | Voice recognition text modal |
+| `ui-events.js` | 209 | Event listeners and event bus subscriptions |
+| `speech.js` | barrel | Re-exports from speech-utils, speech-recognition, speech-edit |
+| `speech-utils.js` | 238 | Mic button state, audio effects, language update |
+| `speech-recognition.js` | 294 | Core speech recognition lifecycle |
+| `speech-edit.js` | 227 | Speech-based editing functionality |
+| `input-handler.js` | barrel | Re-exports from input-storage, input-menu, input-operations, input-handler-init |
+| `input-storage.js` | 186 | Chrome storage operations for menu/auto-submit state |
+| `input-menu.js` | 236 | Menu toggle, settings modal, auto-submit UI |
+| `input-operations.js` | 265 | Input field operations, proofread, enhance handlers |
+| `input-handler-init.js` | 176 | Initialization and event subscriptions |
+| `gpt-service.js` | barrel | Re-exports from gpt-correction, gpt-proofreading, gpt-editing |
+| `gpt-api-client.js` | 93 | Shared OpenAI API request infrastructure |
+| `gpt-correction.js` | 142 | Voice input auto-correction |
+| `gpt-proofreading.js` | 100 | Text proofreading |
+| `gpt-editing.js` | 141 | Instruction-based text editing |
 
 ## Dependency Layers
 
@@ -127,14 +151,15 @@ const result = await tryCatch(asyncFn, {
 
 **Categories:** NETWORK, API, INPUT, PERMISSION, SPEECH, STORAGE, DOM, UNKNOWN
 
-## Planned Refactoring
+## Barrel Files
 
-Large files are candidates for splitting into focused sub-modules:
-- `dom-utils.js` (913 lines) -> `dom-visibility.js`, `dom-input-detection.js`, `dom-button-detection.js`, `dom-input-manipulation.js`, `dom-element-actions.js`
-- `ui.js` (1357 lines) -> `ui-core.js`, `ui-settings-modal.js`, `ui-recognition-modal.js`, `ui-events.js`
-- `speech.js` (972 lines) -> `speech-recognition.js`, `speech-edit.js`, `speech-utils.js`
-- `input-handler.js` (942 lines) -> `storage-manager.js`, `menu-controller.js`, `input-operations.js`, `input-handler-init.js`
-- `gpt-service.js` (394 lines) -> `gpt-api-client.js`, `gpt-correction.js`, `gpt-proofreading.js`, `gpt-editing.js`
+Large modules have been split into focused sub-modules. Original files are now barrel re-exports for backward compatibility. Import from either the barrel or the specific sub-module:
+
+```javascript
+// Both work:
+import { showStatus } from './ui.js';           // via barrel
+import { showStatus } from './ui-status.js';     // direct
+```
 
 ## Conventions
 
