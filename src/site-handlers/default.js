@@ -5,6 +5,7 @@
 
 import { showStatus } from '../modules/ui.js';
 import { publish, EVENTS } from '../modules/event-bus.js';
+import { getState } from '../modules/state.js';
 import {
   findBestSubmitButton,
   findBestInputField as domFindBestInputField,
@@ -89,8 +90,9 @@ export function submitAfterVoiceInput() {
     let targetElement = document.activeElement;
     if (!isInputElement(targetElement)) {
         // Use state management to get lastClickedInput
-        targetElement = window.lastClickedInput && isInputElement(window.lastClickedInput)
-            ? window.lastClickedInput
+        const lastClickedInput = getState('lastClickedInput');
+        targetElement = lastClickedInput && isInputElement(lastClickedInput)
+            ? lastClickedInput
             : findBestInputField();
 
         if (targetElement) {

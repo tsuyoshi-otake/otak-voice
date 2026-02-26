@@ -7,7 +7,7 @@ import { proofreadWithGPT } from './gpt-service.js';
 import { PROCESSING_STATE } from '../constants.js';
 import { getState, setState } from './state.js';
 import { publish, EVENTS } from './event-bus.js';
-import { toggleSettingsModal } from './input-menu.js';
+import { toggleSettingsModal } from './ui-settings-modal.js';
 import { createError, handleError, ERROR_CODE, ERROR_CATEGORY, ERROR_SEVERITY } from './error-handler.js';
 import {
     isInputElement,
@@ -249,9 +249,9 @@ function handleEnterKey(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
         // textareaの場合は複数行入力を許可するため、Ctrl+Enterのみで送信
         if (this.tagName.toLowerCase() === 'textarea' && !e.ctrlKey) return;
-        window.currentInputElement = this;
+        setState('currentInputElement', this);
         // 送信ボタンを探して自動クリック（モーダルウィンドウを使用していない場合のみ）
-        if (!window.useRecognitionModal) autoSubmitAfterVoiceInput();
+        if (!getState('useRecognitionModal')) autoSubmitAfterVoiceInput();
     }
 }
 

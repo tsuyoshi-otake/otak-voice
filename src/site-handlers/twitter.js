@@ -11,6 +11,7 @@
 import { showStatus, showRecognitionTextModal } from '../modules/ui.js';
 import { findElement, findAllElements } from '../modules/dom-utils.js';
 import { publish, EVENTS } from '../modules/event-bus.js';
+import { getState } from '../modules/state.js';
 
 /**
  * Finds the post input field on x.com
@@ -61,7 +62,7 @@ export function submitAfterVoiceInput() {
   console.log('x.com site handler: submitAfterVoiceInput called');
   
   // Get the last recognized text from state
-  const lastRecognizedText = window.lastRecognizedText;
+  const lastRecognizedText = getState('lastRecognizedText');
   
   // x.comでは音声認識テキストをモーダルダイアログで表示する
   if (lastRecognizedText) {

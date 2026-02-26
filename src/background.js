@@ -18,7 +18,7 @@ chrome.runtime.onInstalled.addListener(details => {
       [MENU_EXPANDED_STORAGE_KEY]: false, // Default menu state is collapsed
       [AUTO_DETECT_INPUT_FIELDS_STORAGE_KEY]: DEFAULT_AUTO_DETECT_INPUT_FIELDS // Default auto-detect setting
     };
-    chrome.storage.local.set(defaultSettings, () => {
+    chrome.storage.sync.set(defaultSettings, () => {
       if (chrome.runtime.lastError) {
         console.error('Failed to save default settings:', chrome.runtime.lastError);
       } else {
@@ -39,7 +39,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === 'getSettings') {
-    chrome.storage.local.get([MENU_EXPANDED_STORAGE_KEY, AUTO_DETECT_INPUT_FIELDS_STORAGE_KEY], (result) => {
+    chrome.storage.sync.get([MENU_EXPANDED_STORAGE_KEY, AUTO_DETECT_INPUT_FIELDS_STORAGE_KEY], (result) => {
       if (chrome.runtime.lastError) {
         console.error('Failed to get settings:', chrome.runtime.lastError);
         sendResponse({});
