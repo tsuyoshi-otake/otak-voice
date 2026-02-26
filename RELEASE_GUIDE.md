@@ -28,46 +28,52 @@
 
 ### 1. ローカル環境での準備
 
-1. リポジトリをクローンまたは最新の状態に更新します：
+1. リポジトリを最新の状態に更新します：
    ```
-   git clone https://github.com/tsuyoshi-otake/otak-voice.git
-   # または
    git pull origin main
    ```
 
-2. `manifest.json`と`package.json`のバージョン番号が一致していることを確認します：
+2. テスト・ビルド・Lintがすべて通ることを確認します：
+   ```
+   npm test
+   npm run lint
+   npm run build
+   ```
+
+3. `manifest.json`と`package.json`のバージョン番号が一致していることを確認します：
    ```
    cat manifest.json | grep version
    cat package.json | grep version
    ```
 
-3. 必要に応じてバージョン番号を更新します：
-   ```
-   # manifest.jsonの編集
-   # package.jsonの編集
+4. 必要に応じてバージョン番号を更新します（両ファイルを同時に更新）：
+   ```json
+   // manifest.json
+   "version": "X.Y"
+
+   // package.json
+   "version": "X.Y"
    ```
 
-4. 変更をコミットします：
+5. `release_notes.md` を新バージョンの内容に更新します。
+
+6. 変更をコミットします：
    ```
-   git add manifest.json package.json
-   git commit -m "バージョンを3.x.xに更新"
+   git add manifest.json package.json release_notes.md
+   git commit -m "chore: bump version to vX.Y"
    ```
 
 ### 2. タグの作成とプッシュ
 
 1. 新しいタグを作成します（バージョン番号を指定）：
    ```
-   git tag v3.1
+   git tag vX.Y
    ```
 
-2. タグをリモートリポジトリにプッシュします：
-   ```
-   git push origin v3.1
-   ```
-
-3. コミットもプッシュします：
+2. コミットとタグをリモートリポジトリにプッシュします：
    ```
    git push origin main
+   git push origin vX.Y
    ```
 
 ### 3. GitHub Actionsの実行確認
@@ -79,10 +85,8 @@
 
 ### 4. リリースの確認
 
-1. GitHubリポジトリのページに移動します
-2. 「Releases」セクションをクリックします
-3. 新しいリリースが作成されていることを確認します
-4. リリースには以下のファイルが添付されているはずです：
+1. GitHubリポジトリの「Releases」セクションを確認します
+2. 新しいリリースに以下のファイルが添付されていることを確認します：
    - `otak-voice-latest.zip`
    - `otak-voice-latest.crx`
    - `version-info.json`
@@ -103,10 +107,9 @@
 
 ### 手動でリリースを作成する場合
 
-1. GitHubリポジトリのページに移動します
-2. 「Releases」セクションをクリックします
-3. 「Draft a new release」ボタンをクリックします
-4. タグを選択または新しいタグを作成します
-5. リリースタイトルとリリースノートを入力します
-6. ビルドしたファイルをアップロードします
-7. 「Publish release」ボタンをクリックします
+1. GitHubリポジトリの「Releases」セクションを開きます
+2. 「Draft a new release」ボタンをクリックします
+3. タグを選択または新しいタグを作成します
+4. リリースタイトルとリリースノートを入力します
+5. ビルドしたファイルをアップロードします
+6. 「Publish release」ボタンをクリックします
