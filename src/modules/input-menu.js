@@ -8,8 +8,6 @@ import { getState, setState } from './state.js';
 import { publish, EVENTS } from './event-bus.js';
 import { updateSettingsModalValues } from './ui.js';
 import { MENU_ICON } from '../icons.js';
-import { THEME_MODES } from '../constants.js';
-import { updateAutoDetectTooltip, updateAutoCorrectionTooltip, updateUseHistoryContextTooltip } from './ui-tooltips.js';
 
 /**
  * Toggle menu display
@@ -74,60 +72,6 @@ export function updateMenuState() {
         // Close settings modal as well
         const settingsModal = document.getElementById('otak-voice-settings-modal');
         if (settingsModal) settingsModal.style.display = 'none';
-    }
-}
-
-/**
- * Toggle settings modal display
- */
-export function toggleSettingsModal() {
-    const modal = document.getElementById('otak-voice-settings-modal');
-    if (!modal) return;
-
-    const currentDisplay = modal.style.display || 'none';
-    modal.style.display = currentDisplay === 'none' ? 'block' : 'none';
-
-    // Update API key input field and language selection values when displaying
-    if (currentDisplay === 'none') {
-        const apiKeyInput = document.getElementById('api-key-input');
-        const langSelect = document.getElementById('recognition-lang-select');
-        const autoDetectCheckbox = document.getElementById('auto-detect-input-fields-checkbox');
-        const themeSelect = document.getElementById('theme-select');
-
-        // Get values from state management
-        const apiKey = getState('apiKey');
-        const recognitionLang = getState('recognitionLang');
-        const autoDetectInputFields = getState('autoDetectInputFields');
-        const autoCorrection = getState('autoCorrection');
-        const useHistoryContext = getState('useHistoryContext');
-        const themeMode = getState('themeMode');
-
-        // Set values to form elements
-        if (apiKeyInput) apiKeyInput.value = apiKey || '';
-        if (langSelect) langSelect.value = recognitionLang || 'ja-JP';
-
-        if (autoDetectCheckbox) {
-            autoDetectCheckbox.checked = autoDetectInputFields === true;
-            updateAutoDetectTooltip();
-        }
-
-        // Set values for new settings items
-        const autoCorrectionCheckbox = document.getElementById('auto-correction-checkbox');
-        if (autoCorrectionCheckbox) {
-            autoCorrectionCheckbox.checked = autoCorrection === true;
-            updateAutoCorrectionTooltip();
-        }
-
-        const useHistoryContextCheckbox = document.getElementById('use-history-context-checkbox');
-        if (useHistoryContextCheckbox) {
-            useHistoryContextCheckbox.checked = useHistoryContext === true;
-            updateUseHistoryContextTooltip();
-        }
-
-        // Set theme select value
-        if (themeSelect) {
-            themeSelect.value = themeMode || THEME_MODES.DARK;
-        }
     }
 }
 

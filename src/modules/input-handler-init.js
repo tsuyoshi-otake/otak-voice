@@ -4,7 +4,8 @@
  */
 
 import { loadMenuState, loadAutoSubmitState } from './input-storage.js';
-import { toggleMenu, updateMenuState, toggleSettingsModal, updateAutoSubmitButtonState, toggleAutoSubmit } from './input-menu.js';
+import { toggleMenu, updateMenuState, updateAutoSubmitButtonState, toggleAutoSubmit } from './input-menu.js';
+import { toggleSettingsModal } from './ui-settings-modal.js';
 import {
     findBestInputField,
     autoSubmitAfterVoiceInput,

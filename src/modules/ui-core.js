@@ -112,33 +112,6 @@ export function createUI() {
         modalToggleBtn.addEventListener('click', toggleModalVisibility);
     }
 
-    /**
-     * Update edit/proofread buttons state based on input field state
-     */
-    function updateEditProofreadButtonsState() {
-        const proofreadButton = document.querySelector('.otak-voice-menu__proofread-btn');
-        const editButton = document.querySelector('.otak-voice-menu__edit-btn');
-
-        if (!proofreadButton || !editButton) return;
-
-        const currentInputElement = getState('currentInputElement');
-
-        if (!currentInputElement ||
-            (currentInputElement.value === '' && !currentInputElement.textContent) ||
-            (currentInputElement.value && currentInputElement.value.trim() === '') ||
-            (currentInputElement.textContent && currentInputElement.textContent.trim() === '')) {
-
-            proofreadButton.classList.add('otak-voice-menu__item--disabled');
-            editButton.classList.add('otak-voice-menu__item--disabled');
-        } else {
-            const processingState = getState('processingState');
-            if (processingState === PROCESSING_STATE.IDLE) {
-                proofreadButton.classList.remove('otak-voice-menu__item--disabled');
-                editButton.classList.remove('otak-voice-menu__item--disabled');
-            }
-        }
-    }
-
     // Add event listener for theme toggle button
     const themeToggleBtn = document.querySelector('.otak-voice-menu__theme-toggle-btn');
     if (themeToggleBtn) {
