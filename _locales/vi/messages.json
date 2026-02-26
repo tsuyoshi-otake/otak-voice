@@ -198,7 +198,7 @@
     "description": "Status message when speech input is stopped."
   },
   "statusCorrecting": {
-    "message": "Đang sửa bằng GPT-4.1-mini...",
+    "message": "Đang sửa bằng gpt-4o-mini...",
     "description": "Status message during GPT correction."
   },
   "statusCorrectionSuccess": {
@@ -242,7 +242,7 @@
     "description": "Title for the settings modal."
   },
   "modalSettingsDescription": {
-    "message": "Nhập khóa API của bạn cho việc sửa lỗi nhận dạng giọng nói tự động (GPT-4.1-mini) và đọc sửa thủ công (GPT-4.1). Khóa được lưu trữ cục bộ trong bộ nhớ của tiện ích mở rộng và chỉ được sử dụng cho các lệnh gọi API OpenAI.",
+    "message": "Nhập khóa API của bạn cho việc sửa lỗi nhận dạng giọng nói tự động (gpt-4o-mini) và đọc sửa thủ công (gpt-4.1). Khóa được lưu trữ cục bộ trong bộ nhớ của tiện ích mở rộng và chỉ được sử dụng cho các lệnh gọi API OpenAI.",
     "description": "Description text in the settings modal."
   },
   "modalSettingsInputPlaceholder": {
@@ -742,5 +742,41 @@
   "statusPreparingRecognition": {
     "message": "Đang chuẩn bị nhận dạng giọng nói...",
     "description": "Status message when preparing speech recognition"
+  },
+  "settingApiSettingsLabel": {
+    "message": "Cài đặt API",
+    "description": "Label for API settings section header."
+  },
+  "settingDisplaySettingsLabel": {
+    "message": "Cài đặt hiển thị",
+    "description": "Label for display settings section header."
+  },
+  "settingFunctionSettingsLabel": {
+    "message": "Cài đặt chức năng",
+    "description": "Label for function settings section header."
+  },
+  "settingShowModalWindowLabel": {
+    "message": "Hiển thị cửa sổ Modal",
+    "description": "Label for show modal window checkbox."
+  },
+  "settingAutoSubmitLabel": {
+    "message": "Tự động gửi",
+    "description": "Label for auto-submit checkbox."
+  },
+  "settingSilenceTimeoutLabel": {
+    "message": "Thời gian phát hiện im lặng (ms)",
+    "description": "Label for silence timeout input."
+  },
+  "settingPromptSettingsLabel": {
+    "message": "Cài đặt Prompt",
+    "description": "Label for prompt settings section header."
+  },
+  "settingApiKeyHelpText": {
+    "message": "Chỉ được sử dụng cho các lệnh gọi API OpenAI.",
+    "description": "Help text for API key input."
+  },
+  "settingApiKeyLink": {
+    "message": "Lấy hoặc quản lý khóa API tại đây",
+    "description": "Link text for API key management."
   }
 }

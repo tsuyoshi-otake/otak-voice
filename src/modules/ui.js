@@ -624,19 +624,19 @@ export function createSettingsModal() {
         <div class="otak-voice-settings__grid">
             <!-- API設定ブロック -->
             <div class="otak-voice-settings__block">
-                <h4>API設定</h4>
+                <h4>${chrome.i18n.getMessage('settingApiSettingsLabel')}</h4>
                 <div class="otak-voice-settings__block-content">
                     <label for="api-key-input">OpenAI API Key</label>
-                    <input type="text" id="api-key-input" placeholder="${chrome.i18n.getMessage('modalSettingsInputPlaceholder')}">
+                    <input type="password" id="api-key-input" placeholder="${chrome.i18n.getMessage('modalSettingsInputPlaceholder')}" autocomplete="off">
                     <div class="otak-voice-settings__help-text">
-                        OpenAIのAPIにのみ使用されます。<a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">APIキーの取得・管理はこちら</a>
+                        ${chrome.i18n.getMessage('settingApiKeyHelpText')} <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">${chrome.i18n.getMessage('settingApiKeyLink')}</a>
                     </div>
                 </div>
             </div>
 
             <!-- 言語・テーマ設定ブロック -->
             <div class="otak-voice-settings__block">
-                <h4>表示設定</h4>
+                <h4>${chrome.i18n.getMessage('settingDisplaySettingsLabel')}</h4>
                 <div class="otak-voice-settings__block-content">
                     <label for="recognition-lang-select">${chrome.i18n.getMessage('modalSettingsLangLabel')}</label>
                     <select id="recognition-lang-select">
@@ -652,7 +652,7 @@ export function createSettingsModal() {
 
             <!-- 機能設定ブロック -->
             <div class="otak-voice-settings__block">
-                <h4>機能設定</h4>
+                <h4>${chrome.i18n.getMessage('settingFunctionSettingsLabel')}</h4>
                 <div class="otak-voice-settings__block-content">
                     <div class="otak-voice-settings__item">
                         <label for="auto-detect-input-fields-checkbox">${chrome.i18n.getMessage('settingAutoDetectInputFieldsLabel')}</label>
@@ -679,7 +679,7 @@ export function createSettingsModal() {
                     </div>
 
                     <div class="otak-voice-settings__item">
-                        <label for="show-modal-window-checkbox">モーダルウィンドウ表示</label>
+                        <label for="show-modal-window-checkbox">${chrome.i18n.getMessage('settingShowModalWindowLabel')}</label>
                         <label class="otak-voice-settings__switch">
                             <input type="checkbox" id="show-modal-window-checkbox">
                             <span class="otak-voice-settings__slider otak-voice-settings__slider--round"></span>
@@ -687,7 +687,7 @@ export function createSettingsModal() {
                     </div>
 
                     <div class="otak-voice-settings__item">
-                        <label for="auto-submit-checkbox">自動送信</label>
+                        <label for="auto-submit-checkbox">${chrome.i18n.getMessage('settingAutoSubmitLabel')}</label>
                         <label class="otak-voice-settings__switch">
                             <input type="checkbox" id="auto-submit-checkbox">
                             <span class="otak-voice-settings__slider otak-voice-settings__slider--round"></span>
@@ -695,7 +695,7 @@ export function createSettingsModal() {
                     </div>
                     
                     <div class="otak-voice-settings__item">
-                        <label for="silence-timeout-input">無音検出時間 (ミリ秒)</label>
+                        <label for="silence-timeout-input">${chrome.i18n.getMessage('settingSilenceTimeoutLabel')}</label>
                         <input type="number" id="silence-timeout-input" min="500" max="10000" step="500" value="3000" class="otak-voice-settings__number-input">
                     </div>
 
@@ -704,7 +704,7 @@ export function createSettingsModal() {
 
             <!-- プロンプト設定ブロック -->
             <div class="otak-voice-settings__block">
-                <h4>プロンプト設定</h4>
+                <h4>${chrome.i18n.getMessage('settingPromptSettingsLabel')}</h4>
                 <div class="otak-voice-settings__block-content">
                     <label for="auto-correction-prompt-textarea">${chrome.i18n.getMessage('autoCorrectionPromptLabel')}</label>
                     <textarea id="auto-correction-prompt-textarea" rows="4" placeholder="${chrome.i18n.getMessage('promptPlaceholder')}"></textarea>
@@ -1257,13 +1257,19 @@ export function showRecognitionTextModal(text = '', isInitial = false) {
     // Header, body structure
     modal.innerHTML = `
       <h3>${chrome.i18n.getMessage('recognitionModalTitle')}</h3>
-      <textarea placeholder="${isInitial ? chrome.i18n.getMessage('recognitionModalPlaceholder') : ''}">${text}</textarea>
+      <textarea placeholder="${isInitial ? chrome.i18n.getMessage('recognitionModalPlaceholder') : ''}"></textarea>
       <div class="otak-voice-recognition__button-container">
         <button class="otak-voice-recognition__copy-btn">${chrome.i18n.getMessage('recognitionModalCopyButton')}</button>
         <button class="otak-voice-recognition__close-btn">${chrome.i18n.getMessage('recognitionModalCloseButton')}</button>
       </div>
     `;
     
+    // Safely set textarea value to prevent XSS
+    const textarea = modal.querySelector('textarea');
+    if (textarea) {
+        textarea.value = text;
+    }
+
     // Add event listeners to buttons
     const copyButton = modal.querySelector('.otak-voice-recognition__copy-btn');
     copyButton.onclick = () => {

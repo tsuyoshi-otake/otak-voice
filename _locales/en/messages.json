@@ -198,7 +198,7 @@
     "description": "Status message when speech input is stopped."
   },
   "statusCorrecting": {
-    "message": "Correcting with GPT-4.1-mini...",
+    "message": "Correcting with gpt-4o-mini...",
     "description": "Status message during GPT correction."
   },
   "statusCorrectionSuccess": {
@@ -242,7 +242,7 @@
     "description": "Title for the settings modal."
   },
   "modalSettingsDescription": {
-    "message": "Enter your API key for automatic voice recognition correction (GPT-4.1-mini) and manual proofreading (GPT-4.1). The key is stored locally in the extension's storage and used only for OpenAI API calls.",
+    "message": "Enter your API key for automatic voice recognition correction (gpt-4o-mini) and manual proofreading (gpt-4.1). The key is stored locally in the extension's storage and used only for OpenAI API calls.",
     "description": "Description text in the settings modal."
   },
   "modalSettingsInputPlaceholder": {
@@ -742,5 +742,41 @@
   "statusPreparingRecognition": {
     "message": "Preparing speech recognition...",
     "description": "Status message when preparing speech recognition"
+  },
+  "settingApiSettingsLabel": {
+    "message": "API Settings",
+    "description": "Label for API settings section header."
+  },
+  "settingDisplaySettingsLabel": {
+    "message": "Display Settings",
+    "description": "Label for display settings section header."
+  },
+  "settingFunctionSettingsLabel": {
+    "message": "Function Settings",
+    "description": "Label for function settings section header."
+  },
+  "settingShowModalWindowLabel": {
+    "message": "Show Modal Window",
+    "description": "Label for show modal window checkbox."
+  },
+  "settingAutoSubmitLabel": {
+    "message": "Auto Submit",
+    "description": "Label for auto-submit checkbox."
+  },
+  "settingSilenceTimeoutLabel": {
+    "message": "Silence Timeout (ms)",
+    "description": "Label for silence timeout input."
+  },
+  "settingPromptSettingsLabel": {
+    "message": "Prompt Settings",
+    "description": "Label for prompt settings section header."
+  },
+  "settingApiKeyHelpText": {
+    "message": "Used only for OpenAI API calls.",
+    "description": "Help text for API key input."
+  },
+  "settingApiKeyLink": {
+    "message": "Get or manage API keys here",
+    "description": "Link text for API key management."
   }
 }

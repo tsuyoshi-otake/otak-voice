@@ -86,11 +86,16 @@ export async function correctWithGPT(text) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            
+            let errorData;
+            try {
+                errorData = await response.json();
+            } catch (e) {
+                errorData = { error: { message: `HTTP ${response.status} ${response.statusText}` } };
+            }
+
             // Map HTTP status to appropriate error code
             const errorCode = mapHttpStatusToErrorCode(response.status);
-            
+
             // Create and handle the error
             const error = createError(
                 errorCode,
@@ -104,12 +109,12 @@ export async function correctWithGPT(text) {
                 ERROR_SEVERITY.ERROR
             );
             handleError(error, true, false, 'gpt-service');
-            
+
             // For unauthorized errors, open settings modal
             if (response.status === 401) {
                 publish(EVENTS.SETTINGS_MODAL_TOGGLED);
             }
-            
+
             return text;
         }
 
@@ -205,11 +210,16 @@ export async function proofreadWithGPT(text) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            
+            let errorData;
+            try {
+                errorData = await response.json();
+            } catch (e) {
+                errorData = { error: { message: `HTTP ${response.status} ${response.statusText}` } };
+            }
+
             // Map HTTP status to appropriate error code
             const errorCode = mapHttpStatusToErrorCode(response.status);
-            
+
             // Create and throw the error
             throw createError(
                 errorCode,
@@ -258,7 +268,6 @@ export async function proofreadWithGPT(text) {
  * @returns {Promise<void>}
  */
 export async function editWithGPT(currentText, instruction, activeElement) {
-    console.log("Editing with GPT:", { currentText, instruction });
     const apiKey = getState('apiKey');
 
     try {
@@ -293,11 +302,16 @@ export async function editWithGPT(currentText, instruction, activeElement) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            
+            let errorData;
+            try {
+                errorData = await response.json();
+            } catch (e) {
+                errorData = { error: { message: `HTTP ${response.status} ${response.statusText}` } };
+            }
+
             // Map HTTP status to appropriate error code
             const errorCode = mapHttpStatusToErrorCode(response.status);
-            
+
             // Create and handle the error
             const error = createError(
                 errorCode,
@@ -311,7 +325,7 @@ export async function editWithGPT(currentText, instruction, activeElement) {
                 ERROR_SEVERITY.ERROR
             );
             handleError(error, true, false, 'gpt-service');
-            
+
             return; // Don't proceed if API call failed
         }
 
@@ -321,7 +335,6 @@ export async function editWithGPT(currentText, instruction, activeElement) {
         
         if (data.choices && data.choices.length > 0 && data.choices[0].message) {
             const editedText = data.choices[0].message.content.trim();
-            console.log('Edited text:', editedText);
             
             setTimeout(() => {
                 // Update the input field based on its type

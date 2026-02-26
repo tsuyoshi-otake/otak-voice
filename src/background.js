@@ -33,10 +33,19 @@ chrome.runtime.onInstalled.addListener(details => {
 
 // Listen for messages from content scripts
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  // Handle any messages from content scripts if needed
+  // Verify sender is from this extension
+  if (!sender.id || sender.id !== chrome.runtime.id) {
+    return false;
+  }
+
   if (message.type === 'getSettings') {
-    chrome.storage.local.get(null, (result) => {
-      sendResponse(result);
+    chrome.storage.local.get([MENU_EXPANDED_STORAGE_KEY, AUTO_DETECT_INPUT_FIELDS_STORAGE_KEY], (result) => {
+      if (chrome.runtime.lastError) {
+        console.error('Failed to get settings:', chrome.runtime.lastError);
+        sendResponse({});
+      } else {
+        sendResponse(result);
+      }
     });
     return true; // Required for async response
   }

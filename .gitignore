@@ -14,3 +14,29 @@ temp_download/
 
 # Test coverage reports
 coverage/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE settings
+.vscode/
+.idea/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor temp files
+*.swp
+*.swo
+*~
+
+# Cache
+.cache/
+.eslintcache

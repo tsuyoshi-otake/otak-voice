@@ -69,7 +69,7 @@ export function setupDOMObserver() {
     });
 
     // Periodic check for UI presence and functionality
-    setInterval(() => {
+    const periodicCheckId = setInterval(() => {
         const voiceMenuBtn = document.getElementById('otak-voice-menu-btn');
         if (!voiceMenuBtn) {
             console.log(chrome.i18n.getMessage('logPollingUiNotFound'));
@@ -106,21 +106,8 @@ export function setupDOMObserver() {
  * Set up event subscriptions for DOM observer
  */
 function setupEventSubscriptions() {
-    // Subscribe to menu state update events
-    subscribe(EVENTS.MENU_STATE_UPDATE_NEEDED, () => {
-        // This will be handled by input-handler.js
-        console.log('Menu state update needed (event received in dom-observer)');
-    });
-
-    // Subscribe to input handlers update events
-    subscribe(EVENTS.INPUT_HANDLERS_UPDATE_NEEDED, () => {
-        // This will be handled by input-handler.js
-        console.log('Input handlers update needed (event received in dom-observer)');
-    });
-
-    // Subscribe to UI recovery events
-    subscribe(EVENTS.UI_RECOVERY_NEEDED, () => {
-        // This will be handled by content.js
-        console.log('UI recovery needed (event received in dom-observer)');
-    });
+    // Event subscriptions are handled by their respective modules:
+    // - MENU_STATE_UPDATE_NEEDED: handled by input-handler.js
+    // - INPUT_HANDLERS_UPDATE_NEEDED: handled by input-handler.js
+    // - UI_RECOVERY_NEEDED: handled by content.js
 }

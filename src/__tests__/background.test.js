@@ -18,6 +18,7 @@ const mockStorageLocalGet = jest.fn((keys, callback) => {
 global.chrome = {
   ...global.chrome,
   runtime: {
+    id: 'test-extension-id',
     onInstalled: {
       addListener: jest.fn()
     },
@@ -131,16 +132,18 @@ describe('background script', () => {
 
     test('should handle getSettings message', async () => {
       const message = { type: 'getSettings' };
-      const sender = {}; // Mock sender object
+      const sender = { id: 'test-extension-id' }; // Must match chrome.runtime.id
       const sendResponse = jest.fn();
 
       const result = onMessageListener(message, sender, sendResponse);
 
       expect(mockStorageLocalGet).toHaveBeenCalledTimes(1);
-      expect(mockStorageLocalGet).toHaveBeenCalledWith(null, expect.any(Function));
+      expect(mockStorageLocalGet).toHaveBeenCalledWith(
+        ['menu_expanded_state', 'auto_detect_input_fields'],
+        expect.any(Function)
+      );
 
       // The mock itself now handles the async callback, so we just need to wait for it.
-      // We can wait for the next tick to ensure the callback has had a chance to run.
       await new Promise(process.nextTick);
 
       expect(sendResponse).toHaveBeenCalledTimes(1);
@@ -152,16 +155,27 @@ describe('background script', () => {
       expect(result).toBe(true); // Should return true for async response
     });
 
-    test('should do nothing for other message types', () => {
-      const message = { type: 'someOtherMessage' };
-      const sender = {};
+    test('should reject messages from unknown senders', () => {
+      const message = { type: 'getSettings' };
+      const sender = { id: 'unknown-extension-id' };
       const sendResponse = jest.fn();
 
       const result = onMessageListener(message, sender, sendResponse);
 
       expect(mockStorageLocalGet).not.toHaveBeenCalled();
       expect(sendResponse).not.toHaveBeenCalled();
-      expect(result).toBeUndefined(); // Should not return true for non-async response
+      expect(result).toBe(false); // Should return false for rejected sender
+    });
+
+    test('should do nothing for other message types', () => {
+      const message = { type: 'someOtherMessage' };
+      const sender = { id: 'test-extension-id' };
+      const sendResponse = jest.fn();
+
+      const result = onMessageListener(message, sender, sendResponse);
+
+      expect(mockStorageLocalGet).not.toHaveBeenCalled();
+      expect(sendResponse).not.toHaveBeenCalled();
     });
   });
 });

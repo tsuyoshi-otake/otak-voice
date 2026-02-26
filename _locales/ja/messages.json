@@ -198,7 +198,7 @@
     "description": "Status message when speech input is stopped."
   },
   "statusCorrecting": {
-    "message": "GPT-4.1-miniで校閲中...",
+    "message": "gpt-4o-miniで校閲中...",
     "description": "Status message during GPT correction."
   },
   "statusCorrectionSuccess": {
@@ -742,5 +742,41 @@
   "statusPreparingRecognition": {
     "message": "音声認識の準備中...",
     "description": "Status message when preparing speech recognition"
+  },
+  "settingApiSettingsLabel": {
+    "message": "API設定",
+    "description": "Label for API settings section header."
+  },
+  "settingDisplaySettingsLabel": {
+    "message": "表示設定",
+    "description": "Label for display settings section header."
+  },
+  "settingFunctionSettingsLabel": {
+    "message": "機能設定",
+    "description": "Label for function settings section header."
+  },
+  "settingShowModalWindowLabel": {
+    "message": "モーダルウィンドウ表示",
+    "description": "Label for show modal window checkbox."
+  },
+  "settingAutoSubmitLabel": {
+    "message": "自動送信",
+    "description": "Label for auto-submit checkbox."
+  },
+  "settingSilenceTimeoutLabel": {
+    "message": "無音検出時間 (ミリ秒)",
+    "description": "Label for silence timeout input."
+  },
+  "settingPromptSettingsLabel": {
+    "message": "プロンプト設定",
+    "description": "Label for prompt settings section header."
+  },
+  "settingApiKeyHelpText": {
+    "message": "OpenAIのAPIにのみ使用されます。",
+    "description": "Help text for API key input."
+  },
+  "settingApiKeyLink": {
+    "message": "APIキーの取得・管理はこちら",
+    "description": "Link text for API key management."
   }
 }

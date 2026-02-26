@@ -96,12 +96,8 @@ describe('dom-observer', () => {
         expect(mockSetInterval).toHaveBeenCalledTimes(1);
         expect(mockSetInterval).toHaveBeenCalledWith(expect.any(Function), 5000);
 
-        // Check if event subscriptions were set up (delegated to setupEventSubscriptions)
-        // We will test setupEventSubscriptions separately or verify subscribe calls here
-        expect(subscribe).toHaveBeenCalledTimes(3); // Assuming setupEventSubscriptions is called internally
-        expect(subscribe).toHaveBeenCalledWith(EVENTS.MENU_STATE_UPDATE_NEEDED, expect.any(Function));
-        expect(subscribe).toHaveBeenCalledWith(EVENTS.INPUT_HANDLERS_UPDATE_NEEDED, expect.any(Function));
-        expect(subscribe).toHaveBeenCalledWith(EVENTS.UI_RECOVERY_NEEDED, expect.any(Function));
+        // No-op event subscriptions were removed - events are handled by their respective modules
+        expect(subscribe).not.toHaveBeenCalled();
 
         // Check initial log
         expect(mockConsoleLog).toHaveBeenCalledWith('mock_logDomObserverStart');
@@ -341,16 +337,13 @@ describe('dom-observer', () => {
         expect(mockConsoleError).not.toHaveBeenCalled();
     });
 
-    test('setupEventSubscriptions should subscribe to necessary events', () => {
+    test('setupEventSubscriptions should be called without subscribing to no-op events', () => {
         // Call setupDOMObserver to trigger setupEventSubscriptions
         setupDOMObserver();
 
-        // Check if subscribe was called for each expected event
-        expect(subscribe).toHaveBeenCalledWith(EVENTS.MENU_STATE_UPDATE_NEEDED, expect.any(Function));
-        expect(subscribe).toHaveBeenCalledWith(EVENTS.INPUT_HANDLERS_UPDATE_NEEDED, expect.any(Function));
-        expect(subscribe).toHaveBeenCalledWith(EVENTS.UI_RECOVERY_NEEDED, expect.any(Function));
-
-        // Check the number of subscribe calls
-        expect(subscribe).toHaveBeenCalledTimes(3);
+        // No-op subscriptions were removed - event handling is delegated to respective modules
+        // (input-handler.js for MENU_STATE_UPDATE_NEEDED and INPUT_HANDLERS_UPDATE_NEEDED,
+        //  content.js for UI_RECOVERY_NEEDED)
+        expect(subscribe).not.toHaveBeenCalled();
     });
 });

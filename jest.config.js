@@ -28,8 +28,8 @@ module.exports = {
   // Mock file extensions
   moduleFileExtensions: ['js', 'json'],
   
-  // カバレッジ測定を有効化
-  collectCoverage: true,
+  // カバレッジ測定はtest:coverageコマンドで実行
+  collectCoverage: false,
   
   // カバレッジレポート形式
   coverageReporters: ['text', 'lcov', 'html'],
@@ -37,10 +37,10 @@ module.exports = {
   // 最低カバレッジ基準（段階的に引き上げる）
   coverageThreshold: {
     global: {
-      branches: 5,
-      functions: 10,
-      lines: 5,
-      statements: 5
+      branches: 10,
+      functions: 15,
+      lines: 10,
+      statements: 10
     }
   },
   
