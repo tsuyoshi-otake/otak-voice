@@ -5,6 +5,7 @@
 
 import { showStatus } from '../modules/ui.js';
 import { retryInputEvents } from '../modules/utils.js';
+import { isButtonDisabled, filterVisibleElements } from '../modules/dom-utils.js';
 
 /**
  * OpenAI特有のセレクター
@@ -20,43 +21,24 @@ const CHATGPT_SELECTORS = [
  * @returns {Element|null} 検出されたボタンまたはnull
  */
 export function findChatGPTSubmitButton() {
-    // セレクターによる検索
-    for (const selector of CHATGPT_SELECTORS) {
-        const buttons = document.querySelectorAll(selector);
-        if (buttons.length > 0) {
-            // Filter only visible buttons
-            const visibleButtons = Array.from(buttons).filter(button => {
-                const style = window.getComputedStyle(button);
-                const rect = button.getBoundingClientRect();
+    try {
+        // セレクターによる検索
+        for (const selector of CHATGPT_SELECTORS) {
+            const buttons = document.querySelectorAll(selector);
+            if (buttons.length > 0) {
+                const visibleButtons = filterVisibleElements(buttons);
 
-                return style.display !== 'none' &&
-                       style.visibility !== 'hidden' &&
-                       style.opacity !== '0' &&
-                       rect.width > 0 &&
-                       rect.height > 0;
-            });
-
-            if (visibleButtons.length > 0) {
-                return visibleButtons[0]; // Return the first visible button
+                if (visibleButtons.length > 0) {
+                    return visibleButtons[0]; // Return the first visible button
+                }
             }
         }
+
+        return null;
+    } catch (error) {
+        console.error('Error finding submit button:', error);
+        return null;
     }
-
-    return null;
-}
-
-/**
- * ボタンが無効状態かどうかを確認する
- * @param {Element} button - チェックするボタン
- * @returns {boolean} 無効の場合はtrue
- */
-function isButtonDisabled(button) {
-    return button.disabled ||
-           button.getAttribute('aria-disabled') === 'true' ||
-           button.classList.contains('disabled') ||
-           button.classList.contains('cursor-not-allowed') ||
-           button.classList.contains('opacity-50') ||
-           getComputedStyle(button).opacity < '0.9';
 }
 
 /**
@@ -64,39 +46,44 @@ function isButtonDisabled(button) {
  * @returns {boolean} 送信処理が開始された場合はtrue
  */
 export function submitAfterVoiceInput() {
-    // ChatGPT送信ボタンを検索
-    const submitButton = findChatGPTSubmitButton();
+    try {
+        // ChatGPT送信ボタンを検索
+        const submitButton = findChatGPTSubmitButton();
 
-    if (submitButton) {
-        // ボタンが無効状態かチェック
-        if (isButtonDisabled(submitButton)) {
-            console.log(chrome.i18n.getMessage('logSubmitButtonDisabled'));
+        if (submitButton) {
+            // ボタンが無効状態かチェック
+            if (isButtonDisabled(submitButton)) {
+                console.log(chrome.i18n.getMessage('logSubmitButtonDisabled'));
 
-            // イベント再試行によるReact状態更新促進
-            if (typeof retryInputEvents === 'function') {
-                retryInputEvents();
+                // イベント再試行によるReact状態更新促進
+                if (typeof retryInputEvents === 'function') {
+                    retryInputEvents();
+                }
+                return false;
             }
-            return false;
+
+            // ボタンをハイライト
+            const originalBackgroundColor = submitButton.style.backgroundColor;
+            submitButton.style.backgroundColor = '#4CAF50';
+
+            // 少し待機してから送信
+            setTimeout(() => {
+                submitButton.style.backgroundColor = originalBackgroundColor;
+                submitButton.click();
+
+                // ステータス表示
+                if (typeof showStatus === 'function') {
+                    showStatus('statusSubmitClicked');
+                }
+            }, 300);
+            return true;
         }
 
-        // ボタンをハイライト
-        const originalBackgroundColor = submitButton.style.backgroundColor;
-        submitButton.style.backgroundColor = '#4CAF50';
-
-        // 少し待機してから送信
-        setTimeout(() => {
-            submitButton.style.backgroundColor = originalBackgroundColor;
-            submitButton.click();
-            
-            // ステータス表示
-            if (typeof showStatus === 'function') {
-                showStatus('statusSubmitClicked');
-            }
-        }, 300);
-        return true;
+        return false;
+    } catch (error) {
+        console.error('Error submitting after voice input:', error);
+        return false;
     }
-    
-    return false;
 }
 
 /**
@@ -106,6 +93,26 @@ export function submitAfterVoiceInput() {
  */
 export function findSubmitButtonForInput(inputElement) {
     return findChatGPTSubmitButton();
+}
+
+/**
+ * ChatGPTの入力フィールドを検出
+ * @returns {Element|null} 入力要素またはnull
+ */
+export function findBestInputField() {
+    // ChatGPT uses a contenteditable div or textarea for input
+    const selectors = [
+        'textarea[data-id="root"]',
+        '#prompt-textarea',
+        'div[contenteditable="true"][data-placeholder]',
+        'div.ProseMirror[contenteditable="true"]',
+        'textarea'
+    ];
+    for (const selector of selectors) {
+        const el = document.querySelector(selector);
+        if (el) return el;
+    }
+    return null;
 }
 
 /**

@@ -49,7 +49,6 @@ function setupEventSubscriptions() {
     const showModalWindowCheckbox = document.getElementById('show-modal-window-checkbox');
     const autoSubmitCheckbox = document.getElementById('auto-submit-checkbox');
     const silenceTimeoutInput = document.getElementById('silence-timeout-input');
-    // const clearExistingTextCheckbox = document.getElementById('clear-existing-text-checkbox');
     const autoCorrectionPromptTextarea = document.getElementById('auto-correction-prompt-textarea');
     const proofreadingPromptTextarea = document.getElementById('proofreading-prompt-textarea');
     
@@ -67,7 +66,6 @@ function setupEventSubscriptions() {
       showModalWindow: showModalWindowCheckbox ? showModalWindowCheckbox.checked : getState('showModalWindow'),
       // 自動送信の状態をチェックボックスと一致させる（チェックがONの場合は自動送信をON、チェックがOFFの場合は自動送信をOFF）
       autoSubmit: autoSubmitCheckbox ? autoSubmitCheckbox.checked : getState('autoSubmit'),
-      // clearExistingText: clearExistingTextCheckbox ? clearExistingTextCheckbox.checked : getState('clearExistingText'),
       themeMode: themeSelect ? themeSelect.value : getState('themeMode'),
       silenceTimeout: silenceTimeoutInput ? parseInt(silenceTimeoutInput.value, 10) || DEFAULT_SETTINGS.SILENCE_TIMEOUT : getState('silenceTimeout') || DEFAULT_SETTINGS.SILENCE_TIMEOUT,
       autoCorrectionPrompt: autoCorrectionPromptTextarea ? autoCorrectionPromptTextarea.value : getState('autoCorrectionPrompt'),
@@ -83,7 +81,6 @@ function setupEventSubscriptions() {
       [USE_HISTORY_CONTEXT_STORAGE_KEY]: settings.useHistoryContext,
       [SHOW_MODAL_WINDOW_STORAGE_KEY]: settings.showModalWindow,
       [AUTO_SUBMIT_STORAGE_KEY]: settings.autoSubmit,
-      // [CLEAR_EXISTING_TEXT_STORAGE_KEY]: settings.clearExistingText,
       [THEME_STORAGE_KEY]: settings.themeMode,
       [SILENCE_TIMEOUT_STORAGE_KEY]: settings.silenceTimeout,
       [AUTO_CORRECTION_PROMPT_STORAGE_KEY]: settings.autoCorrectionPrompt,
@@ -478,7 +475,6 @@ function getSettingsFromUI() {
   const showModalWindowCheckbox = document.getElementById('show-modal-window-checkbox');
   const autoSubmitCheckbox = document.getElementById('auto-submit-checkbox');
   const silenceTimeoutInput = document.getElementById('silence-timeout-input');
-  // const clearExistingTextCheckbox = document.getElementById('clear-existing-text-checkbox');
   const themeSelect = document.getElementById('theme-select');
   const autoCorrectionPromptTextarea = document.getElementById('auto-correction-prompt-textarea');
   const proofreadingPromptTextarea = document.getElementById('proofreading-prompt-textarea');
@@ -495,7 +491,6 @@ function getSettingsFromUI() {
     useHistoryContext: useHistoryContextCheckbox ? useHistoryContextCheckbox.checked : currentState.useHistoryContext,
     showModalWindow: showModalWindowCheckbox ? showModalWindowCheckbox.checked : currentState.showModalWindow, // チェックボックスの状態を反映
     autoSubmit: autoSubmitCheckbox ? autoSubmitCheckbox.checked : currentState.autoSubmit, // 自動送信の設定を追加
-    // clearExistingText: clearExistingTextCheckbox ? clearExistingTextCheckbox.checked : currentState.clearExistingText, // 入力済み文字列の削除設定を追加
     themeMode: themeSelect ? themeSelect.value : currentState.themeMode,
     silenceTimeout: silenceTimeoutInput ? parseInt(silenceTimeoutInput.value, 10) || DEFAULT_SETTINGS.SILENCE_TIMEOUT : currentState.silenceTimeout || DEFAULT_SETTINGS.SILENCE_TIMEOUT,
     autoCorrectionPrompt: autoCorrectionPromptTextarea ? autoCorrectionPromptTextarea.value : currentState.autoCorrectionPrompt,

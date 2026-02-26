@@ -7,6 +7,23 @@ import { createError, handleError, ERROR_CODE, ERROR_CATEGORY, ERROR_SEVERITY } 
 import { publish, EVENTS } from './event-bus.js';
 
 /**
+ * Filter elements to return only visible ones
+ * @param {NodeList|Array} elements - Elements to filter
+ * @returns {Array} Visible elements
+ */
+export function filterVisibleElements(elements) {
+    return Array.from(elements).filter(el => {
+        const style = window.getComputedStyle(el);
+        const rect = el.getBoundingClientRect();
+        return style.display !== 'none' &&
+               style.visibility !== 'hidden' &&
+               style.opacity !== '0' &&
+               rect.width > 0 &&
+               rect.height > 0;
+    });
+}
+
+/**
  * Checks if an element is visible in the viewport
  * @param {Element} element - Element to check
  * @returns {boolean} True if element is visible

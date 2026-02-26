@@ -5,6 +5,7 @@
 
 import { showStatus } from '../modules/ui.js';
 import { retryInputEvents } from '../modules/utils.js';
+import { isButtonDisabled, filterVisibleElements } from '../modules/dom-utils.js';
 
 /**
  * Gemini特有のセレクター
@@ -29,23 +30,28 @@ const GEMINI_SELECTORS = [
  * @returns {Element|null} 検出されたボタンまたはnull
  */
 export function findGeminiSubmitButton() {
-    // セレクターによる検索（複数の検出戦略を試行）
-    const buttonStrategies = [
-        findButtonBySelector,
-        findButtonByPosition,
-        findButtonByAttribute,
-        findButtonByIcon
-    ];
-    
-    // 各戦略を順番に試行
-    for (const strategy of buttonStrategies) {
-        const button = strategy();
-        if (button) {
-            return button;
-        }
-    }
+    try {
+        // セレクターによる検索（複数の検出戦略を試行）
+        const buttonStrategies = [
+            findButtonBySelector,
+            findButtonByPosition,
+            findButtonByAttribute,
+            findButtonByIcon
+        ];
 
-    return null;
+        // 各戦略を順番に試行
+        for (const strategy of buttonStrategies) {
+            const button = strategy();
+            if (button) {
+                return button;
+            }
+        }
+
+        return null;
+    } catch (error) {
+        console.error('Error finding submit button:', error);
+        return null;
+    }
 }
 
 /**
@@ -56,17 +62,7 @@ function findButtonBySelector() {
     for (const selector of GEMINI_SELECTORS) {
         const buttons = document.querySelectorAll(selector);
         if (buttons.length > 0) {
-            // Filter only visible buttons
-            const visibleButtons = Array.from(buttons).filter(button => {
-                const style = window.getComputedStyle(button);
-                const rect = button.getBoundingClientRect();
-
-                return style.display !== 'none' &&
-                       style.visibility !== 'hidden' &&
-                       style.opacity !== '0' &&
-                       rect.width > 0 &&
-                       rect.height > 0;
-            });
+            const visibleButtons = filterVisibleElements(buttons);
 
             if (visibleButtons.length > 0) {
                 return visibleButtons[0]; // Return the first visible button
@@ -148,68 +144,58 @@ function findButtonByIcon() {
 }
 
 /**
- * ボタンが無効状態かどうかを確認する
- * @param {Element} button - チェックするボタン
- * @returns {boolean} 無効の場合はtrue
- */
-function isButtonDisabled(button) {
-    return button.disabled ||
-           button.getAttribute('aria-disabled') === 'true' ||
-           button.classList.contains('disabled') ||
-           button.getAttribute('disabled') === 'true' ||
-           button.classList.contains('cursor-not-allowed') ||
-           button.classList.contains('opacity-50') ||
-           getComputedStyle(button).opacity < '0.9';
-}
-
-/**
  * 音声入力後の自動送信処理
  * @returns {boolean} 送信処理が開始された場合はtrue
  */
 export function submitAfterVoiceInput() {
-    // Gemini送信ボタンを検索
-    const submitButton = findGeminiSubmitButton();
+    try {
+        // Gemini送信ボタンを検索
+        const submitButton = findGeminiSubmitButton();
 
-    if (submitButton) {
-        // ボタンが無効状態かチェック
-        if (isButtonDisabled(submitButton)) {
-            console.log(chrome.i18n.getMessage('logSubmitButtonDisabled'));
+        if (submitButton) {
+            // ボタンが無効状態かチェック
+            if (isButtonDisabled(submitButton)) {
+                console.log(chrome.i18n.getMessage('logSubmitButtonDisabled'));
 
-            // イベント再試行によるフレームワーク状態更新促進
-            if (typeof retryInputEvents === 'function') {
-                retryInputEvents();
-            }
-            
-            // Gemini/Bardは長めの待機時間が必要な場合がある
-            setTimeout(() => {
-                // 再度ボタンを取得して再試行
-                const refreshedButton = findGeminiSubmitButton();
-                if (refreshedButton && !isButtonDisabled(refreshedButton)) {
-                    refreshedButton.click();
+                // イベント再試行によるフレームワーク状態更新促進
+                if (typeof retryInputEvents === 'function') {
+                    retryInputEvents();
                 }
-            }, 800);
-            
-            return false;
+
+                // Gemini/Bardは長めの待機時間が必要な場合がある
+                setTimeout(() => {
+                    // 再度ボタンを取得して再試行
+                    const refreshedButton = findGeminiSubmitButton();
+                    if (refreshedButton && !isButtonDisabled(refreshedButton)) {
+                        refreshedButton.click();
+                    }
+                }, 800);
+
+                return false;
+            }
+
+            // ボタンをハイライト
+            const originalBackgroundColor = submitButton.style.backgroundColor;
+            submitButton.style.backgroundColor = '#4CAF50';
+
+            // 少し待機してから送信
+            setTimeout(() => {
+                submitButton.style.backgroundColor = originalBackgroundColor;
+                submitButton.click();
+
+                // ステータス表示
+                if (typeof showStatus === 'function') {
+                    showStatus('statusSubmitClicked');
+                }
+            }, 300);
+            return true;
         }
 
-        // ボタンをハイライト
-        const originalBackgroundColor = submitButton.style.backgroundColor;
-        submitButton.style.backgroundColor = '#4CAF50';
-
-        // 少し待機してから送信
-        setTimeout(() => {
-            submitButton.style.backgroundColor = originalBackgroundColor;
-            submitButton.click();
-            
-            // ステータス表示
-            if (typeof showStatus === 'function') {
-                showStatus('statusSubmitClicked');
-            }
-        }, 300);
-        return true;
+        return false;
+    } catch (error) {
+        console.error('Error submitting after voice input:', error);
+        return false;
     }
-    
-    return false;
 }
 
 /**

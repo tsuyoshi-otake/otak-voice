@@ -468,14 +468,12 @@ describe('Input Handler Module - 100%カバレッジテスト', () => {
       const result = inputHandler.simulateTypingIntoElement(element, 'test text');
       
       expect(result).toBe(true);
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('[Debug] simulateTypingIntoElement: 開始'), expect.anything());
     });
     
     test('simulateTypingIntoElement - 要素がnullの場合', () => {
       const result = inputHandler.simulateTypingIntoElement(null, 'test text');
       
       expect(result).toBe(false);
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('[Debug] simulateTypingIntoElement: 要素またはテキストが空のため終了'));
     });
     
     test('clearCurrentInput - アクティブ要素がinput', () => {

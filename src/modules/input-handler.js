@@ -226,8 +226,6 @@ export function toggleMenu() {
     // Also update local variable for backward compatibility
     menuExpanded = newMenuExpanded;
     
-    // console.log('Menu state toggled:', newMenuExpanded); // Debug log removed
-
     // Update menu state
     updateMenuState();
     
@@ -248,14 +246,11 @@ export function updateMenuState() {
         return;
     }
 
-    // console.log('Updating menu state:', menuExpanded); // Debug log removed
-
     // Update menu container state
     const menuExpanded = getState('menuExpanded');
     if (menuExpanded) {
         menuContainer.classList.add('otak-voice-menu__container--expanded');
         menuButton.classList.add('otak-voice-menu__btn--expanded');
-        // console.log('Menu set to expanded state'); // Debug log removed
 
         // Update menu button icon - directly set the innerHTML since it doesn't have an icon container
         menuButton.innerHTML = `
@@ -266,7 +261,6 @@ export function updateMenuState() {
     } else {
         menuContainer.classList.remove('otak-voice-menu__container--expanded');
         menuButton.classList.remove('otak-voice-menu__btn--expanded');
-        // console.log('Menu set to closed state'); // Debug log removed
 
         // Update menu button icon - directly set the innerHTML
         // Use MENU_ICON directly from import
@@ -584,9 +578,7 @@ export function writeToInputField(el, txt) {
  * @returns {boolean} 成功したらtrue
  */
 export function simulateTypingIntoElement(element, text) {
-    console.log('[Debug] simulateTypingIntoElement: 開始', { element, text });
     if (!element || text === undefined || text === null) {
-        console.log('[Debug] simulateTypingIntoElement: 要素またはテキストが空のため終了');
         return false;
     }
     
@@ -594,7 +586,6 @@ export function simulateTypingIntoElement(element, text) {
     const result = domWriteToInputField(element, text);
     
     if (result) {
-        console.log('[Debug] simulateTypingIntoElement: DOM abstraction layer succeeded');
         return true;
     } else {
         console.error(chrome.i18n.getMessage('logTypingSimulateError'));

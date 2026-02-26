@@ -63,7 +63,6 @@ function handleMicButtonClick() {
     if (wasPreviousElementInput) {
         currentInputElement = previousActiveElement;
         setState('currentInputElement', currentInputElement);
-        console.log('[Debug handleMicButtonClick: Using previous input element:', currentInputElement);
     } else {
         currentInputElement = document.activeElement;
         
@@ -88,13 +87,11 @@ function handleMicButtonClick() {
             if (currentInputElement) {
                 currentInputElement.focus();
                 setState('currentInputElement', currentInputElement);
-                console.log('[Debug] handleMicButtonClick: Found input via lastClickedInput or findBestInputField:', currentInputElement);
                 showStatus('statusInputFound');
             } else {
                 // 入力フィールドが見つからない場合でも音声認識を開始
                 // フラグを設定して、認識結果をモーダルダイアログに表示するようにする
                 setState('useRecognitionModal', true);
-                console.log('[Debug] handleMicButtonClick: No input field found, will use modal dialog');
                 showStatus('statusUsingModalDialog');
                 toggleSpeechRecognition();
                 return;

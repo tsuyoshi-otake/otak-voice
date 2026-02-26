@@ -9,8 +9,6 @@ import { loadSettings } from './modules/settings.js';
 import { createUI, setupEventListeners } from './modules/ui.js';
 import { loadMenuState, updateMenuState, initInputHandler } from './modules/input-handler.js';
 import { MENU_ICON } from './icons.js';
-import { isInputElement } from './modules/utils.js';
-import { detectSiteType } from './site-handlers/site-detector.js';
 import { initializeState, setState, getState } from './modules/state.js';
 import { initSpeechEvents } from './modules/speech.js';
 import { publish, subscribe, EVENTS } from './modules/event-bus.js';
@@ -28,11 +26,6 @@ setState({
 
 // Store MENU_ICON in state instead of window
 setState('MENU_ICON', MENU_ICON);
-
-// Make essential functions available for legacy code that might still use window
-// These will be gradually phased out as modules are updated to use event bus
-window.isInputElement = isInputElement;
-window.detectSiteType = detectSiteType;
 
 /**
  * Initialize voice input functionality

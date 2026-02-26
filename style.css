@@ -16,7 +16,7 @@
     --otak-divider-color: #333333;
     --otak-link-color: #888888;
     --otak-link-hover: #d97757;
-    --otak-placeholder-color: #888888;
+    --otak-placeholder-color: #a0a0a0;
     --otak-shadow-color: rgba(0, 0, 0, 0.4);
 }
 
@@ -37,7 +37,7 @@
     --otak-divider-color: #e0e0e0;
     --otak-link-color: #666666;
     --otak-link-hover: #d97757;
-    --otak-placeholder-color: #999999;
+    --otak-placeholder-color: #767676;
     --otak-shadow-color: rgba(0, 0, 0, 0.15);
 }
 
@@ -58,7 +58,7 @@
     --otak-divider-color: #333333;
     --otak-link-color: #888888;
     --otak-link-hover: #d97757;
-    --otak-placeholder-color: #888888;
+    --otak-placeholder-color: #a0a0a0;
     --otak-shadow-color: rgba(0, 0, 0, 0.4);
 }
 
@@ -358,6 +358,16 @@
         background-color: #444444; /* モノクロ配色 - ダークグレー */
         color: #ffffff; /* 白色テキスト */
         font-weight: bold;
+    }
+
+    /* Screen reader only: aria-live region for status announcements (accessibility) */
+    .otak-voice-status[aria-live] {
+        position: absolute;
+        clip: rect(0, 0, 0, 0);
+        height: 1px;
+        width: 1px;
+        overflow: hidden;
+        white-space: nowrap;
     }
 
     /* モーダルウィンドウ共通スタイル (DeepL風) */
@@ -728,7 +738,17 @@
         border: none;
         user-select: none !important; /* テキスト選択を防止 */
     }
-    
+
+    /* Visible focus indicators for keyboard navigation (accessibility) */
+    .otak-voice-menu__item:focus-visible,
+    .otak-voice-settings button:focus-visible,
+    .otak-voice-settings input:focus-visible,
+    .otak-voice-settings select:focus-visible,
+    .otak-voice-settings textarea:focus-visible {
+        outline: 2px solid var(--otak-input-focus-border);
+        outline-offset: 2px;
+    }
+
     .otak-voice-settings__save-btn {
         background-color: var(--otak-button-primary-bg);
         color: #ffffff;
