@@ -46,8 +46,8 @@ describe('anthropic-claude.js - detection', () => {
       expect(result).toBe(true);
     });
 
-    test('detects anthropic.com domain', () => {
-      // Set location to anthropic.com
+    test('returns false for anthropic.com domain (not a chat site)', () => {
+      // anthropic.com is the company site, not the Claude chat interface
       Object.defineProperty(window, 'location', {
         value: {
           hostname: 'anthropic.com',
@@ -57,7 +57,7 @@ describe('anthropic-claude.js - detection', () => {
 
       const result = claudeHandler.isClaudeSite();
 
-      expect(result).toBe(true);
+      expect(result).toBe(false);
     });
 
     test('returns false for unrelated domain', () => {
@@ -98,8 +98,19 @@ describe('anthropic-claude.js - detection', () => {
       expect(result).toBe(mockTextarea);
     });
 
-    test('returns null when no textarea found', () => {
-      // No textarea in DOM
+    test('falls back to ProseMirror contenteditable div', () => {
+      const mockDiv = document.createElement('div');
+      mockDiv.classList.add('ProseMirror');
+      mockDiv.setAttribute('contenteditable', 'true');
+      document.body.appendChild(mockDiv);
+
+      const result = claudeHandler.findBestInputField();
+
+      expect(result).toBe(mockDiv);
+    });
+
+    test('returns null when no textarea or contenteditable found', () => {
+      // No matching elements in DOM
       const result = claudeHandler.findBestInputField();
 
       expect(result).toBeNull();

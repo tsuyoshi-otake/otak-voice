@@ -6,6 +6,13 @@
 jest.mock('../../modules/ui.js');
 jest.mock('../../modules/event-bus.js');
 jest.mock('../../modules/dom-utils.js');
+jest.mock('../../modules/state.js', () => ({
+  getState: jest.fn((key) => {
+    if (key === 'lastClickedInput') return global._mockLastClickedInput || null;
+    return null;
+  }),
+  setState: jest.fn()
+}));
 
 // インポート
 import { submitAfterVoiceInput } from '../../site-handlers/default';
@@ -69,10 +76,10 @@ describe('Default Site Handler - Operations', () => {
       // inputElement checks
       domUtils.isInputElement.mockReturnValueOnce(false); // activeElement
 
-      // Set up lastClickedInput
+      // Set up lastClickedInput via state mock
       const mockInput = document.createElement('input');
       mockInput.focus = jest.fn();
-      window.lastClickedInput = mockInput;
+      global._mockLastClickedInput = mockInput;
       domUtils.isInputElement.mockReturnValueOnce(true); // lastClickedInput
 
       // Submit button mock
@@ -82,6 +89,9 @@ describe('Default Site Handler - Operations', () => {
 
       // Call function
       const result = submitAfterVoiceInput();
+
+      // Cleanup
+      global._mockLastClickedInput = null;
 
       // Verify
       expect(result).toBe(true);
@@ -97,8 +107,8 @@ describe('Default Site Handler - Operations', () => {
         writable: true
       });
 
-      // No lastClickedInput
-      window.lastClickedInput = null;
+      // No lastClickedInput (state returns null by default)
+      global._mockLastClickedInput = null;
       domUtils.isInputElement.mockReturnValueOnce(false); // activeElement
 
       // findBestInputField result

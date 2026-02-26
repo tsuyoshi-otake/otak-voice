@@ -254,13 +254,13 @@ describe('settings-schema module', () => {
   // -------------------------------------------------------------------------
   const promptSettings = ['autoCorrectionPrompt', 'proofreadingPrompt'];
 
-  describe.each(promptSettings)('validateSetting - %s (non-empty string)', (settingName) => {
+  describe.each(promptSettings)('validateSetting - %s (string, empty allowed)', (settingName) => {
     test('accepts a non-empty string', () => {
       expect(validateSetting(settingName, 'Please correct the text.')).toBe(true);
     });
 
-    test('rejects an empty string', () => {
-      expect(validateSetting(settingName, '')).toBe(false);
+    test('accepts an empty string (user clearing the prompt)', () => {
+      expect(validateSetting(settingName, '')).toBe(true);
     });
 
     test('rejects null', () => {

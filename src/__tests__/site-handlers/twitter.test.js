@@ -24,6 +24,13 @@ jest.mock('../../modules/event-bus', () => ({
   }
 }));
 
+jest.mock('../../modules/state', () => ({
+  getState: jest.fn((key) => {
+    if (key === 'lastRecognizedText') return global._mockLastRecognizedText;
+    return null;
+  })
+}));
+
 describe('twitter.js', () => {
   // Setup and teardown
   beforeEach(() => {
@@ -42,13 +49,13 @@ describe('twitter.js', () => {
       writable: true
     });
 
-    // Set up global lastRecognizedText used by submitAfterVoiceInput
-    window.lastRecognizedText = 'This is a test tweet';
+    // Set up lastRecognizedText used by submitAfterVoiceInput (via state mock)
+    global._mockLastRecognizedText = 'This is a test tweet';
   });
 
   afterEach(() => {
     // Clean up
-    delete window.lastRecognizedText;
+    delete global._mockLastRecognizedText;
   });
 
   describe('findBestInputField', () => {
@@ -132,8 +139,8 @@ describe('twitter.js', () => {
     });
 
     test('returns false when no recognized text is available', () => {
-      // Remove recognized text
-      delete window.lastRecognizedText;
+      // Remove recognized text (state mock will return null)
+      global._mockLastRecognizedText = null;
       
       const result = submitAfterVoiceInput();
       

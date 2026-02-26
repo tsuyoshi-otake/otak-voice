@@ -1,9 +1,9 @@
 // Mock chrome.runtime and chrome.storage before importing background.js
-const mockStorageLocalSet = jest.fn((settings, callback) => {
+const mockStorageSyncSet = jest.fn((settings, callback) => {
   // Simulate successful save by default
   callback();
 });
-const mockStorageLocalGet = jest.fn((keys, callback) => {
+const mockStorageSyncGet = jest.fn((keys, callback) => {
   // Simulate async behavior using Promise and process.nextTick
   Promise.resolve().then(() => {
     // Simulate returning some settings by default
@@ -29,9 +29,9 @@ global.chrome = {
   },
   storage: {
     ...global.chrome.storage,
-    local: {
-      set: mockStorageLocalSet,
-      get: mockStorageLocalGet,
+    sync: {
+      set: mockStorageSyncSet,
+      get: mockStorageSyncGet,
     }
   }
 };
@@ -53,8 +53,8 @@ describe('background script', () => {
 
   beforeEach(() => {
     // Reset mocks and spies before each test
-    mockStorageLocalSet.mockClear();
-    mockStorageLocalGet.mockClear();
+    mockStorageSyncSet.mockClear();
+    mockStorageSyncGet.mockClear();
     global.chrome.runtime.lastError = undefined;
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -77,8 +77,8 @@ describe('background script', () => {
 
       expect(consoleLogSpy).toHaveBeenCalledWith('onInstalled event detected:', details);
       expect(consoleLogSpy).toHaveBeenCalledWith('Extension newly installed. Saving default settings.');
-      expect(mockStorageLocalSet).toHaveBeenCalledTimes(1);
-      expect(mockStorageLocalSet).toHaveBeenCalledWith({
+      expect(mockStorageSyncSet).toHaveBeenCalledTimes(1);
+      expect(mockStorageSyncSet).toHaveBeenCalledWith({
         menu_expanded_state: false,
         auto_detect_input_fields: true
       }, expect.any(Function));
@@ -98,7 +98,7 @@ describe('background script', () => {
 
       expect(consoleLogSpy).toHaveBeenCalledWith('onInstalled event detected:', details);
       expect(consoleLogSpy).toHaveBeenCalledWith('Extension newly installed. Saving default settings.');
-      expect(mockStorageLocalSet).toHaveBeenCalledTimes(1);
+      expect(mockStorageSyncSet).toHaveBeenCalledTimes(1);
       expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to save default settings:', mockError);
       expect(consoleLogSpy).not.toHaveBeenCalledWith('Default settings saved:', expect.any(Object));
     });
@@ -109,7 +109,7 @@ describe('background script', () => {
 
       expect(consoleLogSpy).toHaveBeenCalledWith('onInstalled event detected:', details);
       expect(consoleLogSpy).toHaveBeenCalledWith('Extension updated. Version:', details.previousVersion);
-      expect(mockStorageLocalSet).not.toHaveBeenCalled();
+      expect(mockStorageSyncSet).not.toHaveBeenCalled();
       expect(consoleErrorSpy).not.toHaveBeenCalled();
     });
 
@@ -120,7 +120,7 @@ describe('background script', () => {
       expect(consoleLogSpy).toHaveBeenCalledWith('onInstalled event detected:', details);
       expect(consoleLogSpy).not.toHaveBeenCalledWith('Extension newly installed. Saving default settings.');
       expect(consoleLogSpy).not.toHaveBeenCalledWith('Extension updated. Version:', expect.any(String));
-      expect(mockStorageLocalSet).not.toHaveBeenCalled();
+      expect(mockStorageSyncSet).not.toHaveBeenCalled();
       expect(consoleErrorSpy).not.toHaveBeenCalled();
     });
   });
@@ -137,8 +137,8 @@ describe('background script', () => {
 
       const result = onMessageListener(message, sender, sendResponse);
 
-      expect(mockStorageLocalGet).toHaveBeenCalledTimes(1);
-      expect(mockStorageLocalGet).toHaveBeenCalledWith(
+      expect(mockStorageSyncGet).toHaveBeenCalledTimes(1);
+      expect(mockStorageSyncGet).toHaveBeenCalledWith(
         ['menu_expanded_state', 'auto_detect_input_fields'],
         expect.any(Function)
       );
@@ -162,7 +162,7 @@ describe('background script', () => {
 
       const result = onMessageListener(message, sender, sendResponse);
 
-      expect(mockStorageLocalGet).not.toHaveBeenCalled();
+      expect(mockStorageSyncGet).not.toHaveBeenCalled();
       expect(sendResponse).not.toHaveBeenCalled();
       expect(result).toBe(false); // Should return false for rejected sender
     });
@@ -174,7 +174,7 @@ describe('background script', () => {
 
       const result = onMessageListener(message, sender, sendResponse);
 
-      expect(mockStorageLocalGet).not.toHaveBeenCalled();
+      expect(mockStorageSyncGet).not.toHaveBeenCalled();
       expect(sendResponse).not.toHaveBeenCalled();
     });
   });
