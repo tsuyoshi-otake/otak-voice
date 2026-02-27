@@ -862,11 +862,22 @@
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
     
+    .otak-voice-recognition__clear-btn {
+        background-color: var(--otak-button-secondary-bg);
+        color: var(--otak-text-color);
+    }
+
+    .otak-voice-recognition__clear-btn:hover {
+        background-color: var(--otak-button-secondary-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
     .otak-voice-recognition__close-btn {
         background-color: var(--otak-button-secondary-bg);
         color: var(--otak-text-color);
     }
-    
+
     .otak-voice-recognition__close-btn:hover {
         background-color: var(--otak-button-secondary-hover);
         transform: translateY(-1px);

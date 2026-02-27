@@ -583,6 +583,10 @@
     "message": "コピーしました！",
     "description": "Text shown after copying in the recognition result modal dialog."
   },
+  "recognitionModalClearButton": {
+    "message": "クリア",
+    "description": "Clear button text in the recognition result modal dialog."
+  },
   "recognitionModalCloseButton": {
     "message": "閉じる",
     "description": "Close button text in the recognition result modal dialog."

@@ -5,7 +5,8 @@
 
 import { THEME_MODES } from '../constants.js';
 import { getState, setState } from './state.js';
-import { publish, EVENTS } from './event-bus.js';
+import { publish, publishStatus, EVENTS } from './event-bus.js';
+import { clearInputField } from './dom-utils.js';
 import { makeDraggable } from './ui-settings-modal.js';
 
 /** AbortController for the recognition modal ESC key listener */
@@ -52,6 +53,7 @@ export function showRecognitionTextModal(text = '', isInitial = false) {
       <textarea placeholder="${isInitial ? chrome.i18n.getMessage('recognitionModalPlaceholder') : ''}"></textarea>
       <div class="otak-voice-recognition__button-container">
         <button class="otak-voice-recognition__copy-btn">${chrome.i18n.getMessage('recognitionModalCopyButton')}</button>
+        <button class="otak-voice-recognition__clear-btn">${chrome.i18n.getMessage('recognitionModalClearButton')}</button>
         <button class="otak-voice-recognition__close-btn">${chrome.i18n.getMessage('recognitionModalCloseButton')}</button>
       </div>
     `;
@@ -99,6 +101,17 @@ export function showRecognitionTextModal(text = '', isInitial = false) {
           }
         }, 2000);
       }
+    };
+
+    const clearButton = modal.querySelector('.otak-voice-recognition__clear-btn');
+    clearButton.onclick = () => {
+      const textarea = modal.querySelector('textarea');
+      if (textarea) { textarea.value = ''; textarea.placeholder = ''; }
+      const currentInputElement = getState('currentInputElement');
+      if (currentInputElement) { clearInputField(currentInputElement); }
+      setState('originalText', '');
+      setState('lastRecognizedText', '');
+      publishStatus('statusClearSuccess');
     };
 
     const closeButton = modal.querySelector('.otak-voice-recognition__close-btn');
