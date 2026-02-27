@@ -29,6 +29,12 @@ import { isInputElement } from './dom-utils.js';
 // Variables for append mode
 let menuExpanded = false; // Menu expanded state
 
+/** AbortController for document-level listeners */
+let clickListenerController = null;
+
+/** Stored unsubscribe functions to prevent subscription accumulation */
+let unsubscribeFunctions = [];
+
 /**
  * input-handler モジュールの初期化
  */
@@ -42,13 +48,17 @@ export async function initInputHandler() {
     // メニュー状態を状態管理モジュールに反映
     setState('menuExpanded', menuExpanded);
 
+    // Clean up previous click listener to prevent accumulation on re-init
+    if (clickListenerController) clickListenerController.abort();
+    clickListenerController = new AbortController();
+
     // イベントリスナーを設定
     document.addEventListener('click', e => {
         if (isInputElement(e.target)) {
             setState('lastClickedInput', e.target);
             publish(EVENTS.INPUT_FIELD_CLICKED, e.target);
         }
-    }, true);
+    }, { capture: true, signal: clickListenerController.signal });
 
     // イベントバスのサブスクライブ
     setupEventSubscriptions();
@@ -58,51 +68,55 @@ export async function initInputHandler() {
  * イベントバスのサブスクリプションを設定
  */
 export function setupEventSubscriptions() {
+    // Unsubscribe all previous subscriptions to prevent accumulation
+    unsubscribeFunctions.forEach(unsub => unsub());
+    unsubscribeFunctions = [];
+
     // メニュートグルイベント
-    eventSubscribe(EVENTS.MENU_TOGGLED, () => {
+    unsubscribeFunctions.push(eventSubscribe(EVENTS.MENU_TOGGLED, () => {
         toggleMenu();
-    });
+    }));
 
     // 設定モーダルトグルイベント
-    eventSubscribe(EVENTS.SETTINGS_MODAL_TOGGLED, () => {
+    unsubscribeFunctions.push(eventSubscribe(EVENTS.SETTINGS_MODAL_TOGGLED, () => {
         toggleSettingsModal();
-    });
+    }));
 
     // 自動送信トグルイベント
-    eventSubscribe(EVENTS.AUTO_SUBMIT_TOGGLED, (data) => {
+    unsubscribeFunctions.push(eventSubscribe(EVENTS.AUTO_SUBMIT_TOGGLED, (data) => {
         const fromMenuButton = data && data.fromMenuButton === true;
         toggleAutoSubmit(fromMenuButton);
-    });
+    }));
 
     // 自動送信状態変更イベント
-    eventSubscribe(EVENTS.AUTO_SUBMIT_STATE_CHANGED, (autoSubmit) => {
+    unsubscribeFunctions.push(eventSubscribe(EVENTS.AUTO_SUBMIT_STATE_CHANGED, (autoSubmit) => {
         // 状態を更新
         setState('autoSubmit', autoSubmit);
 
         // UI を更新
         updateAutoSubmitButtonState(autoSubmit);
-    });
+    }));
 
     // 入力クリアイベント
-    eventSubscribe(EVENTS.INPUT_CLEARED, () => {
+    unsubscribeFunctions.push(eventSubscribe(EVENTS.INPUT_CLEARED, () => {
         clearCurrentInput();
-    });
+    }));
 
     // 校閲開始イベント
-    eventSubscribe(EVENTS.GPT_PROOFREADING_STARTED, () => {
+    unsubscribeFunctions.push(eventSubscribe(EVENTS.GPT_PROOFREADING_STARTED, () => {
         proofreadCurrentInput();
-    });
+    }));
 
     // 入力フィールド検索イベント
-    eventSubscribe(EVENTS.INPUT_FIELD_FOUND, () => {
+    unsubscribeFunctions.push(eventSubscribe(EVENTS.INPUT_FIELD_FOUND, () => {
         const bestInputField = findBestInputField();
         if (bestInputField) {
             setState('currentInputElement', bestInputField);
         }
-    });
+    }));
 
     // 音声認識結果イベント
-    eventSubscribe(EVENTS.SPEECH_RECOGNITION_RESULT, (data) => {
+    unsubscribeFunctions.push(eventSubscribe(EVENTS.SPEECH_RECOGNITION_RESULT, (data) => {
         const { final, text } = data;
         const currentInputElement = getState('currentInputElement');
 
@@ -127,10 +141,10 @@ export function setupEventSubscriptions() {
             // 中間結果
             writeToInputField(currentInputElement, text);
         }
-    });
+    }));
 
     // メニュー状態更新イベント
-    eventSubscribe(EVENTS.MENU_STATE_UPDATE_NEEDED, async () => {
+    unsubscribeFunctions.push(eventSubscribe(EVENTS.MENU_STATE_UPDATE_NEEDED, async () => {
         try {
             await loadMenuState();
             updateMenuState();
@@ -146,10 +160,10 @@ export function setupEventSubscriptions() {
                 });
             }
         }
-    });
+    }));
 
     // 入力ハンドラ更新イベント
-    eventSubscribe(EVENTS.INPUT_HANDLERS_UPDATE_NEEDED, () => {
+    unsubscribeFunctions.push(eventSubscribe(EVENTS.INPUT_HANDLERS_UPDATE_NEEDED, () => {
         try {
             enhanceInputElementHandlers();
         } catch (error) {
@@ -167,5 +181,5 @@ export function setupEventSubscriptions() {
                 handleError(appError, false, false, 'input-handler');
             }
         }
-    });
+    }));
 }

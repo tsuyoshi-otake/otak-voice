@@ -19,10 +19,15 @@ import {
 import { handleEditButtonClick } from './speech-edit.js';
 
 let recognitionInstance = null;
+let warmupTimerId = null;
 setState({ isListening: false, isEditing: false });
 
-/** Stop and clear the existing recognition instance. */
+/** Stop and clear the existing recognition instance and any pending warmup. */
 export function stopExistingRecognition() {
+    if (warmupTimerId) {
+        clearTimeout(warmupTimerId);
+        warmupTimerId = null;
+    }
     if (recognitionInstance) {
         try { recognitionInstance.stop(); } catch (e) {
             console.warn("Previous recognition stop error:", e);
@@ -251,30 +256,32 @@ export function startSpeechRecognition() {
         if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null; }
     };
 
-    try {
-        setTimeout(() => {
-            try {
-                recognition.start();
-                console.log('[Speech] Recognition started after warmup');
-            } catch (e) {
-                const error = createError(ERROR_CODE[ERROR_CATEGORY.SPEECH].START_FAILED, null, e, null, ERROR_SEVERITY.ERROR);
-                handleError(error, true, false, 'speech');
-                setState('isListening', false);
-                updateMicButtonState(false);
-                recognitionInstance = null;
-            }
-        }, 300);
-    } catch (e) {
-        const error = createError(ERROR_CODE[ERROR_CATEGORY.SPEECH].START_FAILED, null, e, null, ERROR_SEVERITY.ERROR);
-        handleError(error, true, false, 'speech');
-        setState('isListening', false);
-        updateMicButtonState(false);
-        recognitionInstance = null;
-    }
+    // Set isListening immediately to prevent duplicate starts from rapid clicks
+    setState('isListening', true);
+    updateMicButtonState(true);
+
+    warmupTimerId = setTimeout(() => {
+        warmupTimerId = null;
+        try {
+            recognition.start();
+            console.log('[Speech] Recognition started after warmup');
+        } catch (e) {
+            const error = createError(ERROR_CODE[ERROR_CATEGORY.SPEECH].START_FAILED, null, e, null, ERROR_SEVERITY.ERROR);
+            handleError(error, true, false, 'speech');
+            setState('isListening', false);
+            updateMicButtonState(false);
+            recognitionInstance = null;
+        }
+    }, 300);
 }
 
 /** Stop speech recognition (when explicitly stopping) */
 export function stopSpeechRecognition() {
+    // Cancel pending warmup timer if stop is requested during warmup
+    if (warmupTimerId) {
+        clearTimeout(warmupTimerId);
+        warmupTimerId = null;
+    }
     const isListening = getState('isListening');
     if (recognitionInstance && isListening) {
         try {
@@ -283,12 +290,9 @@ export function stopSpeechRecognition() {
         } catch (e) {
             const error = createError(ERROR_CODE[ERROR_CATEGORY.SPEECH].STOP_FAILED, null, e, null, ERROR_SEVERITY.ERROR);
             handleError(error, true, false, 'speech');
-            setState('isListening', false);
-            updateMicButtonState(false);
-            recognitionInstance = null;
         }
-    } else {
-         setState('isListening', false);
-         updateMicButtonState(false);
     }
+    setState('isListening', false);
+    updateMicButtonState(false);
+    recognitionInstance = null;
 }

@@ -240,7 +240,7 @@ describe('Input Handler Operations Module', () => {
 
       await inputHandler.initInputHandler();
 
-      expect(document.addEventListener).toHaveBeenCalledWith('click', expect.any(Function), true);
+      expect(document.addEventListener).toHaveBeenCalledWith('click', expect.any(Function), expect.objectContaining({ capture: true }));
       expect(eventBus.subscribe).toHaveBeenCalled();
 
       document.addEventListener = originalAddEventListener;

@@ -191,6 +191,9 @@ export function createSettingsModal() {
     }
 }
 
+/** WeakMap to track AbortControllers for draggable elements */
+const draggableControllers = new WeakMap();
+
 /**
  * Makes an element draggable
  * @param {HTMLElement} element - The element to make draggable
@@ -198,10 +201,17 @@ export function createSettingsModal() {
 export function makeDraggable(element) {
     const header = element.querySelector('h3');
     if (!header) return;
+
+    // Clean up previous listeners for this element
+    const prevController = draggableControllers.get(element);
+    if (prevController) prevController.abort();
+    const controller = new AbortController();
+    draggableControllers.set(element, controller);
+
     let isDragging = false;
     let offsetX = 0, offsetY = 0;
     header.style.cursor = 'move';
-    header.onmousedown = e => {
+    header.addEventListener('mousedown', e => {
         isDragging = true;
         offsetX = e.clientX - element.offsetLeft;
         offsetY = e.clientY - element.offsetTop;
@@ -212,13 +222,13 @@ export function makeDraggable(element) {
         } else {
             element.classList.add('otak-voice-modal--dragging');
         }
-    };
+    }, { signal: controller.signal });
     document.addEventListener('mousemove', e => {
         if (!isDragging) return;
         element.style.left = (e.clientX - offsetX) + 'px';
         element.style.top = (e.clientY - offsetY) + 'px';
         element.style.transform = 'none';
-    });
+    }, { signal: controller.signal });
     document.addEventListener('mouseup', () => {
         isDragging = false;
         if (element.classList.contains('otak-voice-settings')) {
@@ -228,5 +238,5 @@ export function makeDraggable(element) {
         } else {
             element.classList.remove('otak-voice-modal--dragging');
         }
-    });
+    }, { signal: controller.signal });
 }

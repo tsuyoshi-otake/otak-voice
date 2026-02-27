@@ -7,6 +7,12 @@ import { THEME_MODES } from '../constants.js';
 import { getState, setState } from './state.js';
 import { makeDraggable } from './ui-settings-modal.js';
 
+/** AbortController for the recognition modal ESC key listener */
+let escAbortController = null;
+
+/** Timer ID for copy button feedback (prevents overlapping timers) */
+let copyFeedbackTimerId = null;
+
 /**
  * Creates and displays a modal dialog for showing voice recognition text
  * @param {string} text - Text to display
@@ -71,18 +77,23 @@ export function showRecognitionTextModal(text = '', isInitial = false) {
       // Change button text to "Copied"
       copyButton.textContent = chrome.i18n.getMessage('recognitionModalCopied');
 
+      // Clear previous copy feedback timer
+      if (copyFeedbackTimerId) { clearTimeout(copyFeedbackTimerId); copyFeedbackTimerId = null; }
+
       // Check if autoSubmit is enabled
       const autoSubmit = getState('autoSubmit');
 
       // Only close the modal if autoSubmit is enabled
       if (autoSubmit) {
-        setTimeout(() => {
-          modal.remove();
+        copyFeedbackTimerId = setTimeout(() => {
+          copyFeedbackTimerId = null;
+          if (modal.isConnected) modal.remove();
         }, 1000);
       } else {
         // If not auto-closing, revert button text after 2 seconds
-        setTimeout(() => {
-          if (modal.querySelector('.otak-voice-recognition__copy-btn')) {
+        copyFeedbackTimerId = setTimeout(() => {
+          copyFeedbackTimerId = null;
+          if (modal.isConnected && modal.querySelector('.otak-voice-recognition__copy-btn')) {
             copyButton.textContent = originalText;
           }
         }, 2000);
@@ -94,12 +105,15 @@ export function showRecognitionTextModal(text = '', isInitial = false) {
       modal.remove();
     };
 
-    // Allow closing with ESC key
+    // Allow closing with ESC key (clean up previous listener first)
+    if (escAbortController) escAbortController.abort();
+    escAbortController = new AbortController();
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && document.querySelector('.otak-voice-recognition')) {
         modal.remove();
+        if (escAbortController) { escAbortController.abort(); escAbortController = null; }
       }
-    });
+    }, { signal: escAbortController.signal });
 
     // Add to body
     document.body.appendChild(modal);

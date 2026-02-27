@@ -19,6 +19,12 @@ import {
     updateShowModalWindowTooltip,
 } from './ui-tooltips.js';
 
+/** AbortController for document-level listeners added by setupEventListeners */
+let documentListenersController = null;
+
+/** Stored unsubscribe functions for event bus subscriptions */
+let uiUnsubscribeFunctions = [];
+
 /** Helper: attach a click handler to a button that checks processing state before publishing */
 function addButtonClickHandler(selector, event, eventData) {
     const btn = document.querySelector(selector);
@@ -61,32 +67,36 @@ export { updateAutoDetectTooltip, updateAutoCorrectionTooltip, updateUseHistoryC
 
 /** Set up event subscriptions for UI module */
 export function setupEventSubscriptions() {
-    subscribe(EVENTS.STATUS_UPDATED, (data) => {
+    // Unsubscribe all previous subscriptions to prevent accumulation
+    uiUnsubscribeFunctions.forEach(unsub => unsub());
+    uiUnsubscribeFunctions = [];
+
+    uiUnsubscribeFunctions.push(subscribe(EVENTS.STATUS_UPDATED, (data) => {
         showStatus(data.messageKey, data.substitutions, data.persistent);
-    });
-    subscribe(EVENTS.RECOGNITION_MODAL_SHOWN, (data) => {
+    }));
+    uiUnsubscribeFunctions.push(subscribe(EVENTS.RECOGNITION_MODAL_SHOWN, (data) => {
         showRecognitionTextModal(data.text, data.isInitial);
-    });
-    subscribe(EVENTS.RECOGNITION_MODAL_UPDATED, (text) => { updateRecognitionModal(text); });
-    subscribe(EVENTS.PROCESSING_STATE_CHANGED, (state) => {
+    }));
+    uiUnsubscribeFunctions.push(subscribe(EVENTS.RECOGNITION_MODAL_UPDATED, (text) => { updateRecognitionModal(text); }));
+    uiUnsubscribeFunctions.push(subscribe(EVENTS.PROCESSING_STATE_CHANGED, (state) => {
         updateProcessingState(state);
         updateEditProofreadButtonsState();
-    });
-    subscribe(EVENTS.AUTO_SUBMIT_STATE_CHANGED, (autoSubmit) => {
+    }));
+    uiUnsubscribeFunctions.push(subscribe(EVENTS.AUTO_SUBMIT_STATE_CHANGED, (autoSubmit) => {
         const modal = document.getElementById('otak-voice-settings-modal');
         if (modal && modal.style.display === 'block') {
             const cb = document.getElementById('auto-submit-checkbox');
             if (cb) { cb.checked = autoSubmit; }
         }
-    });
-    subscribe(EVENTS.MODAL_VISIBILITY_TOGGLED, (showModalWindow) => {
+    }));
+    uiUnsubscribeFunctions.push(subscribe(EVENTS.MODAL_VISIBILITY_TOGGLED, (showModalWindow) => {
         const modal = document.getElementById('otak-voice-settings-modal');
         if (modal && modal.style.display === 'block') {
             const cb = document.getElementById('show-modal-window-checkbox');
             if (cb) { cb.checked = showModalWindow; }
         }
-    });
-    subscribe(EVENTS.SETTINGS_LOADED, (settings) => {
+    }));
+    uiUnsubscribeFunctions.push(subscribe(EVENTS.SETTINGS_LOADED, (settings) => {
         const apiKeyInput = document.getElementById('api-key-input');
         if (apiKeyInput) { apiKeyInput.value = settings.apiKey || ''; }
         const langSelect = document.getElementById('recognition-lang-select');
@@ -124,10 +134,10 @@ export function setupEventSubscriptions() {
                 updateAutoSubmitButtonState(settings.autoSubmit);
             }
         }
-    });
-    subscribe(EVENTS.INPUT_FIELD_CLICKED, () => { updateEditProofreadButtonsState(); });
-    subscribe(EVENTS.INPUT_FIELD_FOUND, () => { updateEditProofreadButtonsState(); });
-    subscribe(EVENTS.SPEECH_RECOGNITION_RESULT, () => { updateEditProofreadButtonsState(); });
+    }));
+    uiUnsubscribeFunctions.push(subscribe(EVENTS.INPUT_FIELD_CLICKED, () => { updateEditProofreadButtonsState(); }));
+    uiUnsubscribeFunctions.push(subscribe(EVENTS.INPUT_FIELD_FOUND, () => { updateEditProofreadButtonsState(); }));
+    uiUnsubscribeFunctions.push(subscribe(EVENTS.SPEECH_RECOGNITION_RESULT, () => { updateEditProofreadButtonsState(); }));
 }
 
 /** Sets up event listeners */
@@ -168,10 +178,14 @@ export function setupEventListeners() {
     const showModalWindowCheckbox = document.getElementById('show-modal-window-checkbox');
     if (showModalWindowCheckbox) { showModalWindowCheckbox.checked = getState('showModalWindow'); }
 
+    // Clean up previous document-level listeners to prevent accumulation on UI re-creation
+    if (documentListenersController) documentListenersController.abort();
+    documentListenersController = new AbortController();
+
     // Automatically turn on the microphone when a text area is focused (only if auto-recognition is off)
     document.addEventListener('focusin', e => {
         if (isInputElement(e.target) && getState('autoDetectInputFields') === true && !getState('isListening')) {
             publish(EVENTS.MIC_BUTTON_CLICKED);
         }
-    });
+    }, { signal: documentListenersController.signal });
 }

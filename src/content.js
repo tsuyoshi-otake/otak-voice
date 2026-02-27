@@ -16,6 +16,9 @@ import { publish, subscribe, EVENTS } from './modules/event-bus.js';
 /** Interval for self-healing UI recovery check (ms) */
 const SELF_HEALING_INTERVAL_MS = 10000;
 
+/** Self-healing interval ID (prevents accumulation on re-initialization) */
+let selfHealingIntervalId = null;
+
 // Initialize state with default values
 // This will be properly set by the state module during initialization
 setState({
@@ -65,12 +68,13 @@ export async function initVoiceInput() {
  * This helps recover from SPA navigation or DOM changes that might remove our UI
  */
 export function setupPeriodicSelfHealing() {
-    setInterval(() => {
+    if (selfHealingIntervalId) clearInterval(selfHealingIntervalId);
+    selfHealingIntervalId = setInterval(() => {
         const menuButton = document.getElementById('otak-voice-menu-btn');
         if (!menuButton) {
             console.warn(chrome.i18n.getMessage('logUiNotFoundHealing'));
+            // UI_RECOVERY_NEEDED subscriber already calls initVoiceInput
             publish(EVENTS.UI_RECOVERY_NEEDED);
-            initVoiceInput();
         }
     }, SELF_HEALING_INTERVAL_MS);
 }
@@ -116,35 +120,42 @@ export async function runInitialization() {
     }
 }
 
+/** Stored unsubscribe functions for content.js event subscriptions */
+let contentUnsubscribeFunctions = [];
+
 /**
  * Set up event subscriptions for content.js
  */
 export function setupEventSubscriptions() {
+    // Unsubscribe all previous subscriptions to prevent accumulation
+    contentUnsubscribeFunctions.forEach(unsub => unsub());
+    contentUnsubscribeFunctions = [];
+
     // Subscribe to proofreading events
-    subscribe(EVENTS.GPT_PROOFREADING_STARTED, () => {
+    contentUnsubscribeFunctions.push(subscribe(EVENTS.GPT_PROOFREADING_STARTED, () => {
         console.log('Proofreading started via event bus');
-    });
-    
+    }));
+
     // Subscribe to speech recognition events
-    subscribe(EVENTS.SPEECH_RECOGNITION_STARTED, () => {
+    contentUnsubscribeFunctions.push(subscribe(EVENTS.SPEECH_RECOGNITION_STARTED, () => {
         console.log('Speech recognition started via event bus');
-    });
-    
+    }));
+
     // Subscribe to speech recognition stopped events
-    subscribe(EVENTS.SPEECH_RECOGNITION_STOPPED, () => {
+    contentUnsubscribeFunctions.push(subscribe(EVENTS.SPEECH_RECOGNITION_STOPPED, () => {
         console.log('Speech recognition stopped via event bus');
-    });
-    
+    }));
+
     // Subscribe to settings loaded events
-    subscribe(EVENTS.SETTINGS_LOADED, (settings) => {
+    contentUnsubscribeFunctions.push(subscribe(EVENTS.SETTINGS_LOADED, (settings) => {
         console.log('Settings loaded via event bus');
-    });
-    
+    }));
+
     // Subscribe to UI recovery events
-    subscribe(EVENTS.UI_RECOVERY_NEEDED, () => {
+    contentUnsubscribeFunctions.push(subscribe(EVENTS.UI_RECOVERY_NEEDED, () => {
         console.log('UI recovery needed via event bus');
         initVoiceInput();
-    });
+    }));
 }
 
 // Execute extension initialization

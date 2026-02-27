@@ -86,6 +86,7 @@ export async function correctWithGPT(text) {
                 publish(EVENTS.SETTINGS_MODAL_TOGGLED);
             }
 
+            updateProcessingState(PROCESSING_STATE.IDLE);
             return text;
         }
 

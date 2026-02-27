@@ -222,6 +222,9 @@ export function appendToInputField(element, text, completeText = '', isFinal = t
     return false;
   }
 }
+/** Timer ID for clickButtonWithFeedback to prevent multiple pending clicks */
+let feedbackTimerId = null;
+
 /** Clicks a button with visual feedback
  * @param {Element} button - Button to click
  * @param {number} [delayMs] - Delay before clicking (defaults to UI_FEEDBACK.CLICK_FEEDBACK_DELAY_MS)
@@ -229,12 +232,16 @@ export function appendToInputField(element, text, completeText = '', isFinal = t
  */
 export function clickButtonWithFeedback(button, delayMs = UI_FEEDBACK.CLICK_FEEDBACK_DELAY_MS) {
   if (!button || isButtonDisabled(button)) return false;
+  // Prevent multiple pending clicks from rapid calls
+  if (feedbackTimerId) return false;
   try {
     const originalBackgroundColor = button.style.backgroundColor;
     const originalBorder = button.style.border;
     button.style.backgroundColor = UI_FEEDBACK.BUTTON_HIGHLIGHT_COLOR;
     button.style.border = UI_FEEDBACK.BUTTON_HIGHLIGHT_BORDER;
-    setTimeout(() => {
+    feedbackTimerId = setTimeout(() => {
+      feedbackTimerId = null;
+      if (!button.isConnected) return;
       button.style.backgroundColor = originalBackgroundColor;
       button.style.border = originalBorder;
       button.click();
@@ -242,6 +249,7 @@ export function clickButtonWithFeedback(button, delayMs = UI_FEEDBACK.CLICK_FEED
     }, delayMs);
     return true;
   } catch (error) {
+    feedbackTimerId = null;
     console.error('Error clicking button with feedback:', error);
     const appError = createError(ERROR_CODE[ERROR_CATEGORY.DOM].BUTTON_CLICK_FAILED, 'Failed to click button with feedback', error, { button }, ERROR_SEVERITY.WARNING);
     handleError(appError, false, false, 'dom-utils');

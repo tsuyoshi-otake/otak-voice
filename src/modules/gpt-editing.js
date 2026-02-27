@@ -79,6 +79,8 @@ export async function editWithGPT(currentText, instruction, activeElement) {
             const editedText = data.choices[0].message.content.trim();
 
             setTimeout(() => {
+                // Verify element is still in the DOM before updating
+                if (!activeElement || !activeElement.isConnected) return;
                 // Update the input field based on its type
                 if (activeElement.isContentEditable) {
                     activeElement.textContent = editedText;

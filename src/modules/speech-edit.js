@@ -19,6 +19,11 @@ import { stopExistingRecognition, setRecognitionInstance } from './speech-recogn
  * Edit button click handler
  */
 export function handleEditButtonClick() {
+    // Guard against rapid clicks: check both processingState and isEditing
+    if (getState('isEditing')) {
+        showStatus('statusProcessingInProgress');
+        return;
+    }
     const processingState = getState('processingState');
     if (processingState && processingState !== PROCESSING_STATE.IDLE) {
         showStatus('statusProcessingInProgress');

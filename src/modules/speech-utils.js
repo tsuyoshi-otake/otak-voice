@@ -201,6 +201,9 @@ export function playSiriEndSound(audioContext) {
     osc2.stop(audioContext.currentTime + 0.25);
 }
 
+/** Timer ID for language restart delay */
+let langRestartTimerId = null;
+
 /**
  * Update recognition language.
  * Called from settings.js and restarts recognition if language is changed during recognition.
@@ -211,6 +214,9 @@ export function updateRecognitionLanguage(newLang) {
     // Update the state with the new language
     setState('recognitionLang', newLang);
 
+    // Cancel any pending restart from a previous language change
+    if (langRestartTimerId) { clearTimeout(langRestartTimerId); langRestartTimerId = null; }
+
     // If language changes during recognition, restart to apply the new language
     const isListening = getState('isListening');
     if (isListening) {
@@ -218,7 +224,8 @@ export function updateRecognitionLanguage(newLang) {
         // Import dynamically to avoid circular dependency
         import('./speech-recognition.js').then(({ stopSpeechRecognition, startSpeechRecognition }) => {
             stopSpeechRecognition();
-            setTimeout(() => {
+            langRestartTimerId = setTimeout(() => {
+                langRestartTimerId = null;
                 const currentIsListening = getState('isListening');
                 if (!currentIsListening) { // Restart only if stopping completed
                     startSpeechRecognition();

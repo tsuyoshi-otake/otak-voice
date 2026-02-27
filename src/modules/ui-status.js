@@ -10,6 +10,9 @@ import { LOADING_ICON, PROOFREAD_ICON, EDIT_ICON } from '../icons.js';
 // Processing state timeout ID
 let processingStateTimeoutId = null;
 
+// Status hide timeout ID (prevents overlapping timers)
+let statusHideTimeoutId = null;
+
 /**
  * Status display function
  * @param {string} messageKey - i18n key for the message to display
@@ -45,10 +48,17 @@ export function showStatus(messageKey, substitutions, persistent = false) {
 
     // Only hide after timeout if not persistent display or is an error message
     if (!persistent || isErrorMessage) {
+        // Clear previous hide timer to prevent overlapping timeouts
+        if (statusHideTimeoutId) {
+            clearTimeout(statusHideTimeoutId);
+            statusHideTimeoutId = null;
+        }
+
         // Shorter timeout for error messages
         const timeout = isErrorMessage ? 3000 : 5000;
 
-        setTimeout(() => {
+        statusHideTimeoutId = setTimeout(() => {
+            statusHideTimeoutId = null;
             if (!statusElem) return;
 
             // Force hide for error messages

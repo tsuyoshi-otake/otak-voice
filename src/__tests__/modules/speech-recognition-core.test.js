@@ -268,6 +268,12 @@ describe('speech.js - Recognition Core', () => {
         });
 
         it('should handle errors during stop and reset state', () => {
+            // Set up recognitionInstance by calling start first
+            jest.useFakeTimers();
+            startSpeechRecognition();
+            jest.useRealTimers();
+            jest.clearAllMocks();
+
             state.getState.mockImplementation(key => key === 'isListening' ? true : undefined);
 
             const stopError = new Error('Stop failed');

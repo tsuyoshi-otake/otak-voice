@@ -14,10 +14,18 @@ const PERIODIC_CHECK_INTERVAL_MS = 5000;
 /** Debounce delay for MutationObserver callback (ms) */
 const MUTATION_DEBOUNCE_MS = 300;
 
+/** Previous observer and interval references for cleanup on re-initialization */
+let previousObserver = null;
+let previousIntervalId = null;
+
 /**
  * Set up DOM observer to monitor page changes
  */
 export function setupDOMObserver() {
+    // Clean up previous observer and interval to prevent accumulation
+    if (previousObserver) { previousObserver.disconnect(); previousObserver = null; }
+    if (previousIntervalId) { clearInterval(previousIntervalId); previousIntervalId = null; }
+
     console.log(chrome.i18n.getMessage('logDomObserverStart'));
 
     // Set up event subscriptions
@@ -56,16 +64,14 @@ export function setupDOMObserver() {
         childList: true,
         subtree: true
     });
+    previousObserver = observer;
 
     // Periodic check for UI presence and functionality
-    const periodicCheckId = setInterval(() => {
+    previousIntervalId = setInterval(() => {
         const voiceMenuBtn = document.getElementById('otak-voice-menu-btn');
         if (!voiceMenuBtn) {
             console.log(chrome.i18n.getMessage('logPollingUiNotFound'));
             publish(EVENTS.UI_RECOVERY_NEEDED);
-            publish(EVENTS.MENU_STATE_UPDATE_NEEDED);
-        } else {
-            console.log('Periodic check: Reapplying menu state');
             publish(EVENTS.MENU_STATE_UPDATE_NEEDED);
         }
 

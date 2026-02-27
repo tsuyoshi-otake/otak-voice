@@ -204,6 +204,7 @@ describe('GPT Service Module', () => {
     test('makes API request and handles response', async () => {
       const activeElement = {
         isContentEditable: false,
+        isConnected: true,
         value: 'Original text',
         dispatchEvent: jest.fn()
       };
@@ -243,6 +244,7 @@ describe('GPT Service Module', () => {
       // モックのcontent editableエレメントを作成
       const activeElement = {
         isContentEditable: true,
+        isConnected: true,
         textContent: 'Original text',
         dispatchEvent: jest.fn()
       };

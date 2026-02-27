@@ -7,6 +7,10 @@ import { getState } from './state.js';
 import { publish, EVENTS } from './event-bus.js';
 import { isInputElement } from './dom-utils.js';
 
+/** Timer IDs for retryInputEvents to prevent accumulation */
+let retryOuterTimerId = null;
+let retryInnerTimerId = null;
+
 /**
  * Function to encourage React state updates
  * Re-fires input field events to encourage React state updates
@@ -42,18 +46,21 @@ export function retryInputEvents() {
                     inputField.value = tempValue;
                     inputField.dispatchEvent(new Event('input', { bubbles: true }));
 
+                    // Clear previous timers to prevent accumulation from rapid calls
+                    if (retryOuterTimerId) { clearTimeout(retryOuterTimerId); retryOuterTimerId = null; }
+                    if (retryInnerTimerId) { clearTimeout(retryInnerTimerId); retryInnerTimerId = null; }
+
                     // Restore original value
-                    setTimeout(() => {
+                    retryOuterTimerId = setTimeout(() => {
+                        retryOuterTimerId = null;
+                        if (!inputField.isConnected) return;
                         inputField.value = currentText;
                         inputField.dispatchEvent(new Event('input', { bubbles: true }));
                         inputField.dispatchEvent(new Event('change', { bubbles: true }));
 
                         // Wait a bit more before trying to submit again
-                        setTimeout(() => {
-                            // Import and call autoSubmitAfterVoiceInput function
-                            // To avoid circular references, don't import directly here,
-                            // but call through the global object
-                            // モーダルウィンドウを使用していない場合のみ自動送信
+                        retryInnerTimerId = setTimeout(() => {
+                            retryInnerTimerId = null;
                             const useRecognitionModal = getState('useRecognitionModal');
                             if (!useRecognitionModal) {
                                 // Use event bus to trigger auto submit

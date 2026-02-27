@@ -34,7 +34,7 @@ jest.mock('../modules/speech', () => ({
 }));
 jest.mock('../modules/event-bus', () => ({
   publish: jest.fn(),
-  subscribe: jest.fn(),
+  subscribe: jest.fn(() => jest.fn()),
   EVENTS: {
     UI_RECOVERY_NEEDED: 'uiRecoveryNeeded',
     INITIALIZATION_COMPLETE: 'initializationComplete',
