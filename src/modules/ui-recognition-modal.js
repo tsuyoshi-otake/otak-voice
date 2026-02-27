@@ -77,7 +77,6 @@ export function showRecognitionTextModal(text = '', isInitial = false) {
       const textToSubmit = textarea.value.trim();
       if (!textToSubmit) return;
       publish(EVENTS.SPEECH_RECOGNITION_RESULT, { final: true, text: textToSubmit, append: false, submit: true });
-      modal.remove();
     };
 
     const copyButton = modal.querySelector('.otak-voice-recognition__copy-btn');
