@@ -9,6 +9,11 @@ import { publish, publishStatus, EVENTS } from './event-bus.js';
 import { clearInputField } from './dom-utils.js';
 import { makeDraggable } from './ui-settings-modal.js';
 
+/** Safe wrapper for chrome.i18n.getMessage (returns key as fallback) */
+function i18n(key) {
+    try { return chrome.i18n.getMessage(key) || key; } catch (e) { return key; }
+}
+
 /** AbortController for the recognition modal ESC key listener */
 let escAbortController = null;
 
@@ -49,12 +54,12 @@ export function showRecognitionTextModal(text = '', isInitial = false) {
 
     // Header, body structure
     modal.innerHTML = `
-      <h3>${chrome.i18n.getMessage('recognitionModalTitle')}</h3>
-      <textarea placeholder="${isInitial ? chrome.i18n.getMessage('recognitionModalPlaceholder') : ''}"></textarea>
+      <h3>${i18n('recognitionModalTitle')}</h3>
+      <textarea placeholder="${isInitial ? i18n('recognitionModalPlaceholder') : ''}"></textarea>
       <div class="otak-voice-recognition__button-container">
-        <button class="otak-voice-recognition__copy-btn">${chrome.i18n.getMessage('recognitionModalCopyButton')}</button>
-        <button class="otak-voice-recognition__clear-btn">${chrome.i18n.getMessage('recognitionModalClearButton')}</button>
-        <button class="otak-voice-recognition__close-btn">${chrome.i18n.getMessage('recognitionModalCloseButton')}</button>
+        <button class="otak-voice-recognition__copy-btn">${i18n('recognitionModalCopyButton')}</button>
+        <button class="otak-voice-recognition__clear-btn">${i18n('recognitionModalClearButton')}</button>
+        <button class="otak-voice-recognition__close-btn">${i18n('recognitionModalCloseButton')}</button>
       </div>
     `;
 
@@ -78,7 +83,7 @@ export function showRecognitionTextModal(text = '', isInitial = false) {
       const originalText = copyButton.textContent;
 
       // Change button text to "Copied"
-      copyButton.textContent = chrome.i18n.getMessage('recognitionModalCopied');
+      copyButton.textContent = i18n('recognitionModalCopied');
 
       // Clear previous copy feedback timer
       if (copyFeedbackTimerId) { clearTimeout(copyFeedbackTimerId); copyFeedbackTimerId = null; }

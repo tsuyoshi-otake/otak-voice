@@ -23,7 +23,12 @@ export function showStatus(messageKey, substitutions, persistent = false) {
     const statusElem = document.querySelector('.otak-voice-status');
     if (!statusElem) return;
 
-    const msg = chrome.i18n.getMessage(messageKey, substitutions);
+    let msg;
+    try {
+        msg = chrome.i18n.getMessage(messageKey, substitutions) || messageKey;
+    } catch (e) {
+        msg = messageKey; // Fallback when extension context is invalidated
+    }
     statusElem.textContent = msg;
     statusElem.style.display = 'block';
 

@@ -6,6 +6,7 @@ import { PROCESSING_STATE } from '../constants.js';
 import { isInputElement } from './dom-utils.js';
 import { getState } from './state.js';
 import { publish, subscribe, EVENTS } from './event-bus.js';
+import { ensureAudioContext } from './speech-utils.js';
 import { saveSetting } from './settings.js';
 import { updateAutoSubmitButtonState } from './input-handler.js';
 import { showStatus, updateProcessingState } from './ui-status.js';
@@ -146,7 +147,19 @@ export function setupEventListeners() {
     if (menuButton) {
         menuButton.addEventListener('click', () => { publish(EVENTS.MENU_TOGGLED); });
     }
-    addButtonClickHandler('.otak-voice-menu__input-btn', EVENTS.MIC_BUTTON_CLICKED);
+    // Mic button: initialize AudioContext during user gesture (click) so beep sounds work
+    const micBtn = document.querySelector('.otak-voice-menu__input-btn');
+    if (micBtn) {
+        micBtn.addEventListener('click', () => {
+            ensureAudioContext();
+            const ps = getState('processingState');
+            if (ps === PROCESSING_STATE.IDLE && !micBtn.classList.contains('otak-voice-menu__item--disabled')) {
+                publish(EVENTS.MIC_BUTTON_CLICKED);
+            } else if (ps !== PROCESSING_STATE.IDLE) {
+                showStatus('statusProcessingInProgress');
+            }
+        });
+    }
     addButtonClickHandler('.otak-voice-menu__append-btn', EVENTS.AUTO_SUBMIT_TOGGLED, { fromMenuButton: true });
     addButtonClickHandler('.otak-voice-menu__clear-btn', EVENTS.INPUT_CLEARED);
     addButtonClickHandler('.otak-voice-menu__proofread-btn', EVENTS.GPT_PROOFREADING_STARTED);
