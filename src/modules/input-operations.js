@@ -29,8 +29,8 @@ export function findBestInputField() {
     return domFindBestInputField();
 }
 
-/** 音声入力後に自動送信します */
-export function autoSubmitAfterVoiceInput() {
+/** 音声入力後に送信します */
+export function submitAfterVoiceInput() {
     const siteHandler = getSiteHandler();
     if (siteHandler && typeof siteHandler.submitAfterVoiceInput === 'function') {
         return siteHandler.submitAfterVoiceInput();
@@ -241,7 +241,7 @@ function handleEnterKey(e) {
         if (this.tagName.toLowerCase() === 'textarea' && !e.ctrlKey) return;
         setState('currentInputElement', this);
         // 送信ボタンを探して自動クリック（モーダルウィンドウを使用していない場合のみ）
-        if (!getState('useRecognitionModal')) autoSubmitAfterVoiceInput();
+        if (!getState('useRecognitionModal')) submitAfterVoiceInput();
     }
 }
 

@@ -66,15 +66,13 @@ describe('State Management Module - Core Operations', () => {
     it('should update multiple state values when given an object', () => {
       const updates = {
         processingState: PROCESSING_STATE.PROOFREADING,
-        isListening: true,
-        autoSubmit: true
+        isListening: true
       };
 
       const result = setState(updates);
       expect(result).toBe(true);
       expect(getState('processingState')).toBe(PROCESSING_STATE.PROOFREADING);
       expect(getState('isListening')).toBe(true);
-      expect(getState('autoSubmit')).toBe(true);
     });
 
     it('should return false when no values change in an object update', () => {

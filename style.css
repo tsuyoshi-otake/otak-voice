@@ -188,7 +188,6 @@
     }
     
     /* アクティブ状態のボタンにホバーした場合の特別なスタイル */
-    .otak-voice-menu__item.otak-voice-menu__append-btn--active:hover,
     .otak-voice-menu__item.otak-voice-menu__input-btn--active:hover,
     .otak-voice-menu__item.otak-voice-menu__modal-toggle-btn--active:hover {
         background-color: var(--otak-button-primary-hover) !important; /* アクティブボタンのホバー色 */
@@ -231,18 +230,6 @@
     .otak-voice-menu__input-btn--always-on.otak-voice-menu__input-btn--active {
          background-color: #222222 !important; /* Even darker background */
          border-color: #888888 !important; /* Lighter border for contrast */
-    }
-
-    /* 追記モードボタン */
-    .otak-voice-menu__append-btn {
-       /* Default style inherited */
-    }
-
-    .otak-voice-menu__append-btn--active {
-        background-color: var(--otak-button-primary-bg) !important; /* テーマに応じたアクティブ背景 */
-        color: #FFFFFF !important; /* White icon */
-        border: 1px solid var(--otak-button-primary-hover) !important;
-        box-shadow: 0 0 5px rgba(255, 255, 255, 0.2) !important; /* 微かな光彩効果 */
     }
 
     /* 校閲ボタン */
@@ -851,11 +838,22 @@
         user-select: none !important; /* テキスト選択を防止 */
     }
     
+    .otak-voice-recognition__submit-btn {
+        background-color: #d97757;
+        color: #ffffff;
+    }
+
+    .otak-voice-recognition__submit-btn:hover {
+        background-color: #c2664a;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
     .otak-voice-recognition__copy-btn {
         background-color: var(--otak-button-primary-bg);
         color: #ffffff;
     }
-    
+
     .otak-voice-recognition__copy-btn:hover {
         background-color: var(--otak-button-primary-hover);
         transform: translateY(-1px);

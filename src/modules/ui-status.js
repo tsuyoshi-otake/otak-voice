@@ -95,7 +95,6 @@ export function updateProcessingState(state) {
     const proofreadButton = document.querySelector('.otak-voice-menu__proofread-btn');
     const editButton = document.querySelector('.otak-voice-menu__edit-btn');
     const micButton = document.querySelector('.otak-voice-menu__input-btn');
-    const appendButton = document.querySelector('.otak-voice-menu__append-btn');
     const clearButton = document.querySelector('.otak-voice-menu__clear-btn');
     const settingsButton = document.querySelector('.otak-voice-menu__settings-btn');
     const historyButton = document.querySelector('.otak-voice-menu__history-btn');
@@ -106,7 +105,7 @@ export function updateProcessingState(state) {
     // Add disabled-button class to all buttons when processing
     const themeToggleButton = document.querySelector('.otak-voice-menu__theme-toggle-btn');
     const modalToggleButton = document.querySelector('.otak-voice-menu__modal-toggle-btn');
-    const allButtons = [proofreadButton, editButton, micButton, appendButton, clearButton, settingsButton, historyButton, themeToggleButton, modalToggleButton];
+    const allButtons = [proofreadButton, editButton, micButton, clearButton, settingsButton, historyButton, themeToggleButton, modalToggleButton];
     allButtons.forEach(button => {
         if (button) {
             if (isProcessing) {

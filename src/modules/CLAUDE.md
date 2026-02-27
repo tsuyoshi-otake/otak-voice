@@ -6,13 +6,13 @@ Core functionality modules for the otak-voice voice input Chrome Extension.
 
 | File | Lines | Description |
 |------|-------|-------------|
-| `event-bus.js` | 199 | Pub/sub event system with 39 event types across 7 categories; includes `publishStatus()` convenience helper |
+| `event-bus.js` | 197 | Pub/sub event system with 37 event types across 7 categories; includes `publishStatus()` convenience helper |
 | `state.js` | 282 | Observable state management with `getState`/`setState` and subscriber notifications |
 | `error-handler.js` | barrel | Re-exports from `error-types.js` + error handling functions |
 | `error-types.js` | 169 | Error categories, codes, severity, AppError class |
 | `settings.js` | barrel | Re-exports from settings-schema, settings-storage, settings-theme |
-| `settings-schema.js` | 134 | Settings schema definition and validation |
-| `settings-storage.js` | 273 | Settings load/save operations |
+| `settings-schema.js` | 126 | Settings schema definition and validation |
+| `settings-storage.js` | 262 | Settings load/save operations |
 | `settings-theme.js` | 99 | Theme toggle and application |
 | `dom-observer.js` | 129 | MutationObserver for SPA navigation with debounced handling |
 | `history.js` | 119 | Voice input history tracking (max 10 entries) |
@@ -23,20 +23,20 @@ Core functionality modules for the otak-voice voice input Chrome Extension.
 | `dom-button-detection.js` | 210 | Button finding and scoring |
 | `dom-input-manipulation.js` | 298 | Text input operations, event dispatch, Twitter handling; `clickButtonWithFeedback(button, delayMs?)` |
 | `ui.js` | barrel | Re-exports from ui-status, ui-core, ui-settings-modal, ui-recognition-modal, ui-events |
-| `ui-status.js` | 174 | Status display and processing state |
-| `ui-core.js` | 220 | Core UI creation and menu items |
+| `ui-status.js` | 188 | Status display and processing state |
+| `ui-core.js` | 206 | Core UI creation and menu items |
 | `ui-settings-modal.js` | 232 | Settings modal and draggable support |
-| `ui-recognition-modal.js` | 143 | Voice recognition text modal |
-| `ui-events.js` | 177 | Event listeners and event bus subscriptions |
+| `ui-recognition-modal.js` | 180 | Voice recognition text modal with Submit button |
+| `ui-events.js` | 187 | Event listeners and event bus subscriptions |
 | `speech.js` | barrel | Re-exports from speech-utils, speech-recognition, speech-edit |
 | `speech-utils.js` | 229 | Mic button state, audio effects, language update; re-exports `publishStatus as showStatus` |
 | `speech-recognition.js` | 294 | Core speech recognition lifecycle |
 | `speech-edit.js` | 230 | Speech-based editing functionality |
 | `input-handler.js` | barrel | Re-exports from input-storage, input-menu, input-operations, input-handler-init |
-| `input-storage.js` | 186 | Chrome storage operations for menu/auto-submit state |
-| `input-menu.js` | 156 | Menu toggle, settings modal, auto-submit UI |
+| `input-storage.js` | 87 | Chrome storage operations for menu state |
+| `input-menu.js` | 75 | Menu toggle and settings modal |
 | `input-operations.js` | 255 | Input field operations, proofread, enhance handlers |
-| `input-handler-init.js` | 171 | Initialization and event subscriptions |
+| `input-handler-init.js` | 167 | Initialization and event subscriptions |
 | `gpt-service.js` | barrel | Re-exports from gpt-correction, gpt-proofreading, gpt-editing |
 | `gpt-api-client.js` | 86 | Shared OpenAI API request infrastructure (`makeGPTRequest`, `validateApiKey`, `handleAPIError`) |
 | `gpt-correction.js` | 142 | Voice input auto-correction |
@@ -85,9 +85,9 @@ unsub();
 `publish(EVENTS.STATUS_UPDATED, { messageKey, substitutions, persistent })`.
 All layers can import it safely — no need for private proxy functions.
 
-### Event Categories (39 total)
+### Event Categories (37 total)
 
-**UI Events (12):** Menu toggle, settings/recognition modals, append mode, auto-submit, processing state, status updates, UI recovery.
+**UI Events (10):** Menu toggle, settings/recognition modals, append mode, processing state, status updates, UI recovery.
 - `MENU_TOGGLED` - `{ expanded: boolean }`
 - `PROCESSING_STATE_CHANGED` - `{ state: PROCESSING_STATE }`
 - `STATUS_UPDATED` - `{ messageKey, substitutions, persistent }`
@@ -98,7 +98,7 @@ All layers can import it safely — no need for private proxy functions.
 - `INPUT_FIELD_CLICKED` - `{ element }`
 
 **Speech Events (4):** Recognition start/stop/result, mic button click.
-- `SPEECH_RECOGNITION_RESULT` - `{ final, text, append }`
+- `SPEECH_RECOGNITION_RESULT` - `{ final, text, append, submit }`
 
 **Settings Events (5):** Save/load, API key, language, theme updates.
 - `SETTINGS_SAVED` - full settings object
@@ -130,7 +130,7 @@ const unsub = subscribe('isListening', (newValue) => { ... });
 ```
 
 ### State Keys
-- **Input:** `currentInputElement`, `lastClickedInput`, `autoSubmit`, `originalText`, `interimText`, `lastRecognizedText`, `appendMode`, `isEditing`
+- **Input:** `currentInputElement`, `lastClickedInput`, `originalText`, `interimText`, `lastRecognizedText`, `appendMode`, `isEditing`
 - **UI:** `processingState`, `menuExpanded`, `showModalWindow`, `modalOriginalText`, `lastAppendedText`, `newRecognitionSession`
 - **Speech:** `isListening`, `silenceTimeout`
 - **Settings:** `apiKey`, `recognitionLang`, `autoDetectInputFields`, `autoCorrection`, `useHistoryContext`, `themeMode`, `autoCorrectionPrompt`, `proofreadingPrompt`

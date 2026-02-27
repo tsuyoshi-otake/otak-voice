@@ -13,7 +13,6 @@ import {
   AUTO_CORRECTION_PROMPT_STORAGE_KEY,
   PROOFREADING_PROMPT_STORAGE_KEY,
   SHOW_MODAL_WINDOW_STORAGE_KEY,
-  AUTO_SUBMIT_STORAGE_KEY,
   SILENCE_TIMEOUT_STORAGE_KEY,
   DEFAULT_SETTINGS,
   THEME_MODES
@@ -38,7 +37,6 @@ describe('settings-schema module', () => {
       'useHistoryContext',
       'themeMode',
       'showModalWindow',
-      'autoSubmit',
       'silenceTimeout',
       'autoCorrectionPrompt',
       'proofreadingPrompt'
@@ -67,7 +65,6 @@ describe('settings-schema module', () => {
       expect(SETTINGS_SCHEMA.useHistoryContext.key).toBe(USE_HISTORY_CONTEXT_STORAGE_KEY);
       expect(SETTINGS_SCHEMA.themeMode.key).toBe(THEME_STORAGE_KEY);
       expect(SETTINGS_SCHEMA.showModalWindow.key).toBe(SHOW_MODAL_WINDOW_STORAGE_KEY);
-      expect(SETTINGS_SCHEMA.autoSubmit.key).toBe(AUTO_SUBMIT_STORAGE_KEY);
       expect(SETTINGS_SCHEMA.silenceTimeout.key).toBe(SILENCE_TIMEOUT_STORAGE_KEY);
       expect(SETTINGS_SCHEMA.autoCorrectionPrompt.key).toBe(AUTO_CORRECTION_PROMPT_STORAGE_KEY);
       expect(SETTINGS_SCHEMA.proofreadingPrompt.key).toBe(PROOFREADING_PROMPT_STORAGE_KEY);
@@ -81,7 +78,6 @@ describe('settings-schema module', () => {
       expect(SETTINGS_SCHEMA.useHistoryContext.default).toBe(DEFAULT_SETTINGS.USE_HISTORY_CONTEXT);
       expect(SETTINGS_SCHEMA.themeMode.default).toBe(DEFAULT_SETTINGS.THEME);
       expect(SETTINGS_SCHEMA.showModalWindow.default).toBe(DEFAULT_SETTINGS.SHOW_MODAL_WINDOW);
-      expect(SETTINGS_SCHEMA.autoSubmit.default).toBe(DEFAULT_SETTINGS.AUTO_SUBMIT);
       expect(SETTINGS_SCHEMA.silenceTimeout.default).toBe(DEFAULT_SETTINGS.SILENCE_TIMEOUT);
     });
   });
@@ -168,8 +164,7 @@ describe('settings-schema module', () => {
     'autoDetectInputFields',
     'autoCorrection',
     'useHistoryContext',
-    'showModalWindow',
-    'autoSubmit'
+    'showModalWindow'
   ];
 
   describe.each(booleanSettings)('validateSetting - %s (boolean)', (settingName) => {

@@ -11,7 +11,6 @@ const _state = {
   // Input handling state
   currentInputElement: null,
   lastClickedInput: null,
-  autoSubmit: false,
   originalText: '',
   interimText: '',
   lastRecognizedText: '',
@@ -195,7 +194,6 @@ export function initializeStateFromGlobals(windowObj = window) {
   const stateWindowMap = {
     currentInputElement: 'currentInputElement',
     lastClickedInput: 'lastClickedInput',
-    autoSubmit: 'autoSubmit',
     originalText: 'originalText',
     isListening: 'isListening',
     apiKey: 'apiKey',
@@ -242,7 +240,6 @@ export function syncStateToGlobals(windowObj = window) {
   const stateWindowMap = {
     currentInputElement: 'currentInputElement',
     lastClickedInput: 'lastClickedInput',
-    autoSubmit: 'autoSubmit',
     originalText: 'originalText',
     isListening: 'isListening',
     apiKey: 'apiKey',

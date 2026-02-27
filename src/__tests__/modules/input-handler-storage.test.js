@@ -1,7 +1,6 @@
 /**
  * Input Handler Storage Module テスト
- * Tests for: loadMenuState, loadAutoSubmitState, saveAutoSubmitState, saveMenuState,
- *            MENU_EXPANDED_STORAGE_KEY, AUTO_SUBMIT_STORAGE_KEY
+ * Tests for: loadMenuState, saveMenuState, MENU_EXPANDED_STORAGE_KEY
  */
 
 jest.mock('../../site-handlers/site-detector.js', () => ({
@@ -27,10 +26,8 @@ jest.mock('../../modules/event-bus.js', () => ({
   subscribe: jest.fn(() => jest.fn()),
   EVENTS: {
     STATUS_UPDATED: 'status:updated',
-    AUTO_SUBMIT_STATE_CHANGED: 'autoSubmit:changed',
     MENU_TOGGLED: 'menu:toggled',
     SETTINGS_MODAL_TOGGLED: 'settings:modal:toggled',
-    AUTO_SUBMIT_TOGGLED: 'auto:submit:toggled',
     INPUT_CLEARED: 'input:cleared',
     GPT_PROOFREADING_STARTED: 'gpt:proofreading:started',
     INPUT_FIELD_FOUND: 'input:field:found',
@@ -80,8 +77,7 @@ import * as eventBus from '../../modules/event-bus.js';
 import { resetDOM } from '../../utils/dom-helpers.js';
 
 const {
-  MENU_EXPANDED_STORAGE_KEY,
-  AUTO_SUBMIT_STORAGE_KEY
+  MENU_EXPANDED_STORAGE_KEY
 } = inputHandler;
 
 global.chrome = {
@@ -104,7 +100,6 @@ describe('Input Handler Storage Module', () => {
     stateModule.getState.mockImplementation(key => {
       const stateValues = {
         menuExpanded: false,
-        autoSubmit: false,
         apiKey: 'test-key',
         recognitionLang: 'ja-JP',
         autoDetectInputFields: true,
@@ -133,10 +128,6 @@ describe('Input Handler Storage Module', () => {
   describe('Storage Key Constants', () => {
     test('MENU_EXPANDED_STORAGE_KEY is defined', () => {
       expect(MENU_EXPANDED_STORAGE_KEY).toBeDefined();
-    });
-
-    test('AUTO_SUBMIT_STORAGE_KEY is defined', () => {
-      expect(AUTO_SUBMIT_STORAGE_KEY).toBeDefined();
     });
   });
 
@@ -170,44 +161,4 @@ describe('Input Handler Storage Module', () => {
     });
   });
 
-  describe('loadAutoSubmitState', () => {
-    test('正常系', async () => {
-      chrome.storage.sync.get.mockResolvedValueOnce({
-        [AUTO_SUBMIT_STORAGE_KEY]: true
-      });
-
-      await inputHandler.loadAutoSubmitState();
-
-      expect(chrome.storage.sync.get).toHaveBeenCalledWith([AUTO_SUBMIT_STORAGE_KEY]);
-      expect(stateModule.setState).toHaveBeenCalledWith('autoSubmit', true);
-    });
-
-    test('デフォルト値', async () => {
-      chrome.storage.sync.get.mockResolvedValueOnce({});
-
-      await inputHandler.loadAutoSubmitState();
-
-      expect(stateModule.setState).toHaveBeenCalledWith('autoSubmit', false);
-    });
-  });
-
-  describe('saveAutoSubmitState', () => {
-    test('正常系', async () => {
-      const autoSubmitCheckbox = document.createElement('input');
-      autoSubmitCheckbox.id = 'auto-submit-checkbox';
-      autoSubmitCheckbox.type = 'checkbox';
-      document.body.appendChild(autoSubmitCheckbox);
-
-      await inputHandler.saveAutoSubmitState(true);
-
-      expect(chrome.storage.sync.set).toHaveBeenCalledWith({
-        [AUTO_SUBMIT_STORAGE_KEY]: true
-      });
-      expect(eventBus.publish).toHaveBeenCalledWith(
-        eventBus.EVENTS.AUTO_SUBMIT_STATE_CHANGED,
-        true
-      );
-      expect(autoSubmitCheckbox.checked).toBe(true);
-    });
-  });
 });

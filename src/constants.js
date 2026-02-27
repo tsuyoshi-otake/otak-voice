@@ -7,7 +7,6 @@ export const THEME_STORAGE_KEY = 'theme_mode';
 export const AUTO_CORRECTION_PROMPT_STORAGE_KEY = 'auto_correction_prompt';
 export const PROOFREADING_PROMPT_STORAGE_KEY = 'proofreading_prompt';
 export const SHOW_MODAL_WINDOW_STORAGE_KEY = 'showModalWindow';
-export const AUTO_SUBMIT_STORAGE_KEY = 'otak_voice_auto_submit_state';
 export const SILENCE_TIMEOUT_STORAGE_KEY = 'silence_timeout';
 
 export const MAX_HISTORY = 10;
@@ -37,7 +36,6 @@ export const DEFAULT_SETTINGS = {
   USE_HISTORY_CONTEXT: false,
   THEME: THEME_MODES.DARK,
   SHOW_MODAL_WINDOW: true,
-  AUTO_SUBMIT: false,
   CLEAR_EXISTING_TEXT: false,
   SILENCE_TIMEOUT: 3000, // 無音検出のデフォルトタイムアウト: 3秒
   AUTO_CORRECTION_PROMPT: "You are an assistant that corrects Japanese voice input in real-time. Please correct the content spoken by the user (the last message), fixing typos, grammatical errors, and unnatural expressions to make it a more natural and readable text. Consider the previous conversation history (if any) as context. Output only the corrected text.",

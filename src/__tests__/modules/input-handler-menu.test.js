@@ -1,7 +1,6 @@
 /**
  * Input Handler Menu Module テスト
- * Tests for: toggleMenu, updateMenuState, toggleSettingsModal,
- *            updateAutoSubmitButtonState, toggleAutoSubmit
+ * Tests for: toggleMenu, updateMenuState, toggleSettingsModal
  */
 
 jest.mock('../../site-handlers/site-detector.js', () => ({
@@ -27,10 +26,8 @@ jest.mock('../../modules/event-bus.js', () => ({
   subscribe: jest.fn(() => jest.fn()),
   EVENTS: {
     STATUS_UPDATED: 'status:updated',
-    AUTO_SUBMIT_STATE_CHANGED: 'autoSubmit:changed',
     MENU_TOGGLED: 'menu:toggled',
     SETTINGS_MODAL_TOGGLED: 'settings:modal:toggled',
-    AUTO_SUBMIT_TOGGLED: 'auto:submit:toggled',
     INPUT_CLEARED: 'input:cleared',
     GPT_PROOFREADING_STARTED: 'gpt:proofreading:started',
     INPUT_FIELD_FOUND: 'input:field:found',
@@ -99,7 +96,6 @@ describe('Input Handler Menu Module', () => {
     stateModule.getState.mockImplementation(key => {
       const stateValues = {
         menuExpanded: false,
-        autoSubmit: false,
         apiKey: 'test-key',
         recognitionLang: 'ja-JP',
         autoDetectInputFields: true,
@@ -222,60 +218,4 @@ describe('Input Handler Menu Module', () => {
     });
   });
 
-  describe('updateAutoSubmitButtonState', () => {
-    test('enabled', () => {
-      const autoSubmitButton = document.createElement('button');
-      autoSubmitButton.className = 'otak-voice-menu__append-btn otak-voice-menu__append-btn--active';
-      const statusElem = document.createElement('div');
-      statusElem.className = 'otak-voice-status';
-      document.body.appendChild(autoSubmitButton);
-      document.body.appendChild(statusElem);
-
-      inputHandler.updateAutoSubmitButtonState(true);
-      expect(autoSubmitButton.classList.contains('otak-voice-menu__append-btn--active')).toBe(false);
-      expect(eventBus.publish).toHaveBeenCalledWith(
-        eventBus.EVENTS.STATUS_UPDATED,
-        expect.objectContaining({ messageKey: 'statusAutoSubmitOn' })
-      );
-    });
-
-    test('disabled', () => {
-      const autoSubmitButton = document.createElement('button');
-      autoSubmitButton.className = 'otak-voice-menu__append-btn';
-      const statusElem = document.createElement('div');
-      statusElem.className = 'otak-voice-status';
-      document.body.appendChild(autoSubmitButton);
-      document.body.appendChild(statusElem);
-
-      inputHandler.updateAutoSubmitButtonState(false);
-      expect(autoSubmitButton.classList.contains('otak-voice-menu__append-btn--active')).toBe(true);
-      expect(eventBus.publish).toHaveBeenCalledWith(
-        eventBus.EVENTS.STATUS_UPDATED,
-        expect.objectContaining({ messageKey: 'statusAutoSubmitOff' })
-      );
-    });
-
-    test('ボタンがない場合', () => {
-      inputHandler.updateAutoSubmitButtonState(true);
-      expect(eventBus.publish).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('toggleAutoSubmit', () => {
-    test('menu button', () => {
-      stateModule.getState.mockReturnValueOnce(false);
-      inputHandler.toggleAutoSubmit(true);
-      expect(stateModule.setState).toHaveBeenCalledWith('autoSubmit', true);
-    });
-
-    test('settings modal', () => {
-      const autoSubmitCheckbox = document.createElement('input');
-      autoSubmitCheckbox.id = 'auto-submit-checkbox';
-      autoSubmitCheckbox.type = 'checkbox';
-      document.body.appendChild(autoSubmitCheckbox);
-
-      inputHandler.toggleAutoSubmit(false);
-      expect(console.log).toHaveBeenCalledWith('Auto submit checkbox changed, will be applied when Save is clicked');
-    });
-  });
 });

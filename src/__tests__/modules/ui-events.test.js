@@ -23,13 +23,12 @@ jest.mock('../../modules/event-bus', () => ({
         STATUS_UPDATED: 'STATUS_UPDATED', RECOGNITION_MODAL_SHOWN: 'RECOGNITION_MODAL_SHOWN',
         RECOGNITION_MODAL_UPDATED: 'RECOGNITION_MODAL_UPDATED', PROCESSING_STATE_CHANGED: 'PROCESSING_STATE_CHANGED',
         SETTINGS_LOADED: 'SETTINGS_LOADED', MENU_TOGGLED: 'MENU_TOGGLED',
-        MIC_BUTTON_CLICKED: 'MIC_BUTTON_CLICKED', AUTO_SUBMIT_TOGGLED: 'AUTO_SUBMIT_TOGGLED',
+        MIC_BUTTON_CLICKED: 'MIC_BUTTON_CLICKED',
         INPUT_CLEARED: 'INPUT_CLEARED', GPT_PROOFREADING_STARTED: 'GPT_PROOFREADING_STARTED',
         GPT_EDITING_STARTED: 'GPT_EDITING_STARTED', SETTINGS_MODAL_TOGGLED: 'SETTINGS_MODAL_TOGGLED',
         HISTORY_PANEL_TOGGLED: 'HISTORY_PANEL_TOGGLED', SETTINGS_SAVED: 'SETTINGS_SAVED',
         INPUT_FIELD_CLICKED: 'INPUT_FIELD_CLICKED', INPUT_FIELD_FOUND: 'INPUT_FIELD_FOUND',
         SPEECH_RECOGNITION_RESULT: 'SPEECH_RECOGNITION_RESULT', MODAL_VISIBILITY_TOGGLED: 'MODAL_VISIBILITY_TOGGLED',
-        AUTO_SUBMIT_STATE_CHANGED: 'AUTO_SUBMIT_STATE_CHANGED',
     },
 }));
 
@@ -37,9 +36,7 @@ jest.mock('../../modules/settings', () => ({
     toggleTheme: jest.fn(), saveSetting: jest.fn(), loadSettings: jest.fn(),
 }));
 
-jest.mock('../../modules/input-handler', () => ({
-    updateAutoSubmitButtonState: jest.fn(),
-}));
+jest.mock('../../modules/input-handler', () => ({}));
 
 global.chrome = global.chrome || {};
 global.chrome.i18n = { getMessage: jest.fn(key => key) };
@@ -57,7 +54,6 @@ describe('UI Module - Events', () => {
             if (key === 'processingState') return mockPROCESSING_STATE.IDLE;
             if (key === 'themeMode') return mockTHEME_MODES.DARK;
             if (key === 'showModalWindow') return true;
-            if (key === 'autoSubmit') return false;
             return undefined;
         });
     });
@@ -113,7 +109,6 @@ describe('UI Module - Events', () => {
                 if (key === 'autoCorrection') return false;
                 if (key === 'useHistoryContext') return false;
                 if (key === 'themeMode') return mockTHEME_MODES.LIGHT;
-                if (key === 'autoSubmit') return true;
                 if (key === 'silenceTimeout') return 1500;
                 return undefined;
             });

@@ -113,10 +113,6 @@ export const EVENTS = {
   SETTINGS_MODAL_TOGGLED: 'settings:modal:toggled',
   /** Fired when append mode is toggled. Data: { enabled: boolean } */
   APPEND_MODE_TOGGLED: 'append:mode:toggled',
-  /** Fired when auto-submit toggle is clicked */
-  AUTO_SUBMIT_TOGGLED: 'auto:submit:toggled',
-  /** Fired when auto-submit state changes. Data: { enabled: boolean } */
-  AUTO_SUBMIT_STATE_CHANGED: 'auto:submit:state:changed',
   /** Fired when processing state changes. Data: { state: PROCESSING_STATE } */
   PROCESSING_STATE_CHANGED: 'processing:state:changed',
   /** Fired to update status message. Data: { messageKey, substitutions, persistent } */

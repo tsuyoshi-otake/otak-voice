@@ -26,13 +26,12 @@ jest.mock('../../modules/event-bus', () => ({
         STATUS_UPDATED: 'STATUS_UPDATED', RECOGNITION_MODAL_SHOWN: 'RECOGNITION_MODAL_SHOWN',
         RECOGNITION_MODAL_UPDATED: 'RECOGNITION_MODAL_UPDATED', PROCESSING_STATE_CHANGED: 'PROCESSING_STATE_CHANGED',
         SETTINGS_LOADED: 'SETTINGS_LOADED', MENU_TOGGLED: 'MENU_TOGGLED',
-        MIC_BUTTON_CLICKED: 'MIC_BUTTON_CLICKED', AUTO_SUBMIT_TOGGLED: 'AUTO_SUBMIT_TOGGLED',
+        MIC_BUTTON_CLICKED: 'MIC_BUTTON_CLICKED',
         INPUT_CLEARED: 'INPUT_CLEARED', GPT_PROOFREADING_STARTED: 'GPT_PROOFREADING_STARTED',
         GPT_EDITING_STARTED: 'GPT_EDITING_STARTED', SETTINGS_MODAL_TOGGLED: 'SETTINGS_MODAL_TOGGLED',
         HISTORY_PANEL_TOGGLED: 'HISTORY_PANEL_TOGGLED', SETTINGS_SAVED: 'SETTINGS_SAVED',
         INPUT_FIELD_CLICKED: 'INPUT_FIELD_CLICKED', INPUT_FIELD_FOUND: 'INPUT_FIELD_FOUND',
         SPEECH_RECOGNITION_RESULT: 'SPEECH_RECOGNITION_RESULT', MODAL_VISIBILITY_TOGGLED: 'MODAL_VISIBILITY_TOGGLED',
-        AUTO_SUBMIT_STATE_CHANGED: 'AUTO_SUBMIT_STATE_CHANGED',
     },
 }));
 
@@ -40,9 +39,7 @@ jest.mock('../../modules/settings', () => ({
     toggleTheme: jest.fn(), saveSetting: jest.fn(), loadSettings: jest.fn(),
 }));
 
-jest.mock('../../modules/input-handler', () => ({
-    updateAutoSubmitButtonState: jest.fn(),
-}));
+jest.mock('../../modules/input-handler', () => ({}));
 
 global.chrome = global.chrome || {};
 global.chrome.i18n = { getMessage: jest.fn(key => key) };
@@ -60,7 +57,6 @@ describe('UI Module - Status', () => {
             if (key === 'processingState') return mockPROCESSING_STATE.IDLE;
             if (key === 'themeMode') return mockTHEME_MODES.DARK;
             if (key === 'showModalWindow') return true;
-            if (key === 'autoSubmit') return false;
             return undefined;
         });
     });
@@ -174,7 +170,7 @@ describe('UI Module - Status', () => {
     });
 
     describe('updateProcessingState', () => {
-        let proofreadButton, editButton, micButton, appendButton, clearButton;
+        let proofreadButton, editButton, micButton, clearButton;
         let settingsButton, historyButton, themeToggleButton, modalToggleButton, statusElem;
 
         beforeEach(() => {
@@ -182,7 +178,6 @@ describe('UI Module - Status', () => {
                 <div class="otak-voice-menu__proofread-btn"><div class="otak-voice-menu__icon-container">${Icons.PROOFREAD_ICON}</div></div>
                 <div class="otak-voice-menu__edit-btn"><div class="otak-voice-menu__icon-container">${Icons.EDIT_ICON}</div></div>
                 <div class="otak-voice-menu__input-btn"></div>
-                <div class="otak-voice-menu__append-btn"></div>
                 <div class="otak-voice-menu__clear-btn"></div>
                 <div class="otak-voice-menu__settings-btn"></div>
                 <div class="otak-voice-menu__history-btn"></div>
@@ -193,7 +188,6 @@ describe('UI Module - Status', () => {
             proofreadButton = document.querySelector('.otak-voice-menu__proofread-btn');
             editButton = document.querySelector('.otak-voice-menu__edit-btn');
             micButton = document.querySelector('.otak-voice-menu__input-btn');
-            appendButton = document.querySelector('.otak-voice-menu__append-btn');
             clearButton = document.querySelector('.otak-voice-menu__clear-btn');
             settingsButton = document.querySelector('.otak-voice-menu__settings-btn');
             historyButton = document.querySelector('.otak-voice-menu__history-btn');
@@ -214,7 +208,7 @@ describe('UI Module - Status', () => {
         });
 
         it('should disable all buttons when processing', () => {
-            const allButtons = [proofreadButton, editButton, micButton, appendButton, clearButton, settingsButton, historyButton, themeToggleButton, modalToggleButton];
+            const allButtons = [proofreadButton, editButton, micButton, clearButton, settingsButton, historyButton, themeToggleButton, modalToggleButton];
             allButtons.forEach(btn => btn.classList.remove('otak-voice-menu__item--disabled'));
             updateProcessingState(mockPROCESSING_STATE.EDITING);
             allButtons.forEach(btn => {
@@ -224,7 +218,7 @@ describe('UI Module - Status', () => {
         });
 
         it('should enable all buttons when IDLE', () => {
-            const allButtons = [proofreadButton, editButton, micButton, appendButton, clearButton, settingsButton, historyButton, themeToggleButton, modalToggleButton];
+            const allButtons = [proofreadButton, editButton, micButton, clearButton, settingsButton, historyButton, themeToggleButton, modalToggleButton];
             allButtons.forEach(btn => btn.classList.add('otak-voice-menu__item--disabled'));
             updateProcessingState(mockPROCESSING_STATE.IDLE);
             allButtons.forEach(btn => expect(btn.classList.contains('otak-voice-menu__item--disabled')).toBe(false));

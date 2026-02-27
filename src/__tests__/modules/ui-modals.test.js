@@ -13,15 +13,15 @@ jest.mock('../../modules/event-bus', () => ({
     EVENTS: { STATUS_UPDATED: 'STATUS_UPDATED', RECOGNITION_MODAL_SHOWN: 'RECOGNITION_MODAL_SHOWN',
         RECOGNITION_MODAL_UPDATED: 'RECOGNITION_MODAL_UPDATED', PROCESSING_STATE_CHANGED: 'PROCESSING_STATE_CHANGED',
         SETTINGS_LOADED: 'SETTINGS_LOADED', MENU_TOGGLED: 'MENU_TOGGLED', MIC_BUTTON_CLICKED: 'MIC_BUTTON_CLICKED',
-        AUTO_SUBMIT_TOGGLED: 'AUTO_SUBMIT_TOGGLED', INPUT_CLEARED: 'INPUT_CLEARED',
+        INPUT_CLEARED: 'INPUT_CLEARED',
         GPT_PROOFREADING_STARTED: 'GPT_PROOFREADING_STARTED', GPT_EDITING_STARTED: 'GPT_EDITING_STARTED',
         SETTINGS_MODAL_TOGGLED: 'SETTINGS_MODAL_TOGGLED', HISTORY_PANEL_TOGGLED: 'HISTORY_PANEL_TOGGLED',
         SETTINGS_SAVED: 'SETTINGS_SAVED', INPUT_FIELD_CLICKED: 'INPUT_FIELD_CLICKED',
         INPUT_FIELD_FOUND: 'INPUT_FIELD_FOUND', SPEECH_RECOGNITION_RESULT: 'SPEECH_RECOGNITION_RESULT',
-        MODAL_VISIBILITY_TOGGLED: 'MODAL_VISIBILITY_TOGGLED', AUTO_SUBMIT_STATE_CHANGED: 'AUTO_SUBMIT_STATE_CHANGED' },
+        MODAL_VISIBILITY_TOGGLED: 'MODAL_VISIBILITY_TOGGLED' },
 }));
 jest.mock('../../modules/settings', () => ({ toggleTheme: jest.fn(), saveSetting: jest.fn(), loadSettings: jest.fn() }));
-jest.mock('../../modules/input-handler', () => ({ updateAutoSubmitButtonState: jest.fn() }));
+jest.mock('../../modules/input-handler', () => ({}));
 
 global.chrome = global.chrome || {};
 global.chrome.i18n = { getMessage: jest.fn(key => key) };
@@ -35,7 +35,6 @@ describe('UI Module - Modals', () => {
             if (key === 'processingState') return mockPROCESSING_STATE.IDLE;
             if (key === 'themeMode') return mockTHEME_MODES.DARK;
             if (key === 'showModalWindow') return true;
-            if (key === 'autoSubmit') return false;
             return undefined;
         });
     });
@@ -48,7 +47,7 @@ describe('UI Module - Modals', () => {
             expect(m.querySelector('h3').textContent).toBe('modalSettingsTitle');
             ['#api-key-input', '#recognition-lang-select', '#theme-select', '#auto-detect-input-fields-checkbox',
              '#auto-correction-checkbox', '#use-history-context-checkbox', '#show-modal-window-checkbox',
-             '#auto-submit-checkbox', '#silence-timeout-input', '#auto-correction-prompt-textarea',
+             '#silence-timeout-input', '#auto-correction-prompt-textarea',
              '#proofreading-prompt-textarea', '.otak-voice-settings__save-btn', '.otak-voice-settings__cancel-btn',
              '#otak-voice-version-link'].forEach(sel => expect(m.querySelector(sel)).not.toBeNull());
         });
@@ -112,11 +111,10 @@ describe('UI Module - Modals', () => {
                 <input type="checkbox" id="use-history-context-checkbox" />
                 <select id="theme-select"><option value="dark"></option><option value="light"></option></select>
                 <input type="checkbox" id="show-modal-window-checkbox" />
-                <input type="checkbox" id="auto-submit-checkbox" />
                 <input type="number" id="silence-timeout-input" /></div>`;
             state.getState.mockImplementation(key => ({ apiKey: 'test-key', recognitionLang: 'en-US',
                 autoDetectInputFields: false, autoCorrection: false, useHistoryContext: false,
-                themeMode: mockTHEME_MODES.LIGHT, showModalWindow: false, autoSubmit: true, silenceTimeout: 1500
+                themeMode: mockTHEME_MODES.LIGHT, showModalWindow: false, silenceTimeout: 1500
             })[key]);
         });
 
@@ -129,7 +127,6 @@ describe('UI Module - Modals', () => {
             expect(document.getElementById('use-history-context-checkbox').checked).toBe(false);
             expect(document.getElementById('theme-select').value).toBe(mockTHEME_MODES.LIGHT);
             expect(document.getElementById('show-modal-window-checkbox').checked).toBe(false);
-            expect(document.getElementById('auto-submit-checkbox').checked).toBe(true);
             expect(document.getElementById('silence-timeout-input').value).toBe('1500');
         });
 
@@ -191,29 +188,9 @@ describe('UI Module - Modals', () => {
             expect(state.setState).toHaveBeenCalledWith('lastAppendedText', '');
         });
 
-        it('copy button should copy text and close modal if autoSubmit is true', () => {
+        it('copy button should copy text and revert button text', () => {
             state.getState.mockImplementation(key => {
                 if (key === 'showModalWindow') return true;
-                if (key === 'autoSubmit') return true;
-                return undefined;
-            });
-            const writeText = jest.fn().mockResolvedValue(undefined);
-            Object.assign(navigator, { clipboard: { writeText } });
-            showRecognitionTextModal('copy this', true);
-            const m = document.querySelector('.otak-voice-recognition');
-            const btn = m.querySelector('.otak-voice-recognition__copy-btn');
-            btn.click();
-            expect(writeText).toHaveBeenCalledWith('copy this');
-            expect(btn.textContent).toBe('Copied!');
-            jest.advanceTimersByTime(1000);
-            m.remove();
-            expect(document.querySelector('.otak-voice-recognition')).toBeNull();
-        });
-
-        it('copy button should copy text and revert button text if autoSubmit is false', () => {
-            state.getState.mockImplementation(key => {
-                if (key === 'showModalWindow') return true;
-                if (key === 'autoSubmit') return false;
                 return undefined;
             });
             const writeText = jest.fn().mockResolvedValue(undefined);

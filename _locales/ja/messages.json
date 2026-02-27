@@ -15,10 +15,6 @@
     "message": "音声入力\n音声認識を開始/停止",
     "description": "Tooltip for the microphone button."
   },
-  "autoSubmitTooltip": {
-    "message": "自動送信（オン/オフ）\n音声認識後に自動的に送信します",
-    "description": "Tooltip for the auto-submit toggle button."
-  },
   "clearTooltip": {
     "message": "入力フィールドをクリア\n現在の入力フィールドの内容を消去します",
     "description": "Tooltip for the clear button."
@@ -62,14 +58,6 @@
   "statusClearNotFound": {
     "message": "クリア対象の入力フィールドが見つかりません",
     "description": "Status message when no input field is found to clear."
-  },
-  "statusAutoSubmitOn": {
-    "message": "自動送信: オン (音声認識後に自動的に送信します)",
-    "description": "Status message when auto-submit is turned on."
-  },
-  "statusAutoSubmitOff": {
-    "message": "自動送信: オフ (音声認識後に自動送信しません)",
-    "description": "Status message when auto-submit is turned off."
   },
   "statusProofreading": {
     "message": "テキスト全体を校閲中...",
@@ -575,6 +563,10 @@
     "message": "音声認識結果",
     "description": "Title for the recognition result modal dialog."
   },
+  "recognitionModalSubmitButton": {
+    "message": "送信",
+    "description": "Submit button text in the recognition result modal dialog."
+  },
   "recognitionModalCopyButton": {
     "message": "コピー",
     "description": "Copy button text in the recognition result modal dialog."
@@ -778,10 +770,6 @@
   "settingShowModalWindowLabel": {
     "message": "モーダルウィンドウ表示",
     "description": "Label for show modal window checkbox."
-  },
-  "settingAutoSubmitLabel": {
-    "message": "自動送信",
-    "description": "Label for auto-submit checkbox."
   },
   "settingSilenceTimeoutLabel": {
     "message": "無音検出時間 (ミリ秒)",

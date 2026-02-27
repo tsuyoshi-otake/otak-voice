@@ -23,7 +23,6 @@ export function updateSettingsModalValues() {
     const autoDetectCheckbox = document.getElementById('auto-detect-input-fields-checkbox');
     const themeSelect = document.getElementById('theme-select');
     const showModalWindowCheckbox = document.getElementById('show-modal-window-checkbox');
-    const autoSubmitCheckbox = document.getElementById('auto-submit-checkbox');
     const silenceTimeoutInput = document.getElementById('silence-timeout-input');
     const apiKey = getState('apiKey');
     const recognitionLang = getState('recognitionLang');
@@ -32,7 +31,6 @@ export function updateSettingsModalValues() {
     const useHistoryContext = getState('useHistoryContext');
     const themeMode = getState('themeMode');
     const showModalWindow = getState('showModalWindow');
-    const autoSubmit = getState('autoSubmit');
     const silenceTimeout = getState('silenceTimeout') || 3000;
     if (apiKeyInput) apiKeyInput.value = apiKey || '';
     if (langSelect) langSelect.value = recognitionLang || 'ja-JP';
@@ -51,7 +49,6 @@ export function updateSettingsModalValues() {
         updateUseHistoryContextTooltip();
     }
     if (showModalWindowCheckbox) { showModalWindowCheckbox.checked = showModalWindow === true; }
-    if (autoSubmitCheckbox) { autoSubmitCheckbox.checked = autoSubmit; }
     if (themeSelect) { themeSelect.value = themeMode || THEME_MODES.DARK; }
     if (silenceTimeoutInput) { silenceTimeoutInput.value = silenceTimeout; }
 }
@@ -118,7 +115,6 @@ export function createSettingsModal() {
                     ${settingsSwitch('auto-correction-checkbox', 'settingAutoCorrectionLabel')}
                     ${settingsSwitch('use-history-context-checkbox', 'settingUseHistoryContextLabel')}
                     ${settingsSwitch('show-modal-window-checkbox', 'settingShowModalWindowLabel')}
-                    ${settingsSwitch('auto-submit-checkbox', 'settingAutoSubmitLabel')}
                     <div class="otak-voice-settings__item">
                         <label for="silence-timeout-input">${msg('settingSilenceTimeoutLabel')}</label>
                         <input type="number" id="silence-timeout-input" min="500" max="10000" step="500" value="3000" class="otak-voice-settings__number-input">
@@ -170,7 +166,7 @@ export function createSettingsModal() {
     if (useHistoryContextCheckbox) {
         useHistoryContextCheckbox.addEventListener('change', () => { saveSetting('useHistoryContext', useHistoryContextCheckbox.checked); });
     }
-    // show-modal-window-checkbox and auto-submit-checkbox have no immediate change handlers
+    // show-modal-window-checkbox has no immediate change handler
     // Silence timeout input
     const silenceTimeoutInput = document.getElementById('silence-timeout-input');
     if (silenceTimeoutInput) {

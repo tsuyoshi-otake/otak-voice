@@ -8,7 +8,6 @@ import { getState } from './state.js';
 import { publish, subscribe, EVENTS } from './event-bus.js';
 import { ensureAudioContext } from './speech-utils.js';
 import { saveSetting } from './settings.js';
-import { updateAutoSubmitButtonState } from './input-handler.js';
 import { showStatus, updateProcessingState } from './ui-status.js';
 import { updateEditProofreadButtonsState } from './ui-core.js';
 import { updateSettingsModalValues } from './ui-settings-modal.js';
@@ -83,13 +82,6 @@ export function setupEventSubscriptions() {
         updateProcessingState(state);
         updateEditProofreadButtonsState();
     }));
-    uiUnsubscribeFunctions.push(subscribe(EVENTS.AUTO_SUBMIT_STATE_CHANGED, (autoSubmit) => {
-        const modal = document.getElementById('otak-voice-settings-modal');
-        if (modal && modal.style.display === 'block') {
-            const cb = document.getElementById('auto-submit-checkbox');
-            if (cb) { cb.checked = autoSubmit; }
-        }
-    }));
     uiUnsubscribeFunctions.push(subscribe(EVENTS.MODAL_VISIBILITY_TOGGLED, (showModalWindow) => {
         const modal = document.getElementById('otak-voice-settings-modal');
         if (modal && modal.style.display === 'block') {
@@ -112,11 +104,6 @@ export function setupEventSubscriptions() {
         if (useHistoryContextCheckbox) { useHistoryContextCheckbox.checked = settings.useHistoryContext; }
         const showModalWindowCheckbox = document.getElementById('show-modal-window-checkbox');
         if (showModalWindowCheckbox) { showModalWindowCheckbox.checked = settings.showModalWindow; }
-        const autoSubmitCheckbox = document.getElementById('auto-submit-checkbox');
-        if (autoSubmitCheckbox) {
-            const currentAutoSubmit = getState('autoSubmit');
-            autoSubmitCheckbox.checked = currentAutoSubmit;
-        }
         const autoCorrectionPromptTextarea = document.getElementById('auto-correction-prompt-textarea');
         if (autoCorrectionPromptTextarea) { autoCorrectionPromptTextarea.value = settings.autoCorrectionPrompt; }
         const proofreadingPromptTextarea = document.getElementById('proofreading-prompt-textarea');
@@ -127,12 +114,6 @@ export function setupEventSubscriptions() {
                 modalToggleButton.classList.remove('otak-voice-menu__modal-toggle-btn--active');
             } else {
                 modalToggleButton.classList.add('otak-voice-menu__modal-toggle-btn--active');
-            }
-        }
-        const autoSubmitButton = document.querySelector('.otak-voice-menu__append-btn');
-        if (autoSubmitButton && settings.autoSubmit !== undefined) {
-            if (typeof updateAutoSubmitButtonState === 'function') {
-                updateAutoSubmitButtonState(settings.autoSubmit);
             }
         }
     }));
@@ -160,7 +141,6 @@ export function setupEventListeners() {
             }
         });
     }
-    addButtonClickHandler('.otak-voice-menu__append-btn', EVENTS.AUTO_SUBMIT_TOGGLED, { fromMenuButton: true });
     addButtonClickHandler('.otak-voice-menu__clear-btn', EVENTS.INPUT_CLEARED);
     addButtonClickHandler('.otak-voice-menu__proofread-btn', EVENTS.GPT_PROOFREADING_STARTED);
     addButtonClickHandler('.otak-voice-menu__edit-btn', EVENTS.GPT_EDITING_STARTED);

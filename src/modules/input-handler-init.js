@@ -3,12 +3,12 @@
  * Provides initialization and event subscription setup for input handling
  */
 
-import { loadMenuState, loadAutoSubmitState } from './input-storage.js';
-import { toggleMenu, updateMenuState, updateAutoSubmitButtonState, toggleAutoSubmit } from './input-menu.js';
+import { loadMenuState } from './input-storage.js';
+import { toggleMenu, updateMenuState } from './input-menu.js';
 import { toggleSettingsModal } from './ui-settings-modal.js';
 import {
     findBestInputField,
-    autoSubmitAfterVoiceInput,
+    submitAfterVoiceInput,
     writeToInputField,
     simulateTypingIntoElement,
     clearCurrentInput,
@@ -39,10 +39,9 @@ let unsubscribeFunctions = [];
  * input-handler モジュールの初期化
  */
 export async function initInputHandler() {
-    // メニュー状態と自動送信状態の読み込み
+    // メニュー状態の読み込み
     console.log('Initializing input handler - loading states...');
     menuExpanded = await loadMenuState();
-    await loadAutoSubmitState();
     console.log('States loaded successfully');
 
     // メニュー状態を状態管理モジュールに反映
@@ -82,21 +81,6 @@ export function setupEventSubscriptions() {
         toggleSettingsModal();
     }));
 
-    // 自動送信トグルイベント
-    unsubscribeFunctions.push(eventSubscribe(EVENTS.AUTO_SUBMIT_TOGGLED, (data) => {
-        const fromMenuButton = data && data.fromMenuButton === true;
-        toggleAutoSubmit(fromMenuButton);
-    }));
-
-    // 自動送信状態変更イベント
-    unsubscribeFunctions.push(eventSubscribe(EVENTS.AUTO_SUBMIT_STATE_CHANGED, (autoSubmit) => {
-        // 状態を更新
-        setState('autoSubmit', autoSubmit);
-
-        // UI を更新
-        updateAutoSubmitButtonState(autoSubmit);
-    }));
-
     // 入力クリアイベント
     unsubscribeFunctions.push(eventSubscribe(EVENTS.INPUT_CLEARED, () => {
         clearCurrentInput();
@@ -131,11 +115,9 @@ export function setupEventSubscriptions() {
                 writeToInputField(currentInputElement, text);
             }
 
-            // 自動送信（自動送信がオンの場合のみ）
-            const useRecognitionModal = getState('useRecognitionModal');
-            const autoSubmit = getState('autoSubmit');
-            if (!useRecognitionModal && autoSubmit) {
-                autoSubmitAfterVoiceInput();
+            // 手動送信（モーダルのSubmitボタンから）
+            if (data.submit) {
+                submitAfterVoiceInput();
             }
         } else {
             // 中間結果

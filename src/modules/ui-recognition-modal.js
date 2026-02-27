@@ -57,6 +57,7 @@ export function showRecognitionTextModal(text = '', isInitial = false) {
       <h3>${i18n('recognitionModalTitle')}</h3>
       <textarea placeholder="${isInitial ? i18n('recognitionModalPlaceholder') : ''}"></textarea>
       <div class="otak-voice-recognition__button-container">
+        <button class="otak-voice-recognition__submit-btn">${i18n('recognitionModalSubmitButton')}</button>
         <button class="otak-voice-recognition__copy-btn">${i18n('recognitionModalCopyButton')}</button>
         <button class="otak-voice-recognition__clear-btn">${i18n('recognitionModalClearButton')}</button>
         <button class="otak-voice-recognition__close-btn">${i18n('recognitionModalCloseButton')}</button>
@@ -70,6 +71,15 @@ export function showRecognitionTextModal(text = '', isInitial = false) {
     }
 
     // Add event listeners to buttons
+    const submitButton = modal.querySelector('.otak-voice-recognition__submit-btn');
+    submitButton.onclick = () => {
+      const textarea = modal.querySelector('textarea');
+      const textToSubmit = textarea.value.trim();
+      if (!textToSubmit) return;
+      publish(EVENTS.SPEECH_RECOGNITION_RESULT, { final: true, text: textToSubmit, append: false, submit: true });
+      modal.remove();
+    };
+
     const copyButton = modal.querySelector('.otak-voice-recognition__copy-btn');
     copyButton.onclick = () => {
       const textarea = modal.querySelector('textarea');
@@ -88,24 +98,13 @@ export function showRecognitionTextModal(text = '', isInitial = false) {
       // Clear previous copy feedback timer
       if (copyFeedbackTimerId) { clearTimeout(copyFeedbackTimerId); copyFeedbackTimerId = null; }
 
-      // Check if autoSubmit is enabled
-      const autoSubmit = getState('autoSubmit');
-
-      // Only close the modal if autoSubmit is enabled
-      if (autoSubmit) {
-        copyFeedbackTimerId = setTimeout(() => {
-          copyFeedbackTimerId = null;
-          if (modal.isConnected) modal.remove();
-        }, 1000);
-      } else {
-        // If not auto-closing, revert button text after 2 seconds
-        copyFeedbackTimerId = setTimeout(() => {
-          copyFeedbackTimerId = null;
-          if (modal.isConnected && modal.querySelector('.otak-voice-recognition__copy-btn')) {
-            copyButton.textContent = originalText;
-          }
-        }, 2000);
-      }
+      // Revert button text after 2 seconds
+      copyFeedbackTimerId = setTimeout(() => {
+        copyFeedbackTimerId = null;
+        if (modal.isConnected && modal.querySelector('.otak-voice-recognition__copy-btn')) {
+          copyButton.textContent = originalText;
+        }
+      }, 2000);
     };
 
     const clearButton = modal.querySelector('.otak-voice-recognition__clear-btn');

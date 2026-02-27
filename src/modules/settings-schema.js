@@ -13,7 +13,6 @@ import {
   AUTO_CORRECTION_PROMPT_STORAGE_KEY,
   PROOFREADING_PROMPT_STORAGE_KEY,
   SHOW_MODAL_WINDOW_STORAGE_KEY,
-  AUTO_SUBMIT_STORAGE_KEY,
   SILENCE_TIMEOUT_STORAGE_KEY,
   DEFAULT_SETTINGS,
   THEME_MODES
@@ -76,13 +75,6 @@ const SETTINGS_SCHEMA = {
     key: SHOW_MODAL_WINDOW_STORAGE_KEY,
     type: 'boolean',
     default: DEFAULT_SETTINGS.SHOW_MODAL_WINDOW,
-    validate: (value) => typeof value === 'boolean',
-    errorMessage: 'errorInvalidBooleanSetting'
-  },
-  autoSubmit: {
-    key: AUTO_SUBMIT_STORAGE_KEY,
-    type: 'boolean',
-    default: DEFAULT_SETTINGS.AUTO_SUBMIT,
     validate: (value) => typeof value === 'boolean',
     errorMessage: 'errorInvalidBooleanSetting'
   },

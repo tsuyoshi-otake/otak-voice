@@ -1,6 +1,6 @@
 /**
  * Input Handler Operations Module テスト
- * Tests for: findBestInputField, autoSubmitAfterVoiceInput, writeToInputField,
+ * Tests for: findBestInputField, submitAfterVoiceInput, writeToInputField,
  *            simulateTypingIntoElement, clearCurrentInput, proofreadCurrentInput,
  *            enhanceInputElementHandlers, initInputHandler, setupEventSubscriptions
  */
@@ -29,10 +29,8 @@ jest.mock('../../modules/event-bus.js', () => ({
   subscribe: jest.fn(() => jest.fn()),
   EVENTS: {
     STATUS_UPDATED: 'status:updated',
-    AUTO_SUBMIT_STATE_CHANGED: 'autoSubmit:changed',
     MENU_TOGGLED: 'menu:toggled',
     SETTINGS_MODAL_TOGGLED: 'settings:modal:toggled',
-    AUTO_SUBMIT_TOGGLED: 'auto:submit:toggled',
     INPUT_CLEARED: 'input:cleared',
     GPT_PROOFREADING_STARTED: 'gpt:proofreading:started',
     INPUT_FIELD_FOUND: 'input:field:found',
@@ -103,7 +101,6 @@ describe('Input Handler Operations Module', () => {
     stateModule.getState.mockImplementation(key => {
       const stateValues = {
         menuExpanded: false,
-        autoSubmit: false,
         apiKey: 'test-key',
         recognitionLang: 'ja-JP',
         autoDetectInputFields: true,
@@ -151,19 +148,19 @@ describe('Input Handler Operations Module', () => {
     });
   });
 
-  describe('autoSubmitAfterVoiceInput', () => {
+  describe('submitAfterVoiceInput', () => {
     test('サイトハンドラーを使用', () => {
       const mockSiteHandler = { submitAfterVoiceInput: jest.fn(() => true) };
       siteDetector.getSiteHandler.mockReturnValueOnce(mockSiteHandler);
 
-      const result = inputHandler.autoSubmitAfterVoiceInput();
+      const result = inputHandler.submitAfterVoiceInput();
       expect(mockSiteHandler.submitAfterVoiceInput).toHaveBeenCalled();
       expect(result).toBe(true);
     });
 
     test('ハンドラーなし', () => {
       siteDetector.getSiteHandler.mockReturnValueOnce({});
-      const result = inputHandler.autoSubmitAfterVoiceInput();
+      const result = inputHandler.submitAfterVoiceInput();
       expect(result).toBe(false);
     });
   });

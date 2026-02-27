@@ -78,9 +78,3 @@ export const THEME_TOGGLE_ICON = `
 </svg>
 `;
 
-export const AUTO_SUBMIT_ICON = `
-<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-  <path d="M10 17V7" />
-  <path d="M6 11l4-4 4 4" />
-</svg>
-`;

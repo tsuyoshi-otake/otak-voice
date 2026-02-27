@@ -15,10 +15,6 @@
     "message": "Micrô\nBắt đầu/dừng nhận dạng giọng nói",
     "description": "Tooltip for the microphone button."
   },
-  "autoSubmitTooltip": {
-    "message": "Tự động gửi (Bật/Tắt)\nTự động gửi sau khi nhận dạng giọng nói",
-    "description": "Tooltip for the auto-submit toggle button."
-  },
   "clearTooltip": {
     "message": "Xóa trường nhập liệu\nXóa nội dung của trường nhập liệu hiện tại",
     "description": "Tooltip for the clear button."
@@ -62,14 +58,6 @@
   "statusClearNotFound": {
     "message": "Không tìm thấy trường nhập liệu để xóa",
     "description": "Status message when no input field is found to clear."
-  },
-  "statusAutoSubmitOn": {
-    "message": "Tự động gửi: Bật (Tự động gửi sau khi nhận dạng giọng nói)",
-    "description": "Status message when auto-submit is turned on."
-  },
-  "statusAutoSubmitOff": {
-    "message": "Tự động gửi: Tắt (Không tự động gửi sau khi nhận dạng giọng nói)",
-    "description": "Status message when auto-submit is turned off."
   },
   "statusProofreading": {
     "message": "Đang đọc và sửa toàn bộ văn bản...",
@@ -575,6 +563,10 @@
     "message": "Kết quả nhận dạng giọng nói",
     "description": "Title for the recognition result modal dialog."
   },
+  "recognitionModalSubmitButton": {
+    "message": "Gửi",
+    "description": "Submit button text in the recognition result modal dialog."
+  },
   "recognitionModalCopyButton": {
     "message": "Sao chép",
     "description": "Copy button text in the recognition result modal dialog."
@@ -778,10 +770,6 @@
   "settingShowModalWindowLabel": {
     "message": "Hiển thị cửa sổ Modal",
     "description": "Label for show modal window checkbox."
-  },
-  "settingAutoSubmitLabel": {
-    "message": "Tự động gửi",
-    "description": "Label for auto-submit checkbox."
   },
   "settingSilenceTimeoutLabel": {
     "message": "Thời gian phát hiện im lặng (ms)",

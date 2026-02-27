@@ -5,7 +5,7 @@ import {
   AUTO_DETECT_INPUT_FIELDS_STORAGE_KEY, AUTO_CORRECTION_STORAGE_KEY,
   USE_HISTORY_CONTEXT_STORAGE_KEY, THEME_STORAGE_KEY,
   AUTO_CORRECTION_PROMPT_STORAGE_KEY, PROOFREADING_PROMPT_STORAGE_KEY,
-  SHOW_MODAL_WINDOW_STORAGE_KEY, AUTO_SUBMIT_STORAGE_KEY,
+  SHOW_MODAL_WINDOW_STORAGE_KEY,
   SILENCE_TIMEOUT_STORAGE_KEY, DEFAULT_SETTINGS
 } from '../constants.js';
 import { SETTINGS_SCHEMA, getAllStorageKeys, validateSetting } from './settings-schema.js';
@@ -29,7 +29,6 @@ function setupEventSubscriptions() {
     const useHistoryContextCheckbox = document.getElementById('use-history-context-checkbox');
     const themeSelect = document.getElementById('theme-select');
     const showModalWindowCheckbox = document.getElementById('show-modal-window-checkbox');
-    const autoSubmitCheckbox = document.getElementById('auto-submit-checkbox');
     const silenceTimeoutInput = document.getElementById('silence-timeout-input');
     const autoCorrectionPromptTextarea = document.getElementById('auto-correction-prompt-textarea');
     const proofreadingPromptTextarea = document.getElementById('proofreading-prompt-textarea');
@@ -44,8 +43,6 @@ function setupEventSubscriptions() {
       autoCorrection: autoCorrectionCheckbox ? autoCorrectionCheckbox.checked : getState('autoCorrection'),
       useHistoryContext: useHistoryContextCheckbox ? useHistoryContextCheckbox.checked : getState('useHistoryContext'),
       showModalWindow: showModalWindowCheckbox ? showModalWindowCheckbox.checked : getState('showModalWindow'),
-      // 自動送信の状態をチェックボックスと一致させる（チェックがONの場合は自動送信をON、チェックがOFFの場合は自動送信をOFF）
-      autoSubmit: autoSubmitCheckbox ? autoSubmitCheckbox.checked : getState('autoSubmit'),
       themeMode: themeSelect ? themeSelect.value : getState('themeMode'),
       silenceTimeout: silenceTimeoutInput ? parseInt(silenceTimeoutInput.value, 10) || DEFAULT_SETTINGS.SILENCE_TIMEOUT : getState('silenceTimeout') || DEFAULT_SETTINGS.SILENCE_TIMEOUT,
       autoCorrectionPrompt: autoCorrectionPromptTextarea ? autoCorrectionPromptTextarea.value : getState('autoCorrectionPrompt'),
@@ -58,7 +55,6 @@ function setupEventSubscriptions() {
       [AUTO_CORRECTION_STORAGE_KEY]: settings.autoCorrection,
       [USE_HISTORY_CONTEXT_STORAGE_KEY]: settings.useHistoryContext,
       [SHOW_MODAL_WINDOW_STORAGE_KEY]: settings.showModalWindow,
-      [AUTO_SUBMIT_STORAGE_KEY]: settings.autoSubmit,
       [THEME_STORAGE_KEY]: settings.themeMode,
       [SILENCE_TIMEOUT_STORAGE_KEY]: settings.silenceTimeout,
       [AUTO_CORRECTION_PROMPT_STORAGE_KEY]: settings.autoCorrectionPrompt,
@@ -80,11 +76,6 @@ function setupEventSubscriptions() {
         } else {
           modalToggleButton.classList.add('otak-voice-menu__modal-toggle-btn--active');
         }
-      }
-      const autoSubmitButton = document.querySelector('.otak-voice-menu__append-btn');
-      if (autoSubmitButton) {
-        setState('autoSubmit', settings.autoSubmit);
-        publish(EVENTS.AUTO_SUBMIT_STATE_CHANGED, settings.autoSubmit);
       }
     });
   });
@@ -246,7 +237,6 @@ function getSettingsFromUI() {
   const autoCorrectionCheckbox = document.getElementById('auto-correction-checkbox');
   const useHistoryContextCheckbox = document.getElementById('use-history-context-checkbox');
   const showModalWindowCheckbox = document.getElementById('show-modal-window-checkbox');
-  const autoSubmitCheckbox = document.getElementById('auto-submit-checkbox');
   const silenceTimeoutInput = document.getElementById('silence-timeout-input');
   const themeSelect = document.getElementById('theme-select');
   const autoCorrectionPromptTextarea = document.getElementById('auto-correction-prompt-textarea');
@@ -259,7 +249,6 @@ function getSettingsFromUI() {
     autoCorrection: autoCorrectionCheckbox ? autoCorrectionCheckbox.checked : currentState.autoCorrection,
     useHistoryContext: useHistoryContextCheckbox ? useHistoryContextCheckbox.checked : currentState.useHistoryContext,
     showModalWindow: showModalWindowCheckbox ? showModalWindowCheckbox.checked : currentState.showModalWindow,
-    autoSubmit: autoSubmitCheckbox ? autoSubmitCheckbox.checked : currentState.autoSubmit,
     themeMode: themeSelect ? themeSelect.value : currentState.themeMode,
     silenceTimeout: silenceTimeoutInput ? parseInt(silenceTimeoutInput.value, 10) || DEFAULT_SETTINGS.SILENCE_TIMEOUT : currentState.silenceTimeout || DEFAULT_SETTINGS.SILENCE_TIMEOUT,
     autoCorrectionPrompt: autoCorrectionPromptTextarea ? autoCorrectionPromptTextarea.value : currentState.autoCorrectionPrompt,

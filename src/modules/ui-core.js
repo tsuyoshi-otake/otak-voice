@@ -6,7 +6,6 @@
 import { updateHistoryPanel } from './history.js';
 import { PROCESSING_STATE } from '../constants.js';
 import { getState } from './state.js';
-import { updateAutoSubmitButtonState } from './input-handler.js';
 import { toggleTheme } from './settings.js';
 import { createSettingsModal } from './ui-settings-modal.js';
 import { toggleModalVisibility } from './ui-events.js';
@@ -14,15 +13,13 @@ import { toggleModalVisibility } from './ui-events.js';
 import {
     MENU_ICON,
     MIC_ICON,
-    APPEND_ICON,
     CLEAR_ICON,
     PROOFREAD_ICON,
     EDIT_ICON,
     SETTINGS_ICON,
     HISTORY_ICON,
     MODAL_TOGGLE_ICON,
-    THEME_TOGGLE_ICON,
-    AUTO_SUBMIT_ICON
+    THEME_TOGGLE_ICON
 } from '../icons.js';
 
 /**
@@ -65,16 +62,6 @@ export function createUI() {
     // Microphone button
     const micButton = createMenuItem('input-btn', MIC_ICON, chrome.i18n.getMessage('micTooltip'));
     menuContainer.appendChild(micButton);
-
-    // Auto-submit toggle button
-    const autoSubmitButton = createMenuItem('append-btn', AUTO_SUBMIT_ICON, chrome.i18n.getMessage('autoSubmitTooltip'));
-    menuContainer.appendChild(autoSubmitButton);
-
-    // Set initial state for auto-submit button
-    const autoSubmit = getState('autoSubmit');
-    if (autoSubmit !== undefined) {
-        updateAutoSubmitButtonState(autoSubmit);
-    }
 
     // Clear button
     const clearButton = createMenuItem('clear-btn', CLEAR_ICON, chrome.i18n.getMessage('clearTooltip'));
@@ -187,7 +174,6 @@ export function removeExistingElements() {
         '.otak-voice-menu__btn',
         '.otak-voice-menu__container',
         '.otak-voice-menu__input-btn',
-        '.otak-voice-menu__append-btn',
         '.otak-voice-menu__proofread-btn',
         '.otak-voice-menu__edit-btn',
         '.otak-voice-menu__settings-btn',

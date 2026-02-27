@@ -8,7 +8,6 @@ import * as history from '../../modules/history';
 import * as state from '../../modules/state';
 import * as eventBus from '../../modules/event-bus';
 import * as settings from '../../modules/settings';
-import * as inputHandler from '../../modules/input-handler';
 import * as Icons from '../../icons';
 
 const mockTHEME_MODES = { DARK: 'dark', LIGHT: 'light' };
@@ -32,13 +31,12 @@ jest.mock('../../modules/event-bus', () => ({
         STATUS_UPDATED: 'STATUS_UPDATED', RECOGNITION_MODAL_SHOWN: 'RECOGNITION_MODAL_SHOWN',
         RECOGNITION_MODAL_UPDATED: 'RECOGNITION_MODAL_UPDATED', PROCESSING_STATE_CHANGED: 'PROCESSING_STATE_CHANGED',
         SETTINGS_LOADED: 'SETTINGS_LOADED', MENU_TOGGLED: 'MENU_TOGGLED',
-        MIC_BUTTON_CLICKED: 'MIC_BUTTON_CLICKED', AUTO_SUBMIT_TOGGLED: 'AUTO_SUBMIT_TOGGLED',
+        MIC_BUTTON_CLICKED: 'MIC_BUTTON_CLICKED',
         INPUT_CLEARED: 'INPUT_CLEARED', GPT_PROOFREADING_STARTED: 'GPT_PROOFREADING_STARTED',
         GPT_EDITING_STARTED: 'GPT_EDITING_STARTED', SETTINGS_MODAL_TOGGLED: 'SETTINGS_MODAL_TOGGLED',
         HISTORY_PANEL_TOGGLED: 'HISTORY_PANEL_TOGGLED', SETTINGS_SAVED: 'SETTINGS_SAVED',
         INPUT_FIELD_CLICKED: 'INPUT_FIELD_CLICKED', INPUT_FIELD_FOUND: 'INPUT_FIELD_FOUND',
         SPEECH_RECOGNITION_RESULT: 'SPEECH_RECOGNITION_RESULT', MODAL_VISIBILITY_TOGGLED: 'MODAL_VISIBILITY_TOGGLED',
-        AUTO_SUBMIT_STATE_CHANGED: 'AUTO_SUBMIT_STATE_CHANGED',
     },
 }));
 
@@ -46,9 +44,7 @@ jest.mock('../../modules/settings', () => ({
     toggleTheme: jest.fn(), saveSetting: jest.fn(), loadSettings: jest.fn(),
 }));
 
-jest.mock('../../modules/input-handler', () => ({
-    updateAutoSubmitButtonState: jest.fn(),
-}));
+jest.mock('../../modules/input-handler', () => ({}));
 
 global.chrome = global.chrome || {};
 global.chrome.i18n = { getMessage: jest.fn(key => key) };
@@ -66,7 +62,6 @@ describe('UI Module - Core', () => {
             if (key === 'processingState') return mockPROCESSING_STATE.IDLE;
             if (key === 'themeMode') return mockTHEME_MODES.DARK;
             if (key === 'showModalWindow') return true;
-            if (key === 'autoSubmit') return false;
             return undefined;
         });
     });
@@ -87,27 +82,11 @@ describe('UI Module - Core', () => {
             expect(menuContainer.querySelector('.otak-voice-menu__theme-toggle-btn')).not.toBeNull();
             expect(menuContainer.querySelector('.otak-voice-menu__modal-toggle-btn')).not.toBeNull();
             expect(menuContainer.querySelector('.otak-voice-menu__input-btn')).not.toBeNull();
-            expect(menuContainer.querySelector('.otak-voice-menu__append-btn')).not.toBeNull();
             expect(menuContainer.querySelector('.otak-voice-menu__clear-btn')).not.toBeNull();
             expect(menuContainer.querySelector('.otak-voice-menu__proofread-btn')).not.toBeNull();
             expect(menuContainer.querySelector('.otak-voice-menu__edit-btn')).not.toBeNull();
             expect(menuContainer.querySelector('.otak-voice-menu__settings-btn')).not.toBeNull();
             expect(menuContainer.querySelector('.otak-voice-menu__history-btn')).not.toBeNull();
-        });
-
-        it('should call updateAutoSubmitButtonState with initial autoSubmit state', () => {
-            state.getState.mockImplementation((key) => {
-                if (key === 'autoSubmit') return true;
-                if (key === 'currentInputElement') {
-                     const input = document.createElement('input');
-                     input.value = 'test';
-                     return input;
-                }
-                if (key === 'processingState') return mockPROCESSING_STATE.IDLE;
-                return undefined;
-            });
-            createUI();
-            expect(inputHandler.updateAutoSubmitButtonState).toHaveBeenCalledWith(true);
         });
 
         it('should add event listener to theme toggle button', () => {

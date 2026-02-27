@@ -15,10 +15,6 @@
     "message": "Voice Input\nStart/stop voice recognition",
     "description": "Tooltip for the microphone button."
   },
-  "autoSubmitTooltip": {
-    "message": "Auto-Submit (On/Off)\nAutomatically submits after voice recognition",
-    "description": "Tooltip for the auto-submit toggle button."
-  },
   "clearTooltip": {
     "message": "Clear Input Field\nClears the content of the current input field",
     "description": "Tooltip for the clear button."
@@ -62,14 +58,6 @@
   "statusClearNotFound": {
     "message": "Input field to clear not found",
     "description": "Status message when no input field is found to clear."
-  },
-  "statusAutoSubmitOn": {
-    "message": "Auto-Submit: On (Automatically submits after voice recognition)",
-    "description": "Status message when auto-submit is turned on."
-  },
-  "statusAutoSubmitOff": {
-    "message": "Auto-Submit: Off (Will not auto-submit after voice recognition)",
-    "description": "Status message when auto-submit is turned off."
   },
   "statusProofreading": {
     "message": "Proofreading entire text...",
@@ -575,6 +563,10 @@
     "message": "Voice Recognition Result",
     "description": "Title for the recognition result modal dialog."
   },
+  "recognitionModalSubmitButton": {
+    "message": "Submit",
+    "description": "Submit button text in the recognition result modal dialog."
+  },
   "recognitionModalCopyButton": {
     "message": "Copy",
     "description": "Copy button text in the recognition result modal dialog."
@@ -778,10 +770,6 @@
   "settingShowModalWindowLabel": {
     "message": "Show Modal Window",
     "description": "Label for show modal window checkbox."
-  },
-  "settingAutoSubmitLabel": {
-    "message": "Auto Submit",
-    "description": "Label for auto-submit checkbox."
   },
   "settingSilenceTimeoutLabel": {
     "message": "Silence Timeout (ms)",
