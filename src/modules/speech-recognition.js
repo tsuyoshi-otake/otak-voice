@@ -49,6 +49,11 @@ export function setRecognitionInstance(instance) {
 export function initSpeechEvents() {
     eventSubscribe(EVENTS.MIC_BUTTON_CLICKED, handleMicButtonClick);
     eventSubscribe(EVENTS.GPT_EDITING_STARTED, handleEditButtonClick);
+    eventSubscribe(EVENTS.RECOGNITION_MODAL_CLOSED, () => {
+        if (getState('isListening')) {
+            stopSpeechRecognition();
+        }
+    });
 }
 
 /** Mic button click handler */
@@ -231,6 +236,7 @@ export function startSpeechRecognition() {
     recognition.onend = function() {
         const wasListening = getState('isListening');
         setState('isListening', false);
+        setState('lastRecognitionStopTime', Date.now());
         updateMicButtonState(false);
         playBeepSound('end');
         setState('useRecognitionModal', false);
@@ -293,6 +299,7 @@ export function stopSpeechRecognition() {
         }
     }
     setState('isListening', false);
+    setState('lastRecognitionStopTime', Date.now());
     updateMicButtonState(false);
     recognitionInstance = null;
 }

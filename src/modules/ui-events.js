@@ -185,6 +185,9 @@ export function setupEventListeners() {
     // Automatically turn on the microphone when a text area is focused (only if auto-recognition is off)
     document.addEventListener('focusin', e => {
         if (isInputElement(e.target) && getState('autoDetectInputFields') === true && !getState('isListening')) {
+            // Skip auto-start during cooldown after recent recognition stop (prevents immediate re-trigger)
+            const lastStopTime = getState('lastRecognitionStopTime') || 0;
+            if (Date.now() - lastStopTime < 500) return;
             publish(EVENTS.MIC_BUTTON_CLICKED);
         }
     }, { signal: documentListenersController.signal });

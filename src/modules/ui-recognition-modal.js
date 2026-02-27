@@ -5,6 +5,7 @@
 
 import { THEME_MODES } from '../constants.js';
 import { getState, setState } from './state.js';
+import { publish, EVENTS } from './event-bus.js';
 import { makeDraggable } from './ui-settings-modal.js';
 
 /** AbortController for the recognition modal ESC key listener */
@@ -102,6 +103,7 @@ export function showRecognitionTextModal(text = '', isInitial = false) {
 
     const closeButton = modal.querySelector('.otak-voice-recognition__close-btn');
     closeButton.onclick = () => {
+      publish(EVENTS.RECOGNITION_MODAL_CLOSED);
       modal.remove();
     };
 
@@ -110,6 +112,7 @@ export function showRecognitionTextModal(text = '', isInitial = false) {
     escAbortController = new AbortController();
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && document.querySelector('.otak-voice-recognition')) {
+        publish(EVENTS.RECOGNITION_MODAL_CLOSED);
         modal.remove();
         if (escAbortController) { escAbortController.abort(); escAbortController = null; }
       }

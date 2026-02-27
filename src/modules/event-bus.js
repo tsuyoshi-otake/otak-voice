@@ -127,6 +127,8 @@ export const EVENTS = {
   RECOGNITION_MODAL_UPDATED: 'recognition:modal:updated',
   /** Fired when recognition modal is shown */
   RECOGNITION_MODAL_SHOWN: 'recognition:modal:shown',
+  /** Fired when recognition modal is closed by user (close button or ESC) */
+  RECOGNITION_MODAL_CLOSED: 'recognition:modal:closed',
   /** Fired when UI needs to be re-created (e.g. SPA navigation) */
   UI_RECOVERY_NEEDED: 'ui:recovery:needed',
   /** Fired when menu state needs to be reapplied */
