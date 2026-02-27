@@ -32,15 +32,23 @@ export function createUI() {
     // Main menu button
     const menuButton = document.createElement('div');
     menuButton.className = 'otak-voice-menu__btn';
-    menuButton.id = 'otak-voice-menu-btn'; // Add ID for easier selection
+    menuButton.id = 'otak-voice-menu-btn';
     menuButton.innerHTML = MENU_ICON;
-    // Remove title attribute to disable native tooltip
+    menuButton.setAttribute('role', 'button');
+    menuButton.setAttribute('aria-label', 'otak-voice menu');
+    menuButton.setAttribute('aria-expanded', 'false');
+    menuButton.setAttribute('tabindex', '0');
+    menuButton.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); menuButton.click(); }
+    });
     document.body.appendChild(menuButton);
 
     // Menu container
     const menuContainer = document.createElement('div');
     menuContainer.className = 'otak-voice-menu__container';
-    menuContainer.id = 'otak-voice-menu-container'; // Add ID for easier selection
+    menuContainer.id = 'otak-voice-menu-container';
+    menuContainer.setAttribute('role', 'toolbar');
+    menuContainer.setAttribute('aria-label', 'otak-voice tools');
     document.body.appendChild(menuContainer);
 
     // Theme toggle button
@@ -52,8 +60,8 @@ export function createUI() {
     // Modal display/hide toggle button
     const modalToggleButton = createMenuItem('modal-toggle-btn', MODAL_TOGGLE_ICON, chrome.i18n.getMessage('modalToggleTooltip'));
     const showModalWindow = getState('showModalWindow');
-    // Set initial state based on settings
-    if (!showModalWindow) {
+    // Set initial state: active = modal visible (feature ON)
+    if (showModalWindow) {
         modalToggleButton.classList.add('otak-voice-menu__modal-toggle-btn--active');
     }
     // Remove title attribute to disable native tooltip
@@ -147,6 +155,19 @@ export function createMenuItem(id, iconSvg, tooltip) {
     const item = document.createElement('div');
     item.className = `otak-voice-menu__${id} otak-voice-menu__item`;
 
+    // Accessibility: role, label, keyboard support
+    item.setAttribute('role', 'button');
+    item.setAttribute('aria-label', tooltip);
+    item.setAttribute('tabindex', '0');
+
+    // Allow activation via Enter/Space keys
+    item.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            item.click();
+        }
+    });
+
     // Set SVG icon
     const iconContainer = document.createElement('div');
     iconContainer.className = 'otak-voice-menu__icon-container';
@@ -155,12 +176,7 @@ export function createMenuItem(id, iconSvg, tooltip) {
 
     const label = document.createElement('div');
     label.className = 'otak-voice-menu__label';
-
-    // Set label text for all buttons
     label.textContent = tooltip;
-
-    // Do not set native tooltip (remove title attribute)
-
     item.appendChild(label);
 
     return item;

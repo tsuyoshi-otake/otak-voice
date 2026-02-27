@@ -48,9 +48,9 @@ export function toggleModalVisibility() {
     const modalToggleButton = document.querySelector('.otak-voice-menu__modal-toggle-btn');
     if (modalToggleButton) {
         if (newShowModalWindow) {
-            modalToggleButton.classList.remove('otak-voice-menu__modal-toggle-btn--active');
-        } else {
             modalToggleButton.classList.add('otak-voice-menu__modal-toggle-btn--active');
+        } else {
+            modalToggleButton.classList.remove('otak-voice-menu__modal-toggle-btn--active');
         }
     }
     const showModalWindowCheckbox = document.getElementById('show-modal-window-checkbox');
@@ -111,9 +111,9 @@ export function setupEventSubscriptions() {
         const modalToggleButton = document.querySelector('.otak-voice-menu__modal-toggle-btn');
         if (modalToggleButton) {
             if (settings.showModalWindow) {
-                modalToggleButton.classList.remove('otak-voice-menu__modal-toggle-btn--active');
-            } else {
                 modalToggleButton.classList.add('otak-voice-menu__modal-toggle-btn--active');
+            } else {
+                modalToggleButton.classList.remove('otak-voice-menu__modal-toggle-btn--active');
             }
         }
     }));

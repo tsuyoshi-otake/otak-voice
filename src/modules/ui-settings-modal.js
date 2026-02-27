@@ -221,8 +221,14 @@ export function makeDraggable(element) {
     }, { signal: controller.signal });
     document.addEventListener('mousemove', e => {
         if (!isDragging) return;
-        element.style.left = (e.clientX - offsetX) + 'px';
-        element.style.top = (e.clientY - offsetY) + 'px';
+        // Clamp position to keep at least 60px visible on screen
+        const minVisible = 60;
+        const maxX = window.innerWidth - minVisible;
+        const maxY = window.innerHeight - minVisible;
+        const newX = Math.max(-element.offsetWidth + minVisible, Math.min(e.clientX - offsetX, maxX));
+        const newY = Math.max(0, Math.min(e.clientY - offsetY, maxY));
+        element.style.left = newX + 'px';
+        element.style.top = newY + 'px';
         element.style.transform = 'none';
     }, { signal: controller.signal });
     document.addEventListener('mouseup', () => {

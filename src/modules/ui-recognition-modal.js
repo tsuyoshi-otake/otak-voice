@@ -70,14 +70,23 @@ export function showRecognitionTextModal(text = '', isInitial = false) {
         textarea.value = text;
     }
 
-    // Add event listeners to buttons
-    const submitButton = modal.querySelector('.otak-voice-recognition__submit-btn');
-    submitButton.onclick = () => {
+    // Submit handler (shared between button click and Ctrl+Enter)
+    const doSubmit = () => {
       const textarea = modal.querySelector('textarea');
       const textToSubmit = textarea.value.trim();
       if (!textToSubmit) return;
       publish(EVENTS.SPEECH_RECOGNITION_RESULT, { final: true, text: textToSubmit, append: false, submit: true });
+      // Brief visual feedback
+      const submitButton = modal.querySelector('.otak-voice-recognition__submit-btn');
+      if (submitButton) {
+        submitButton.style.opacity = '0.6';
+        setTimeout(() => { if (modal.isConnected && submitButton) submitButton.style.opacity = ''; }, 300);
+      }
     };
+
+    // Add event listeners to buttons
+    const submitButton = modal.querySelector('.otak-voice-recognition__submit-btn');
+    submitButton.onclick = doSubmit;
 
     const copyButton = modal.querySelector('.otak-voice-recognition__copy-btn');
     copyButton.onclick = () => {
@@ -118,18 +127,30 @@ export function showRecognitionTextModal(text = '', isInitial = false) {
     };
 
     const closeButton = modal.querySelector('.otak-voice-recognition__close-btn');
-    closeButton.onclick = () => {
+    const closeModal = () => {
+      if (copyFeedbackTimerId) { clearTimeout(copyFeedbackTimerId); copyFeedbackTimerId = null; }
       publish(EVENTS.RECOGNITION_MODAL_CLOSED);
       modal.remove();
     };
+    closeButton.onclick = closeModal;
+
+    // Ctrl+Enter to submit from textarea
+    const textareaEl = modal.querySelector('textarea');
+    if (textareaEl) {
+      textareaEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault();
+          doSubmit();
+        }
+      });
+    }
 
     // Allow closing with ESC key (clean up previous listener first)
     if (escAbortController) escAbortController.abort();
     escAbortController = new AbortController();
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && document.querySelector('.otak-voice-recognition')) {
-        publish(EVENTS.RECOGNITION_MODAL_CLOSED);
-        modal.remove();
+        closeModal();
         if (escAbortController) { escAbortController.abort(); escAbortController = null; }
       }
     }, { signal: escAbortController.signal });
@@ -139,6 +160,10 @@ export function showRecognitionTextModal(text = '', isInitial = false) {
 
     // Add drag functionality
     makeDraggable(modal);
+
+    // Focus textarea for immediate keyboard use
+    const focusTextarea = modal.querySelector('textarea');
+    if (focusTextarea) { focusTextarea.focus(); }
   } else {
     // Update text if modal already exists
     const textarea = modal.querySelector('textarea');

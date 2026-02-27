@@ -47,11 +47,11 @@ export function updateMenuState() {
 
     // Update menu container state
     const menuExpanded = getState('menuExpanded');
+    menuButton.setAttribute('aria-expanded', String(menuExpanded));
     if (menuExpanded) {
         menuContainer.classList.add('otak-voice-menu__container--expanded');
         menuButton.classList.add('otak-voice-menu__btn--expanded');
 
-        // Update menu button icon - directly set the innerHTML since it doesn't have an icon container
         menuButton.innerHTML = `
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
           <line x1="15" y1="5" x2="5" y2="15"></line>
@@ -61,8 +61,6 @@ export function updateMenuState() {
         menuContainer.classList.remove('otak-voice-menu__container--expanded');
         menuButton.classList.remove('otak-voice-menu__btn--expanded');
 
-        // Update menu button icon - directly set the innerHTML
-        // Use MENU_ICON directly from import
         menuButton.innerHTML = MENU_ICON;
         // Close history panel when menu is closed
         const historyPanel = document.getElementById('otak-voice-history-panel');

@@ -19,7 +19,7 @@ export function isButtonDisabled(button) {
            button.classList.contains('disabled') ||
            button.classList.contains('cursor-not-allowed') ||
            button.classList.contains('opacity-50') ||
-           getComputedStyle(button).opacity < '0.9';
+           parseFloat(getComputedStyle(button).opacity) < 0.9;
   } catch (error) {
     console.error('Error checking if button is disabled:', error);
     return true; // Assume disabled on error

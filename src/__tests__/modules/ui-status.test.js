@@ -207,21 +207,23 @@ describe('UI Module - Status', () => {
             expect(state.setState).toHaveBeenCalledWith('processingState', mockPROCESSING_STATE.PROOFREADING);
         });
 
-        it('should disable all buttons when processing', () => {
-            const allButtons = [proofreadButton, editButton, micButton, clearButton, settingsButton, historyButton, themeToggleButton, modalToggleButton];
-            allButtons.forEach(btn => btn.classList.remove('otak-voice-menu__item--disabled'));
+        it('should disable action buttons when processing (not theme/modal toggles)', () => {
+            // The actively processing button (edit for EDITING) has disabled removed after the loop
+            const disabledButtons = [proofreadButton, micButton, clearButton, settingsButton, historyButton];
+            const toggleButtons = [themeToggleButton, modalToggleButton];
+            [...disabledButtons, editButton, ...toggleButtons].forEach(btn => btn.classList.remove('otak-voice-menu__item--disabled'));
             updateProcessingState(mockPROCESSING_STATE.EDITING);
-            allButtons.forEach(btn => {
-                btn.classList.add('otak-voice-menu__item--disabled');
-                expect(btn.classList.contains('otak-voice-menu__item--disabled')).toBe(true);
-            });
+            disabledButtons.forEach(btn => expect(btn.classList.contains('otak-voice-menu__item--disabled')).toBe(true));
+            // Edit button shows processing state, not disabled
+            expect(editButton.classList.contains('otak-voice-menu__item--disabled')).toBe(false);
+            toggleButtons.forEach(btn => expect(btn.classList.contains('otak-voice-menu__item--disabled')).toBe(false));
         });
 
-        it('should enable all buttons when IDLE', () => {
-            const allButtons = [proofreadButton, editButton, micButton, clearButton, settingsButton, historyButton, themeToggleButton, modalToggleButton];
-            allButtons.forEach(btn => btn.classList.add('otak-voice-menu__item--disabled'));
+        it('should enable action buttons when IDLE (theme/modal toggles unaffected)', () => {
+            const actionButtons = [proofreadButton, editButton, micButton, clearButton, settingsButton, historyButton];
+            actionButtons.forEach(btn => btn.classList.add('otak-voice-menu__item--disabled'));
             updateProcessingState(mockPROCESSING_STATE.IDLE);
-            allButtons.forEach(btn => expect(btn.classList.contains('otak-voice-menu__item--disabled')).toBe(false));
+            actionButtons.forEach(btn => expect(btn.classList.contains('otak-voice-menu__item--disabled')).toBe(false));
         });
 
         it('should show processing class on proofread button when proofreading', () => {

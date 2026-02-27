@@ -87,7 +87,8 @@ describe('UI Module - Events', () => {
             toggleModalVisibility();
             expect(settings.saveSetting).toHaveBeenCalledWith('showModalWindow', false);
             const modalToggleBtn = document.querySelector('.otak-voice-menu__modal-toggle-btn');
-            expect(modalToggleBtn.classList.contains('otak-voice-menu__modal-toggle-btn--active')).toBe(true);
+            // newShowModalWindow is false, so active class should NOT be present
+            expect(modalToggleBtn.classList.contains('otak-voice-menu__modal-toggle-btn--active')).toBe(false);
             expect(eventBus.publish).toHaveBeenCalledWith(eventBus.EVENTS.MODAL_VISIBILITY_TOGGLED, false);
 
             state.getState.mockImplementation(key => {
@@ -96,7 +97,8 @@ describe('UI Module - Events', () => {
             });
             toggleModalVisibility();
             expect(settings.saveSetting).toHaveBeenCalledWith('showModalWindow', true);
-            expect(modalToggleBtn.classList.contains('otak-voice-menu__modal-toggle-btn--active')).toBe(false);
+            // newShowModalWindow is true, so active class SHOULD be present
+            expect(modalToggleBtn.classList.contains('otak-voice-menu__modal-toggle-btn--active')).toBe(true);
             expect(eventBus.publish).toHaveBeenCalledWith(eventBus.EVENTS.MODAL_VISIBILITY_TOGGLED, true);
         });
 

@@ -102,11 +102,9 @@ export function updateProcessingState(state) {
     // Check if processing
     const isProcessing = state !== PROCESSING_STATE.IDLE;
 
-    // Add disabled-button class to all buttons when processing
-    const themeToggleButton = document.querySelector('.otak-voice-menu__theme-toggle-btn');
-    const modalToggleButton = document.querySelector('.otak-voice-menu__modal-toggle-btn');
-    const allButtons = [proofreadButton, editButton, micButton, clearButton, settingsButton, historyButton, themeToggleButton, modalToggleButton];
-    allButtons.forEach(button => {
+    // Disable action buttons during processing (keep theme/modal toggles enabled)
+    const actionButtons = [proofreadButton, editButton, micButton, clearButton, settingsButton, historyButton];
+    actionButtons.forEach(button => {
         if (button) {
             if (isProcessing) {
                 button.classList.add('otak-voice-menu__item--disabled');
