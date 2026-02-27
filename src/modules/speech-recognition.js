@@ -1,6 +1,4 @@
-/**
- * Speech Recognition Module - Core speech recognition functionality
- */
+/** Speech Recognition Module - Core speech recognition functionality */
 import { correctWithGPT } from './gpt-service.js';
 import { addToHistory } from './history.js';
 import { isInputElement } from './dom-utils.js';
@@ -243,7 +241,6 @@ export function startSpeechRecognition() {
         playBeepSound('end');
         setState('useRecognitionModal', false);
         setState('recognitionReady', false);
-        // Modal stays open for user to Submit/Copy/Edit — do nothing here
         if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null; }
     };
 
