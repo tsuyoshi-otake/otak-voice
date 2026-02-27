@@ -245,8 +245,13 @@ export function startSpeechRecognition() {
         if (existingModal) {
             const textarea = existingModal.querySelector('textarea');
             if (textarea && textarea.value.trim() !== '') {
+                const textContent = textarea.value.trim();
                 const copyButton = existingModal.querySelector('.otak-voice-recognition__copy-btn');
                 if (copyButton) { copyButton.click(); }
+                // When auto-submit is enabled, write modal text to input field and submit
+                if (getState('autoSubmit')) {
+                    publish(EVENTS.SPEECH_RECOGNITION_RESULT, { final: true, text: textContent, append: false });
+                }
             } else { existingModal.remove(); }
         }
         if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null; }
