@@ -42,13 +42,14 @@ export function showStatus(messageKey, substitutions, persistent = false) {
         statusElem.classList.remove('otak-voice-status--processing');
     }
 
-    // Determine if this is an error message
+    // Determine if this is a transient feedback message (auto-hides after timeout)
     const isErrorMessage = messageKey.startsWith('status') && (
         messageKey.includes('Error') ||
         messageKey.includes('Empty') ||
         messageKey.includes('NotFound') ||
         messageKey === 'statusProcessingInProgress' ||
-        messageKey === 'statusAutoDetectOff'
+        messageKey === 'statusAutoDetectOff' ||
+        messageKey === 'statusInputFieldEmpty'
     );
 
     // Only hide after timeout if not persistent display or is an error message

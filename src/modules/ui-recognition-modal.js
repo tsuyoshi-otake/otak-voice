@@ -48,13 +48,16 @@ export function showRecognitionTextModal(text = '', isInitial = false) {
     // Modal container
     modal = document.createElement('div');
     modal.className = 'otak-voice-recognition';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'otak-recognition-title');
 
     // Set theme attribute on document root element
     document.documentElement.setAttribute('data-otak-theme', currentTheme);
 
     // Header, body structure
     modal.innerHTML = `
-      <h3>${i18n('recognitionModalTitle')}</h3>
+      <h3 id="otak-recognition-title">${i18n('recognitionModalTitle')}</h3>
       <textarea placeholder="${isInitial ? i18n('recognitionModalPlaceholder') : ''}"></textarea>
       <div class="otak-voice-recognition__button-container">
         <button class="otak-voice-recognition__submit-btn">${i18n('recognitionModalSubmitButton')}</button>

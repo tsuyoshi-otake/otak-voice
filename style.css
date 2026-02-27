@@ -986,8 +986,14 @@
 
     .otak-voice-history__text {
         word-break: break-word;
+        overflow-wrap: anywhere;
         color: var(--otak-text-color);
-        user-select: none !important; /* テキスト選択を防止 */
+        user-select: none !important;
+        /* Limit display to 3 lines with ellipsis */
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 /* --- トグルスイッチ スタイル --- */
 .otak-voice-settings__item {
