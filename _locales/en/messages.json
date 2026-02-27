@@ -543,6 +543,10 @@
     "message": "Another process is in progress. Please wait until it completes.",
     "description": "Status message when another processing is already in progress."
   },
+  "statusInputFieldEmpty": {
+    "message": "No text in the input field",
+    "description": "Status message when button is disabled because input field is empty."
+  },
   "statusSubmitDisabled": {
     "message": "Submit button is disabled",
     "description": "Status message when the submit button is disabled."

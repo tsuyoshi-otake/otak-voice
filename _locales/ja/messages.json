@@ -543,6 +543,10 @@
     "message": "別の処理が進行中です。完了までお待ちください。",
     "description": "Status message when another processing is already in progress."
   },
+  "statusInputFieldEmpty": {
+    "message": "入力フィールドにテキストがありません",
+    "description": "Status message when button is disabled because input field is empty."
+  },
   "statusSubmitDisabled": {
     "message": "送信ボタンが無効状態です",
     "description": "Status message when the submit button is disabled."

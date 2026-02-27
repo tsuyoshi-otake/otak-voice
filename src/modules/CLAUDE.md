@@ -24,17 +24,17 @@ Core functionality modules for the otak-voice voice input Chrome Extension.
 | `dom-input-manipulation.js` | 298 | Text input operations, event dispatch, Twitter handling; `clickButtonWithFeedback(button, delayMs?)` |
 | `ui.js` | barrel | Re-exports from ui-status, ui-core, ui-settings-modal, ui-recognition-modal, ui-events |
 | `ui-status.js` | 188 | Status display and processing state |
-| `ui-core.js` | 206 | Core UI creation and menu items |
-| `ui-settings-modal.js` | 232 | Settings modal and draggable support |
-| `ui-recognition-modal.js` | 180 | Voice recognition text modal with Submit button |
-| `ui-events.js` | 187 | Event listeners and event bus subscriptions |
+| `ui-core.js` | 224 | Core UI creation, menu items with ARIA/keyboard support |
+| `ui-settings-modal.js` | 248 | Settings modal, draggable with viewport constraints, ESC close |
+| `ui-recognition-modal.js` | 204 | Voice recognition text modal with Submit button (Ctrl+Enter) |
+| `ui-events.js` | 190 | Event listeners and event bus subscriptions |
 | `speech.js` | barrel | Re-exports from speech-utils, speech-recognition, speech-edit |
 | `speech-utils.js` | 229 | Mic button state, audio effects, language update; re-exports `publishStatus as showStatus` |
 | `speech-recognition.js` | 294 | Core speech recognition lifecycle |
 | `speech-edit.js` | 230 | Speech-based editing functionality |
 | `input-handler.js` | barrel | Re-exports from input-storage, input-menu, input-operations, input-handler-init |
 | `input-storage.js` | 87 | Chrome storage operations for menu state |
-| `input-menu.js` | 75 | Menu toggle and settings modal |
+| `input-menu.js` | 73 | Menu toggle with aria-expanded |
 | `input-operations.js` | 255 | Input field operations, proofread, enhance handlers |
 | `input-handler-init.js` | 167 | Initialization and event subscriptions |
 | `gpt-service.js` | barrel | Re-exports from gpt-correction, gpt-proofreading, gpt-editing |

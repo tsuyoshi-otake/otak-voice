@@ -31,10 +31,13 @@ function addButtonClickHandler(selector, event, eventData) {
     if (btn) {
         btn.addEventListener('click', () => {
             const ps = getState('processingState');
-            if (ps === PROCESSING_STATE.IDLE && !btn.classList.contains('otak-voice-menu__item--disabled')) {
-                publish(event, eventData);
-            } else if (ps !== PROCESSING_STATE.IDLE) {
+            if (ps !== PROCESSING_STATE.IDLE) {
                 showStatus('statusProcessingInProgress');
+            } else if (btn.classList.contains('otak-voice-menu__item--disabled')) {
+                // Disabled due to empty input — show contextual hint
+                showStatus('statusInputFieldEmpty');
+            } else {
+                publish(event, eventData);
             }
         });
     }

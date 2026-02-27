@@ -185,6 +185,10 @@ export function createSettingsModal() {
     if (proofreadingPromptTextarea) {
         proofreadingPromptTextarea.addEventListener('change', () => { saveSetting('proofreadingPrompt', proofreadingPromptTextarea.value); });
     }
+    // Close settings modal with ESC key
+    modal.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { modal.style.display = 'none'; }
+    });
 }
 
 /** WeakMap to track AbortControllers for draggable elements */

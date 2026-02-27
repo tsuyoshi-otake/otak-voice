@@ -543,6 +543,10 @@
     "message": "Một quá trình khác đang diễn ra. Vui lòng đợi cho đến khi hoàn tất.",
     "description": "Status message when another processing is already in progress."
   },
+  "statusInputFieldEmpty": {
+    "message": "Không có văn bản trong trường nhập liệu",
+    "description": "Status message when button is disabled because input field is empty."
+  },
   "statusSubmitDisabled": {
     "message": "Nút gửi bị vô hiệu hóa",
     "description": "Status message when the submit button is disabled."

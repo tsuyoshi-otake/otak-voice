@@ -91,9 +91,11 @@ export function createUI() {
     const historyButton = createMenuItem('history-btn', HISTORY_ICON, chrome.i18n.getMessage('historyTooltip'));
     menuContainer.appendChild(historyButton);
 
-    // Status display
+    // Status display (aria-live for screen reader announcements)
     const statusDisplay = document.createElement('div');
     statusDisplay.className = 'otak-voice-status';
+    statusDisplay.setAttribute('role', 'status');
+    statusDisplay.setAttribute('aria-live', 'polite');
     document.body.appendChild(statusDisplay);
 
     // Settings modal
