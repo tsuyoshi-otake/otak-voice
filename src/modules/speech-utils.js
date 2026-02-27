@@ -81,18 +81,40 @@ export function forceSetTextAreaValue(element, value) {
     }
 }
 
+/** Shared AudioContext instance (reused across calls to avoid user gesture requirement) */
+let sharedAudioContext = null;
+
+/**
+ * Ensure the shared AudioContext is created and running.
+ * Must be called during a user gesture (e.g., button click) for Chrome to allow it.
+ */
+export function ensureAudioContext() {
+    try {
+        if (!sharedAudioContext) {
+            sharedAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (sharedAudioContext.state === 'suspended') {
+            sharedAudioContext.resume().catch(() => {});
+        }
+    } catch (e) {
+        console.warn("Failed to initialize AudioContext:", e);
+    }
+}
+
 /**
  * Play beep sound for speech recognition start/end (Siri-like)
  * @param {string} type - 'start' or 'end'
  */
 export function playBeepSound(type) {
     try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        if (!sharedAudioContext || sharedAudioContext.state !== 'running') {
+            return; // AudioContext not initialized or not allowed yet
+        }
 
         if (type === 'start') {
-            playSiriStartSound(audioContext);
+            playSiriStartSound(sharedAudioContext);
         } else {
-            playSiriEndSound(audioContext);
+            playSiriEndSound(sharedAudioContext);
         }
     } catch (e) {
         console.warn("Failed to play sound:", e);

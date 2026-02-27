@@ -76,26 +76,21 @@ export function handleError(error, showNotification = true, persistent = false, 
  */
 function logError(error, source = null) {
   const sourcePrefix = source ? `[${source}] ` : '';
-  const errorInfo = {
-    code: error.code,
-    message: error.message,
-    details: error.details,
-    originalError: error.originalError
-  };
+  const errorMsg = `${sourcePrefix}${error.severity || 'Error'}: ${error.code} - ${error.message}`;
 
   switch (error.severity) {
     case ERROR_SEVERITY.INFO:
-      console.log(`${sourcePrefix}Info:`, errorInfo);
+      console.log(errorMsg);
       break;
     case ERROR_SEVERITY.WARNING:
-      console.warn(`${sourcePrefix}Warning:`, errorInfo);
+      console.warn(errorMsg);
       break;
     case ERROR_SEVERITY.CRITICAL:
-      console.error(`${sourcePrefix}CRITICAL ERROR:`, errorInfo);
+      console.error(errorMsg, error.originalError || '');
       break;
     case ERROR_SEVERITY.ERROR:
     default:
-      console.error(`${sourcePrefix}Error:`, errorInfo);
+      console.error(errorMsg, error.originalError || '');
       break;
   }
 }

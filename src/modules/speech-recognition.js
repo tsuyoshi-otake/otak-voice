@@ -14,7 +14,7 @@ import {
 } from './error-handler.js';
 import {
     updateMicButtonState, basicCleanup, showStatus,
-    playBeepSound
+    playBeepSound, ensureAudioContext
 } from './speech-utils.js';
 import { handleEditButtonClick } from './speech-edit.js';
 
@@ -58,6 +58,8 @@ export function initSpeechEvents() {
 
 /** Mic button click handler */
 function handleMicButtonClick() {
+    // Initialize AudioContext during user gesture (click) so beep sounds work in callbacks
+    ensureAudioContext();
     const previousActiveElement = document.activeElement;
     const wasPreviousElementInput = isInputElement(previousActiveElement);
     publish(EVENTS.RECOGNITION_MODAL_SHOWN, { text: '', isInitial: true });
