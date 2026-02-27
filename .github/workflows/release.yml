@@ -5,17 +5,20 @@ on:
     tags:
       - 'v*' # vから始まるタグ（例：v3.1）がプッシュされたときに実行
 
+permissions:
+  contents: write
+
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Install dependencies
         run: npm ci
@@ -172,39 +175,35 @@ jobs:
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          
-          # リリースノートのテンプレートを作成
-          cat > RELEASE_NOTES.md << EOF
+
+          # release_notes.md が存在する場合はそれを使用
+          if [ -f "release_notes.md" ]; then
+            cp release_notes.md RELEASE_NOTES.md
+          else
+            # フォールバック: テンプレートを作成
+            cat > RELEASE_NOTES.md << EOF
           # otak-voice v$VERSION リリースノート
-          
+
           ## 変更点
-          
+
           - ユニバーサル音声入力機能の強化
           - UI/UXの改善
           - バグ修正と安定性の向上
-          
-          ## 主な機能
-          
-          - **どこでも使える音声入力**: あらゆるウェブサイトのテキスト入力欄で使用可能
-          - **GPT-4.1-miniによる自動文脈修正**: 音声認識結果を自動的に校正
-          - **GPT-4.1による高精度校閲**: 入力内容全体を高精度AIモデルで校閲
-          - **SPA（シングルページアプリケーション）対応**: 画面遷移後も自動的に再初期化
-          - **追記モード**: 既存のテキストに追記可能
-          - **自動送信機能**: 音声入力後に自動的に送信ボタンをクリック
-          
+
           ## インストール方法
-          
+
           1. Chrome拡張機能ページ（chrome://extensions/）を開く
           2. デベロッパーモードを有効にする
           3. パッケージ化されていない拡張機能を読み込む（ZIPファイルを使用）
-          
+
           または、CRXファイルをChrome拡張機能ページにドラッグ＆ドロップしてインストールすることもできます。
           EOF
+          fi
 
       # GitHub Releaseを作成
       - name: Create GitHub Release
         id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref }}
           name: otak-voice v${{ steps.release_notes.outputs.version }}
